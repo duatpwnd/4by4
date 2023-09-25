@@ -1,0 +1,48 @@
+import { authInstance, defaultInstance } from "@axios/instance";
+import mitt, { Emitter } from "mitt";
+import { App } from "vue";
+import BaseButton from "@/components/common/BaseButton.vue";
+import BaseInput from "@/components/common/BaseInput.vue";
+import BaseSelect from "@components/common/BaseSelect.vue";
+import BaseCheckBox from "@components/common/BaseCheckBox.vue";
+import BaseRadio from "@components/common/BaseRadio.vue";
+import BaseProgress from "@/components/common/BaseProgress.vue";
+import BaseTable from "@components/common/BaseTable.vue";
+export default {
+  install: (app: App) => {
+    const emitter = mitt();
+    const globalComponent = [
+      BaseButton,
+      BaseInput,
+      BaseSelect,
+      BaseCheckBox,
+      BaseRadio,
+      BaseProgress,
+      BaseTable,
+    ];
+    globalComponent.forEach((el) => {
+      if (el.__name) {
+        app.component(el.__name, el);
+      }
+    });
+    const debounce = <T extends any[]>(
+      fn: (...params: T) => void,
+      wait: number
+    ) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      return function (...args: T) {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        const context = this;
+        timer = setTimeout(() => {
+          fn.apply(context, args);
+        }, wait);
+      };
+    };
+    app.provide("emitter", emitter);
+    app.provide("debounce", debounce);
+    app.provide("authInstance", authInstance);
+    app.provide("defaultInstance", defaultInstance);
+  },
+};

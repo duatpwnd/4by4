@@ -1,0 +1,44 @@
+<template>
+  <input
+    class="base-input"
+    autocomplete="true"
+    @input="onInput"
+    :value="modelValue"
+    :type="type"
+    :placeholder="placeholder"
+  />
+</template>
+<script setup lang="ts">
+  import { onMounted, toRefs, ref } from "vue";
+  interface Props {
+    modelValue: string;
+    type: string;
+    placeholder: string;
+    onlyText?: boolean;
+  }
+  const props = defineProps<Props>();
+  const emit = defineEmits(["update:modelValue"]);
+  const { type, placeholder, onlyText, modelValue } = toRefs(props);
+  const onInput = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (onlyText.value) {
+      target.value = target.value.replace(/[^0-9]/g, "");
+    }
+    emit("update:modelValue", (event.target as HTMLInputElement).value);
+  };
+  onMounted(() => {
+    console.log("onmounted호출");
+  });
+</script>
+<style scoped lang="scss">
+  .base-input {
+    width: 100%;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 18px;
+    box-sizing: border-box;
+    color: black;
+    background-color: #f3f7fa;
+    border-radius: 10px;
+  }
+</style>

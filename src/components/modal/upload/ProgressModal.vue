@@ -1,0 +1,81 @@
+<template>
+  <div class="progress-modal">
+    <p>
+      Inferencing is in progress...<strong class="progress-value"
+        >{{ progressValue }}%</strong
+      >
+    </p>
+    <div class="progress-bar-area">
+      <span
+        class="item"
+        v-for="(item, index) in 10"
+        :class="Number(index + 1) * 10 <= progressValue ? 'fill' : ''"
+      ></span>
+    </div>
+    <BaseButton @click="emit('update:close-progress-modal')" text="Cancel" />
+  </div>
+</template>
+<script setup lang="ts">
+  import { onMounted, toRefs, ref } from "vue";
+  interface Props {
+    progressValue: number;
+  }
+  const props = defineProps<Props>();
+  const { progressValue } = toRefs(props);
+  const emit = defineEmits(["update:close-progress-modal"]);
+  onMounted(() => {
+    console.log("onmounted호출");
+  });
+</script>
+<style scoped lang="scss">
+  .progress-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    background-color: white;
+    border-radius: 6px;
+    padding: 60px;
+    box-sizing: border-box;
+    p {
+      text-align: center;
+      font: {
+        size: 38px;
+        weight: 700;
+      }
+      .progress-value {
+        color: #686de0;
+        width: 100px;
+        display: inline-block;
+      }
+    }
+    .progress-bar-area {
+      display: flex;
+      flex-direction: row;
+      column-gap: 10px;
+      margin: 40px 0;
+      .item {
+        width: 100%;
+        background: #e9e9e9;
+        height: 34px;
+        &.fill {
+          background: #307fe2;
+        }
+        &:first-child {
+          border-top-left-radius: 16px;
+          border-bottom-left-radius: 16px;
+        }
+        &:last-child {
+          border-top-right-radius: 16px;
+          border-bottom-right-radius: 16px;
+        }
+      }
+    }
+    .base-button {
+      width: 125px;
+      margin: 0 auto;
+      display: block;
+    }
+  }
+</style>
