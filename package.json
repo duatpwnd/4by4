@@ -33,5 +33,9 @@
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vue-tsc": "^1.8.5"
-  }
+  },
+  "main": "index.js",
+  "repository": "http://183.111.175.102:4000/4by4/fourbyfour_front.git",
+  "author": "saejung <duatpwnd@aination.kr>",
+  "license": "MIT"
 }
