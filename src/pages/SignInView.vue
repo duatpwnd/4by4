@@ -7,7 +7,7 @@
 <script setup lang="ts">
   import SignIn from "@/container/sign-in/SignIn.vue";
   import SignUp from "@pages/SignUp.vue";
-  import InstanceType from "@axios/types";
+  import { InstanceType } from "@axios/types";
   import { onMounted, inject, ref, watch } from "vue";
   import { useRouter, useRoute } from "vue-router";
   const currentComp = ref(SignIn);

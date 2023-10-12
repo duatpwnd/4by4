@@ -3,7 +3,7 @@
   <div class="register-container">
     <div class="select-box-area">
       <div>
-        <label>HOST</label>
+        <label class="title">HOST</label>
         <BaseSelect
           @update:select-box="(obj:SelectedType) => (selectedHost = obj)"
           :options="hostList"
@@ -12,16 +12,29 @@
         />
       </div>
       <div>
-        <label>GPU</label>
-        <BaseSelect
+        <label class="title">GPU</label>
+        <div>
+          <BaseSelectCheckBox
+            @update:select-box="
+              (obj) => {
+                selectedGpu = [];
+                selectedGpu = obj;
+              }
+            "
+            :options="gpuList"
+            name="name"
+            :text="selectedGpu.length == 0 ? 'Select GPU ID' : selectedGpu"
+          />
+        </div>
+        <!-- <BaseSelect
           @update:select-box="(obj:SelectedType) => (selectedGpu = obj)"
           :options="gpuList"
           name="name"
           :text="selectedGpu == null ? 'Select GPU ID' : selectedGpu.name"
-        />
+        /> -->
       </div>
       <div>
-        <label>MODEL</label>
+        <label class="title">MODEL</label>
         <BaseSelect
           @update:select-box="(obj:SelectedType) => (selectedModel = obj)"
           :options="modelList"
@@ -32,7 +45,7 @@
         />
       </div>
       <div>
-        <label>TAGS</label>
+        <label class="title">TAGS</label>
         <BaseSelect
           @update:select-box="(obj:SelectedType) => (selectedTags = obj)"
           :options="tagList"
@@ -50,16 +63,17 @@
   import { onMounted, ref } from "vue";
   import { useRoute, useRouter } from "vue-router";
   import BaseSelect from "@/components/common/BaseSelect.vue";
+  import BaseSelectCheckBox from "@/components/common/BaseSelectCheckBox.vue";
   interface SelectedType {
     name: string;
   }
   const router = useRouter();
   const selectedHost = ref<SelectedType | null>(null); // 선택된 host
-  const selectedGpu = ref<SelectedType | null>(null); // 선택된 gpu
+  const selectedGpu = ref<SelectedType[]>([]); // 선택된 gpu
   const selectedModel = ref<SelectedType | null>(null); // 선택된 model
   const selectedTags = ref<SelectedType | null>(null); // 선택된 tags
   const hostList = ref<SelectedType[]>([{ name: "test" }]); // host 리스트
-  const gpuList = ref<SelectedType[]>([{ name: "test" }]); // gpu 리스트
+  const gpuList = ref<SelectedType[]>([{ name: "test" }, { name: "test1" }]); // gpu 리스트
   const modelList = ref<SelectedType[]>([{ name: "test" }]); // model 리스트
   const tagList = ref<SelectedType[]>([{ name: "test" }]); // tag 리스트
   const register = () => {};
@@ -88,7 +102,7 @@
       grid-template-columns: 1fr 1fr;
       grid-column-gap: 100px;
       grid-row-gap: 40px;
-      label {
+      .title {
         display: block;
         margin-bottom: 10px;
       }

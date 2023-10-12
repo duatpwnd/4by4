@@ -27,14 +27,6 @@
         <dd>aination/denoise:latest</dd>
       </div>
     </dl>
-    <div class="button-area">
-      <button>Start</button>
-      <button>Stop</button>
-      <button>Kill</button>
-      <button>Restart</button>
-      <button>Pause</button>
-      <button>Resume</button>
-    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -72,8 +64,6 @@
     width: 70%;
     margin: 0 auto;
     padding-top: 40px;
-    height: 100%;
-    box-sizing: border-box;
     .close-button {
       position: absolute;
       top: -40px;
@@ -98,22 +88,6 @@
           padding: 10px;
           margin-top: 10px;
         }
-      }
-    }
-    .button-area {
-      margin-top: 20px;
-      display: flex;
-      justify-content: space-between;
-      column-gap: 20px;
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      button {
-        border: 1px solid black;
-        border-radius: 5px;
-        padding: 10px;
-        width: 100%;
-        box-sizing: border-box;
       }
     }
   }

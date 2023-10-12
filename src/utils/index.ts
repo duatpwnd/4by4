@@ -1,6 +1,9 @@
 import { authInstance, defaultInstance } from "@axios/instance";
-import mitt, { Emitter } from "mitt";
+import mitt from "mitt";
 import { App } from "vue";
+import { useCookies } from "vue3-cookies";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/store/user";
 import BaseButton from "@/components/common/BaseButton.vue";
 import BaseInput from "@/components/common/BaseInput.vue";
 import BaseSelect from "@components/common/BaseSelect.vue";
@@ -8,9 +11,12 @@ import BaseCheckBox from "@components/common/BaseCheckBox.vue";
 import BaseRadio from "@components/common/BaseRadio.vue";
 import BaseProgress from "@/components/common/BaseProgress.vue";
 import BaseTable from "@components/common/BaseTable.vue";
+const { cookies } = useCookies();
+const router = useRouter();
 export default {
   install: (app: App) => {
     const emitter = mitt();
+    const userStore = useUserStore();
     const globalComponent = [
       BaseButton,
       BaseInput,
@@ -40,9 +46,15 @@ export default {
         }, wait);
       };
     };
+    const signOut = () => {
+      cookies.remove("");
+      userStore.putUserInfo(null);
+      router.push("/sign-in");
+    };
     app.provide("emitter", emitter);
     app.provide("debounce", debounce);
     app.provide("authInstance", authInstance);
     app.provide("defaultInstance", defaultInstance);
+    app.provide("signOut", signOut);
   },
 };

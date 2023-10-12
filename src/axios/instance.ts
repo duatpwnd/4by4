@@ -1,13 +1,18 @@
 import axios, { AxiosInstance } from "axios";
+import { inject } from "vue";
 import { useCookies } from "vue3-cookies";
 const { cookies } = useCookies();
-export const defaultInstance = () => {
-  const instance = axios.create({ baseURL: import.meta.env.VITE_BASE_URL });
-  return instance;
-};
-export const authInstance = axios.create({
+const signOut = inject("signOut");
+export const defaultInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
   headers: {
+    "Content-Type": "application/json",
+  },
+});
+export const authInstance: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
     Authorization: "Bearer " + cookies.get("token"),
   },
 });
