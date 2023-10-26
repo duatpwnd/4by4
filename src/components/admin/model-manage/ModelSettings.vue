@@ -1,60 +1,76 @@
 <template>
-  <div class="settings-container">
+  <div class="model-settings-container">
     <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
-    <dl>
+    <dl v-if="'imageName' in modelInfo">
       <div>
         <dt>Model Name</dt>
-        <dd>Denoise</dd>
+        <dd>{{ modelInfo.imageName }}</dd>
       </div>
       <div>
         <dt>Tag</dt>
-        <dd>v1.1</dd>
+        <dd>{{ modelInfo.tag }}</dd>
       </div>
       <div>
         <dt>Project Name</dt>
-        <dd>aination</dd>
+        <dd>{{ modelInfo.projectName }}</dd>
       </div>
     </dl>
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, inject } from "vue";
+  import { onMounted, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";
   import { useRoute, useRouter } from "vue-router";
+  import { AxiosInstance } from "axios";
+  import serviceAPI from "@api/services";
+  interface ModelInfoType {
+    imageName: string;
+    modelName: string;
+    projectName: string;
+    tag: string;
+  }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;
   const router = useRouter();
   const route = useRoute();
-  const hostIP = ref("");
-  const hostName = ref("");
-  const change = () => {
-    if (hostName.value.trim().length == 0) {
-      emitter.emit("update:alert", {
-        isActive: true,
-        message: "host name을 입력해주세요,",
+  const modelId = route.query.modelId;
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const modelInfo = reactive<ModelInfoType | {}>({});
+  // const change = () => {
+  //   if (hostName.value.trim().length == 0) {
+  //     emitter.emit("update:alert", {
+  //       isActive: true,
+  //       message: "host name을 입력해주세요,",
+  //     });
+  //   } else if (hostIP.value.trim().length == 0) {
+  //     emitter.emit("update:alert", {
+  //       isActive: true,
+  //       message: "host IP를 입력해주세요,",
+  //     });
+  //   } else {
+  //   }
+  // };
+  const getModelInfo = () => {
+    defaultInstance
+      .get(serviceAPI.modelInfo + `?modelId=${modelId}`)
+      .then((result) => {
+        Object.assign(modelInfo, result.data);
       });
-    } else if (hostIP.value.trim().length == 0) {
-      emitter.emit("update:alert", {
-        isActive: true,
-        message: "host IP를 입력해주세요,",
-      });
-    } else {
-    }
   };
   onMounted(() => {
-    console.log("onmounted호출");
+    getModelInfo();
   });
 </script>
 <style scoped lang="scss">
-  .settings-container {
+  .model-settings-container {
     position: relative;
     width: 70%;
     margin: 0 auto;
-    padding-top: 40px;
+    padding-top: 100px;
     .close-button {
       position: absolute;
-      top: -40px;
+      top: 20px;
       right: 0px;
       font-size: 40px;
       cursor: pointer;

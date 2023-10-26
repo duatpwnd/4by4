@@ -1,5 +1,14 @@
 <template>
-  <form class="sign-in-form">
+  <form
+    class="sign-in-form"
+    @keydown="
+      (event) => {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+        }
+      }
+    "
+  >
     <fieldset>
       <legend class="legend">PIXELL AI</legend>
       <div class="row">
@@ -34,7 +43,8 @@
             Continue with Google
           </button>
         </div> -->
-        <GoogleLogin :callback="callback" prompt auto-login />
+        <GoogleLogin :callback="callback" />
+        <!-- prompt auto-login  -->
       </div>
       <div class="row">
         <router-link to="/find-password" class="find-password-link"
@@ -43,7 +53,7 @@
       </div>
       <div class="row">
         <span class="question-txt">Don’t Have a Acount?</span>
-        <button class="sign-up-link" @click="emit('update:route')">
+        <button class="sign-up-link" @click="emit('update:route', 'SignUp')">
           Sign Up
         </button>
       </div>
@@ -54,7 +64,7 @@
   import { onMounted, reactive, ref, inject } from "vue";
   import { AxiosInstance } from "axios";
   import { useRouter } from "vue-router";
-  import auth from "@api/auth";
+  import authAPI from "@api/auth";
   import { useUserStore } from "@/store/user";
   import type { CallbackTypes } from "vue3-google-login";
   import {
@@ -137,23 +147,24 @@
     } else {
       validCheck.pw = false;
     }
-    if (validCheck.id && validCheck.pw) {
+    if (!validCheck.id && !validCheck.pw) {
       defaultInstance
-        .post(auth.signIn, { id: userId.value, pw: userPw.value })
+        .post(authAPI.login, { userId: userId.value, password: userPw.value })
         .then((result) => {
           console.log(result);
           // userStore.putUserInfo({ name: "duatpwnd" });
           // router.push("/main");
+        })
+        .catch((err: Error) => {
+          console.log(err);
         });
     }
   };
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
 </script>
 <style scoped lang="scss">
   .sign-in-form {
     width: 50%;
+    overflow-y: auto;
     fieldset {
       height: 100%;
       .legend {

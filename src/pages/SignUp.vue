@@ -1,5 +1,14 @@
 <template>
-  <form class="sign-up-form">
+  <form
+    class="sign-up-form"
+    @keydown="
+      (event) => {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+        }
+      }
+    "
+  >
     <fieldset>
       <legend class="legend">Create an Account</legend>
       <div class="row">
@@ -13,19 +22,25 @@
           <label>First Name</label>
           <BaseInput
             type="text"
-            @update:modelValue="(newValue:string) => (userFirstName = newValue)"
+            @update:modelValue="firstNameCheck"
             :modelValue="userFirstName"
             placeholder="first name"
           />
+          <p class="guide-message" v-if="validCheck.firstName">
+            첫번째 이름을 입력해주세요.
+          </p>
         </div>
         <div class="last-name-area">
           <label>Last Name</label>
           <BaseInput
             type="text"
-            @update:modelValue="(newValue:string) => (userLastName = newValue)"
+            @update:modelValue="lastNameCheck"
             :modelValue="userLastName"
             placeholder="last name"
           />
+          <p class="guide-message" v-if="validCheck.lastName">
+            마지막 이름을 입력해주세요.
+          </p>
         </div>
       </div>
       <div class="row">
@@ -49,7 +64,7 @@
           placeholder="password"
         />
         <p class="guide-message" v-if="validCheck.pw">
-          8자이상 16자이하 영어,숫자를 혼용해서 입력해주세요 ㅡㅡ;;
+          8자이상 16자이하 영어,숫자를 혼용해서 입력해주세요.
         </p>
       </div>
       <div class="row">
@@ -65,13 +80,19 @@
         </p>
       </div>
       <div class="row">
-        <BaseButton text="Create an Account" />
+        <BaseButton text="Create an Account" @click="signUp" />
       </div>
     </fieldset>
   </form>
 </template>
 <script setup lang="ts">
   import { onMounted, ref, inject, reactive } from "vue";
+  import { AxiosInstance } from "axios";
+  import { APIResponse } from "@axios/types";
+  import { useRoute, useRouter } from "vue-router";
+  import { EventType, Emitter } from "mitt";
+  import authAPI from "@api/auth";
+  const router = useRouter();
   const userFirstName = ref("");
   const userLastName = ref("");
   const userEmail = ref("");
@@ -80,12 +101,35 @@
   const pwReg = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,16}$/;
   const emailReg =
     /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const emitter = inject("emitter") as Emitter<
+    Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
+  >;
+  const emit = defineEmits(["update:route"]);
   const validCheck = reactive({
-    id: false,
+    firstName: false,
+    lastName: false,
     pw: false,
     email: false,
     pwConfirm: false,
   });
+  const firstNameCheck = (value: string) => {
+    userFirstName.value = value;
+    if (userFirstName.value.trim().length > 0) {
+      validCheck.firstName = false;
+    } else {
+      validCheck.firstName = true;
+    }
+  };
+  const lastNameCheck = (value: string) => {
+    userLastName.value = value;
+    if (userLastName.value.trim().length > 0) {
+      validCheck.lastName = false;
+    } else {
+      validCheck.lastName = true;
+    }
+  };
+
   const emailValidCheck = (value: string) => {
     const test = emailReg.test(value);
     userEmail.value = value;
@@ -112,13 +156,54 @@
       validCheck.pwConfirm = false;
     }
   };
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
+  const signUp = () => {
+    if (userFirstName.value.trim().length == 0) {
+      validCheck.firstName = true;
+    }
+    if (userLastName.value.trim().length == 0) {
+      validCheck.lastName = true;
+    }
+    if (userEmail.value.trim().length == 0) {
+      validCheck.email = true;
+    }
+    if (userPassword.value.trim().length == 0) {
+      validCheck.pw = true;
+    }
+    if (userPasswordConfirm.value.trim().length == 0) {
+      validCheck.pwConfirm = true;
+    }
+    if (Object.values(validCheck).indexOf(true) == -1) {
+      defaultInstance
+        .post(authAPI.join, {
+          firstName: userFirstName.value,
+          lastName: userLastName.value,
+          password: userPassword.value,
+          email: userEmail.value,
+          role: "user",
+        })
+        .then((result) => {
+          if ("data" in result.data) {
+            emit("update:route", "SignIn");
+            emitter.emit("update:alert", {
+              isActive: true,
+              message: "회원가입이 완료되었으며, 인증 메일이 발송되었습니다.",
+            });
+          }
+        })
+        .catch((err) => {
+          emitter.emit("update:alert", {
+            isActive: true,
+            message: "이미 존재하는 아이디입니다.",
+          });
+        });
+    }
+  };
+  onMounted(() => {});
 </script>
 <style scoped lang="scss">
   .sign-up-form {
     width: 50%;
+    overflow-y: auto;
     fieldset {
       .legend {
         font: {

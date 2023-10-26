@@ -1,9 +1,8 @@
 <template>
+  <div class="mask"></div>
   <div class="progress-modal">
     <p>
-      Inferencing is in progress...<strong class="progress-value"
-        >{{ progressValue }}%</strong
-      >
+      {{ text }}.<strong class="progress-value">{{ progressValue }}%</strong>
     </p>
     <div class="progress-bar-area">
       <span
@@ -18,16 +17,26 @@
 <script setup lang="ts">
   import { onMounted, toRefs, ref } from "vue";
   interface Props {
+    text: string;
     progressValue: number;
   }
   const props = defineProps<Props>();
-  const { progressValue } = toRefs(props);
+  const { progressValue, text } = toRefs(props);
   const emit = defineEmits(["update:close-progress-modal"]);
   onMounted(() => {
     console.log("onmounted호출");
   });
 </script>
 <style scoped lang="scss">
+  .mask {
+    z-index: 1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+  }
   .progress-modal {
     position: fixed;
     top: 50%;

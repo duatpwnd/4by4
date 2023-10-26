@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useCookies } from "vue3-cookies";
 const { cookies } = useCookies();
 import { inject } from "vue";
-const signOut = inject("signOut");
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
@@ -42,7 +41,8 @@ const router = createRouter({
   },
 });
 router.beforeEach((to, from, next) => {
-  console.log(cookies.get("accessToken"));
+  const signOut = inject("signOut");
+  // console.log(cookies.get("accessToken"));
   next();
 });
 export default router;

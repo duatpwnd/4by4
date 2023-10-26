@@ -6,48 +6,49 @@
         class="label"
         v-html="text"
       ></button>
-      <span v-else v-for="(item, index) in text" :key="index" class="label">
-        {{ item.name }}&nbsp;
-      </span>
+      <input
+        v-else
+        type="text"
+        :value="text.map((el) => el[name]).toString()"
+        readonly
+      />
     </div>
     <ul class="optionList" v-show="isActive">
       <li class="optionItem" v-for="(option, index) in options" :key="index">
-        <label :for="option[name]">{{ option[name] }}</label>
-        <BaseCheckBox @update:checkModelValue="select" :id="option[name]" />
-      </li>
-      <li class="complete-area">
-        <BaseButton text="선택완료" @click="complete" />
+        <label :for="option[name] + index">{{ option[name] }}</label>
+        <BaseCheckBox
+          @update:checkModelValue="select(option)"
+          :id="option[name] + index"
+          :value="option"
+        />
       </li>
     </ul>
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, toRefs } from "vue";
+  import { onMounted, ref, toRefs, toRaw } from "vue";
   import BaseButton from "./BaseButton.vue";
   interface Props {
     options: any[];
     name: string;
-    text: string | { name: string }[];
+    text: string | { [key: string]: any }[];
   }
   const props = defineProps<Props>();
   const emit = defineEmits(["update:select-box"]);
   const selectedText = ref<HTMLButtonElement | null>(null);
   const { options, text, name } = toRefs(props);
   const isActive = ref(false);
-  const selectedArr: { name: string }[] = [];
-  const complete = () => {
-    emit("update:select-box", selectedArr);
-    isActive.value = false;
-  };
-  const select = (option: string) => {
+  const selectedArr: any[] = [];
+  const select = (option: string | { [key: string]: any }) => {
     const findIndex = selectedArr.findIndex((el) => {
-      return el.name == option;
+      return el == option;
     });
     if (findIndex == -1) {
-      selectedArr.push({ name: option });
+      selectedArr.push(option);
     } else {
       selectedArr.splice(findIndex, 1);
     }
+    emit("update:select-box", JSON.stringify(selectedArr));
   };
   onMounted(() => {
     document.body.addEventListener("click", (e: Event) => {
@@ -71,9 +72,10 @@
     box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.1);
     .button-area {
       padding: 20px;
-      width: calc(100% - 52px);
       box-sizing: border-box;
-      @include ellipsis(1);
+      input {
+        width: 90%;
+      }
       .label {
         background: transparent;
         cursor: pointer;
@@ -112,15 +114,6 @@
         }
         &:hover {
           background-color: #ccc;
-        }
-      }
-      .complete-area {
-        width: 200px;
-        margin: 0 auto;
-        .base-button {
-          padding: 10px 0;
-          font-size: 17px;
-          border-radius: 0;
         }
       }
     }

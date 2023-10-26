@@ -5,6 +5,18 @@ import { fileURLToPath, URL } from "url";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), tsconfigPaths()],
+  base: "http://183.111.175.101:49090",
+  server: {
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: "http://183.111.175.101:49090",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
   css: {
     preprocessorOptions: {
       scss: {

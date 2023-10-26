@@ -48,8 +48,11 @@
   </div>
 </template>
 <script setup lang="ts">
+  import * as tus from "tus-js-client";
   import { onMounted, ref, inject } from "vue";
+  import serviceAPI from "@api/services";
   import { EventType, Emitter } from "mitt";
+  import { authInstance } from "@/axios/instance";
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;
@@ -122,13 +125,55 @@
     }
   };
   const submit = () => {
-    emit(
-      "update:upload",
-      files.value == null
-        ? [sampleVideos.value[selectedSampleVideo.value]]
-        : files.value
-    );
-    close();
+    console.log("submit");
+    if (files.value !== null) {
+      const file = files.value && files.value[0];
+      console.log(file);
+
+      const chunkSize = 1024 * 1024 * 5;
+      const upload = new tus.Upload(file, {
+        endpoint: serviceAPI.videoFileUpload,
+        chunkSize,
+        retryDelays: [0, 1000, 3000, 5000],
+        // metadata: {
+        //   projectName: modelData.projectName,
+        //   imageName: modelData.modelName,
+        //   tag: modelData.tagName,
+        // },
+        onError: (error) => {
+          console.log("Failed because: " + error);
+        },
+        onProgress: (bytesUploaded, bytesTotal) => {
+          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+          console.log(bytesUploaded, bytesTotal, percentage + "%");
+        },
+        onSuccess: () => {
+          authInstance.get(serviceAPI.videoList).then((result) => {
+            console.log(result);
+            emit(
+              "update:upload",
+              files.value == null
+                ? [sampleVideos.value[selectedSampleVideo.value]]
+                : result.data
+            );
+            close();
+          });
+
+          console.log("Download %s from %s", upload.file.name, upload.url);
+        },
+      });
+
+      // Check if there are any previous uploads to continue.
+      upload.findPreviousUploads().then(function (previousUploads) {
+        // Found previous uploads so we select the first one.
+        if (previousUploads.length) {
+          upload.resumeFromPreviousUpload(previousUploads[0]);
+        }
+
+        // Start the upload
+        upload.start();
+      });
+    }
   };
 </script>
 <style scoped lang="scss">

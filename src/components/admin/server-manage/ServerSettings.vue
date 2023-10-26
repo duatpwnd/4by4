@@ -1,71 +1,81 @@
 <template>
-  <div class="settings-container">
+  <div class="settings-container" v-if="'hostName' in serverInfo">
     <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
     <div>
-      <div class="input-area">
-        <BaseInput
-          type="text"
-          placeholder="host name"
-          @update:modelValue="(newValue:string) => (hostName = newValue)"
-          :modelValue="hostName"
-        />
-        <BaseInput
-          type="text"
-          placeholder="host IP"
-          @update:modelValue="(newValue:string) => (hostIP = newValue)"
-          :modelValue="hostIP"
-        />
-      </div>
+      <dl class="host-info">
+        <div>
+          <dt>Host Name</dt>
+          <dd>{{ serverInfo.hostName }}</dd>
+        </div>
+        <div>
+          <dt>Host Ip</dt>
+          <dd>{{ serverInfo.hostIp }}</dd>
+        </div>
+      </dl>
       <div class="info">
         <h3>Resource</h3>
         <div class="row">
           <strong class="title">CPU : </strong>
-          <strong>i9-10900X</strong>
-          <strong>10cores</strong>
+          <strong>{{ serverInfo.cpuName }}</strong>
+          <strong class="cores">{{ serverInfo.cpuCores }}Cores</strong>
         </div>
         <div class="row">
           <strong class="title">Memory : </strong>
-          <strong>128GB</strong>
+          <strong>{{ Number(serverInfo.memory).toFixed(0) }}GB</strong>
         </div>
         <div class="row">
           <strong class="title">GPU : </strong>
-          <strong>Geforce RTX 4080</strong>
-          <strong>16GB</strong>
+          <div class="gpu-wrapper">
+            <div
+              class="gpu-area"
+              v-for="(list, index) in serverInfo.gpu"
+              :key="index"
+            >
+              <strong>{{ list.gpuName }}</strong>
+              <strong class="gpu-memory">{{ list.gpuMemory }}GB</strong>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="server-change">
+      <!-- <div class="server-change">
         <BaseButton text="설정 변경" @click="change" />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, inject } from "vue";
+  import { onMounted, reactive, inject } from "vue";
   import { EventType, Emitter } from "mitt";
   import { useRoute, useRouter } from "vue-router";
+  import serviceAPI from "@api/services";
+  import { AxiosInstance } from "axios";
+  interface ServerInfoType {
+    cpuCores: string;
+    cpuName: string;
+    hostName: string;
+    hostIp: string;
+    memory: string;
+    gpu: {
+      gpuName: string;
+      gpuMemory: string;
+    }[];
+  }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const router = useRouter();
   const route = useRoute();
-  const hostIP = ref("");
-  const hostName = ref("");
-  const change = () => {
-    if (hostName.value.trim().length == 0) {
-      emitter.emit("update:alert", {
-        isActive: true,
-        message: "host name을 입력해주세요,",
-      });
-    } else if (hostIP.value.trim().length == 0) {
-      emitter.emit("update:alert", {
-        isActive: true,
-        message: "host IP를 입력해주세요,",
-      });
-    } else {
-    }
-  };
+  const serverId = route.query.serverId;
+  const serverInfo = reactive<ServerInfoType | {}>({});
   onMounted(() => {
     console.log("onmounted호출");
+    defaultInstance
+      .get(serviceAPI.serverToggle + `?serverId=${serverId}`)
+      .then((result) => {
+        console.log(result);
+        Object.assign(serverInfo, result.data);
+      });
   });
 </script>
 <style scoped lang="scss">
@@ -73,17 +83,34 @@
     position: relative;
     width: 70%;
     margin: 0 auto;
-    padding-top: 40px;
+    padding-top: 100px;
     .close-button {
       position: absolute;
-      top: -40px;
+      top: 20px;
       right: 0px;
       font-size: 40px;
       cursor: pointer;
     }
-    .input-area {
+    .host-info {
       display: flex;
       column-gap: 20px;
+      div {
+        width: 100%;
+        dt,
+        dd {
+          font: {
+            size: 20px;
+            weight: bold;
+          }
+        }
+        dd {
+          margin-top: 20px;
+          border-radius: 15px;
+          background: #f3f7fa;
+          padding: 20px;
+          box-sizing: border-box;
+        }
+      }
     }
     .info {
       display: flex;
@@ -95,6 +122,20 @@
           color: blue;
           width: 80px;
           display: inline-block;
+        }
+        .cores {
+          margin-left: 16px;
+        }
+        .gpu-wrapper {
+          display: inline-flex;
+          width: calc(100% - 80px);
+          flex-direction: column;
+          row-gap: 16px;
+          .gpu-area {
+            .gpu-memory {
+              margin-left: 16px;
+            }
+          }
         }
       }
     }

@@ -1,17 +1,17 @@
 <template>
-  <button type="button" class="base-button">{{ text }}</button>
+  <button :disabled="disabled" type="button" class="base-button">
+    {{ text }}
+  </button>
 </template>
 <script setup lang="ts">
   import { onMounted, toRefs } from "vue";
   interface Props {
     text: string;
     style?: CSSStyleValue;
+    disabled?: boolean;
   }
   const props = defineProps<Props>();
-  const { text, style } = toRefs(props);
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
+  const { text, style, disabled } = toRefs(props);
 </script>
 <style scoped lang="scss">
   .base-button {

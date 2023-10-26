@@ -1,6 +1,7 @@
 <template>
   <ProgressModal
     v-if="isActiveProgressModal"
+    text="Inferencing is in progress..."
     :progressValue="progressValue"
     @update:close-progress-modal="isActiveProgressModal = false"
   />
@@ -69,16 +70,20 @@
             :text="selectedEncoder.name"
           />
         </div>
-
         <div class="row check-area">
           <div>
-            <BaseCheckBox @update:checkModelValue="onCheck" id="BestQuality" />
+            <BaseCheckBox
+              @update:checkModelValue="onCheck"
+              id="BestQuality"
+              value="best quality"
+            />
             <label for="BestQuality">Best Quality</label>
           </div>
           <div>
             <BaseCheckBox
               @update:checkModelValue="onCheck"
               id="2PassEncoding"
+              value="2-Pass Encoding"
             />
             <label for="2PassEncoding">2-Pass Encoding</label>
           </div>
@@ -132,6 +137,8 @@
   import UploadModal from "@components/modal/upload/UploadModal.vue";
   import { AxiosInstance } from "axios";
   import { ref, inject, onMounted } from "vue";
+  import serviceAPI from "@api/services";
+
   interface SelectedType {
     name: string;
   }
@@ -148,7 +155,7 @@
   const vbrOrCbr = ref("VBR");
   const isActiveUploadModal = ref(false);
   const isActiveProgressModal = ref(false);
-  const bitrate = ref("1");
+  const bitrate = ref("128");
   const progressValue = ref(0);
   const onCheck = (value: string) => {
     const getIndex = quality.value.indexOf(value);
@@ -161,16 +168,31 @@
   const preview = () => {
     if (selectedVideoFile == null) {
     } else {
-      // isActiveProgressModal.value = true;
-      // authInstance
-      //   .post("/test", "", {
-      //     onUploadProgress: (progressEvent) => {
-      //       const percentage =
-      //         (progressEvent.loaded * 100) / (progressEvent.total as number);
-      //       progressValue.value = percentage;
-      //     },
-      //   })
-      //   .then((result) => {});
+      isActiveProgressModal.value = true;
+      authInstance
+        .post(
+          serviceAPI.videoInference,
+          {
+            videoId: "",
+            containerId: "string",
+            format: selectedFormat.value,
+            encoder: selectedEncoder.value,
+            bestQuality: 0,
+            twoPassEncoding: 0,
+            avgBitrate: 0,
+            variableBitrate: bitrate.value,
+          },
+          {
+            onUploadProgress: (progressEvent) => {
+              const percentage =
+                (progressEvent.loaded * 100) / (progressEvent.total as number);
+              progressValue.value = percentage;
+            },
+          }
+        )
+        .then((result) => {
+          console.log(result);
+        });
     }
   };
   onMounted(() => {

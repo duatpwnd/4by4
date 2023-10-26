@@ -62,7 +62,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 5;
+    z-index: 6;
     .msg {
       color: rgb(33, 37, 41);
       text-align: center;

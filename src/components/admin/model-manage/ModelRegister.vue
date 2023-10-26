@@ -1,8 +1,15 @@
 <template>
+  <ProgressModal
+    v-if="isActiveProgressModal"
+    text="tar file uploading..."
+    :progressValue="progressValue"
+    @update:close-progress-modal="cancel"
+  />
   <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
   <div class="register-container">
     <div class="file-upload-wrapper">
       <div
+        id="drag-drop"
         class="file-upload-area"
         :class="isDragged ? 'dragged' : ''"
         @dragenter="onDragenter"
@@ -13,43 +20,109 @@
         <strong>
           Drop Tar File here to upload or
           <label class="file-upload-txt" for="file-upload">Choose File</label>
-          <input type="file" id="file-upload" @change="fileUpload" multiple />
+          <input
+            type="file"
+            id="file-upload"
+            accept=".tar"
+            @change="fileUpload"
+          />
         </strong>
+        <ul class="guide-msg">
+          <li>
+            도커 이미지 파일을 tar 확장자로 저장하여 업로드 해주시길
+            바랍니다.<br />
+            cf) https://docs.docker.com/engine/reference/commandline/save/
+          </li>
+        </ul>
       </div>
-      <ul class="guide-msg">
-        <li>
-          도커 이미지를 다음과 같이 변경해주시길 바랍니다.<br />
-          1) docker tag {image ID} {Harbor IP}/{프로젝트명}/{모델명}:{tag명}<br />
-          예) docker tag
-        </li>
-        <li>
-          도커 이미지 파일을 tar 확장자로 저장하여 업로드 해주시길 바랍니다.<br />
-          cf) https://docs.docker.com/engine/reference/commandline/save/
-        </li>
-      </ul>
+      <p class="notice-message" v-if="validCheck.files">
+        tar파일을 업로드해주세요..
+      </p>
 
+      <div class="input-area">
+        <div>
+          <label class="title">Project Name</label>
+          <BaseInput
+            @update:modelValue="(newValue:string) => (modelData.projectName = newValue)"
+            :modelValue="modelData.projectName"
+            type="text"
+            placeholder="Insert Project Name"
+          />
+          <p class="notice-message" v-if="validCheck.projectName">
+            project name을 입력해주세요.
+          </p>
+        </div>
+        <div>
+          <label class="title">Model Name</label>
+          <BaseInput
+            @update:modelValue="(newValue:string) => (modelData.modelName = newValue)"
+            :modelValue="modelData.modelName"
+            type="text"
+            placeholder="Insert Model Name"
+          />
+          <p class="notice-message" v-if="validCheck.modelName">
+            model name을 입력해주세요.
+          </p>
+        </div>
+        <div>
+          <label class="title">Tag Name(Version)</label>
+          <BaseInput
+            @update:modelValue="(newValue:string) => (modelData.tagName = newValue)"
+            :modelValue="modelData.tagName"
+            type="text"
+            placeholder="Insert Tag Name"
+          />
+          <p class="notice-message" v-if="validCheck.tagName">
+            tag name을 입력해주세요.
+          </p>
+        </div>
+      </div>
       <ul class="file-name-area" v-if="files != null">
-        <li v-for="(file, index) in files" :key="index">
-          {{ file.name }}
+        <li>
+          {{ files.name }}
         </li>
       </ul>
     </div>
+    <div id="progress-bar"></div>
+
     <div class="model-register">
       <BaseButton text="모델 등록" @click="register" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, inject } from "vue";
+  import * as tus from "tus-js-client";
+  import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
+  import { getModelList } from "./model";
+  import { AxiosInstance } from "axios";
+  import { onMounted, ref, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";
   import { useRoute, useRouter } from "vue-router";
+  import BaseInput from "@/components/common/BaseInput.vue";
+  import serviceAPI from "@api/services";
   const router = useRouter();
   const route = useRoute();
   const registrationItem = ref([{ hostName: "", hostIP: "" }]);
   const isDragged = ref(false);
-  const files = ref<FileList | null>(null);
+  const files = ref<File | null>(null);
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const isActiveProgressModal = ref(false);
+  const progressValue = ref(0);
+  const controller = new AbortController();
+  const validCheck = reactive({
+    files: false,
+    projectName: false,
+    modelName: false,
+    tagName: false,
+  });
+  const modelData = reactive({
+    projectName: "",
+    modelName: "",
+    tagName: "",
+  });
+
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string }>
+    Record<EventType, { isLoading: boolean }>
   >;
   const onDragenter = () => {
     isDragged.value = true;
@@ -67,24 +140,117 @@
     isDragged.value = false;
     const target = event.dataTransfer;
     if (target && target.files) {
-      files.value = target.files;
+      files.value = target.files[0];
     }
   };
   const fileUpload = (event: Event) => {
     const target = event.target as HTMLInputElement;
     if (target && target.files) {
-      files.value = target.files;
+      files.value = target.files[0];
     }
   };
-  const register = () => {};
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
+  const cancel = () => {
+    isActiveProgressModal.value = false;
+    controller.abort();
+  };
+
+  const register = () => {
+    if (modelData.projectName.trim().length == 0) {
+      validCheck.projectName = true;
+    } else {
+      validCheck.projectName = false;
+    }
+    if (modelData.modelName.trim().length == 0) {
+      validCheck.modelName = true;
+    } else {
+      validCheck.modelName = false;
+    }
+    if (modelData.tagName.trim().length == 0) {
+      validCheck.tagName = true;
+    } else {
+      validCheck.tagName = false;
+    }
+    if (files.value == null) {
+      validCheck.files = true;
+    } else {
+      validCheck.files = false;
+    }
+    if (Object.values(validCheck).indexOf(true) == -1) {
+      isActiveProgressModal.value = true;
+      const file = files.value as File;
+      console.log(file);
+      // const chunkSize = 1024 * 1024 * 5;
+      // const upload = new tus.Upload(file, {
+      //   endpoint: serviceAPI.modelUpload,
+      //   chunkSize,
+      //   retryDelays: [0, 1000, 3000, 5000],
+      //   metadata: {
+      //     projectName: modelData.projectName,
+      //     imageName: modelData.modelName,
+      //     tag: modelData.tagName,
+      //   },
+      //   onError: function (error) {
+      //     console.log("Failed because: " + error);
+      //   },
+      //   onProgress: (bytesUploaded, bytesTotal) => {
+      //     console.log(bytesUploaded, bytesTotal);
+      //     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+      //     console.log(bytesUploaded, bytesTotal, percentage + "%");
+      //   },
+      //   onSuccess: () => {
+      //     console.log("Download %s from %s");
+      //   },
+      // });
+
+      // // Check if there are any previous uploads to continue.
+      // upload.findPreviousUploads().then(function (previousUploads) {
+      //   // Found previous uploads so we select the first one.
+      //   if (previousUploads.length) {
+      //     upload.resumeFromPreviousUpload(previousUploads[0]);
+      //   }
+
+      //   // Start the upload
+      //   upload.start();
+      // });
+
+      const form = new FormData();
+      form.append("projectName", modelData.projectName);
+      form.append("imageName", modelData.modelName);
+      form.append("tag", modelData.tagName);
+      form.append("file", file);
+      defaultInstance
+        .postForm(serviceAPI.upload, form, {
+          signal: controller.signal,
+          onUploadProgress: (progressEvent) => {
+            const percentage =
+              (progressEvent.loaded * 100) / (progressEvent.total as number);
+            progressValue.value = Number(percentage.toFixed(0));
+            console.log(percentage);
+            if (percentage == 100) {
+              emitter.emit("update:loading", { isLoading: true });
+            }
+          },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            type: "model",
+          },
+        })
+        .then((result) => {
+          console.log(`output-> result`, result);
+          emitter.emit("update:loading", { isLoading: false });
+          isActiveProgressModal.value = false;
+          router.push(
+            "/admin?mainCategory=modelManage&subCategory=modelStatus"
+          );
+          getModelList(1, "ALL");
+        });
+    }
+  };
 </script>
 <style scoped lang="scss">
   .close-button {
     position: absolute;
-    top: -40px;
+    top: 20px;
     right: 40px;
     font-size: 40px;
     cursor: pointer;
@@ -92,16 +258,46 @@
 
   .register-container {
     position: relative;
+    padding-top: 60px;
     width: 70%;
     margin: 0 auto;
     height: 100%;
     overflow-y: auto;
     box-sizing: border-box;
+    .notice-message {
+      color: red;
+      margin-top: 10px;
+    }
+
     .file-upload-wrapper {
       .file-upload-area {
         text-align: center;
         border-bottom: 3px solid #a9a8a8;
-        padding-bottom: 44px;
+        padding-bottom: 20px;
+        .guide-msg {
+          margin-top: 20px;
+          padding-left: 90px;
+          position: relative;
+          li {
+            line-height: 30px;
+            text-align: left;
+            font: {
+              size: 20px;
+            }
+            list-style-type: disc;
+            &:not(:first-child) {
+              margin-top: 20px;
+            }
+          }
+          &::before {
+            vertical-align: middle;
+            content: url("@images/safety_ico.svg");
+            position: absolute;
+            top: 0;
+            left: 0;
+          }
+        }
+
         &.dragged {
           border-bottom: 3px solid #1400ff;
         }
@@ -116,26 +312,23 @@
           }
         }
       }
-      .guide-msg {
-        margin-top: 65px;
-        padding-left: 90px;
-        position: relative;
-        li {
-          line-height: 30px;
+      .input-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-column-gap: 100px;
+        grid-row-gap: 40px;
+        margin-top: 20px;
+        input {
           font: {
             size: 20px;
           }
-          list-style-type: disc;
-          &:not(:first-child) {
-            margin-top: 20px;
-          }
         }
-        &::before {
-          vertical-align: middle;
-          content: url("@images/safety_ico.svg");
-          position: absolute;
-          top: 0;
-          left: 0;
+        .title {
+          display: block;
+          margin-bottom: 10px;
+          font: {
+            size: 20px;
+          }
         }
       }
       .file-name-area {

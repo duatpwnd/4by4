@@ -26,9 +26,6 @@
     }
     emit("update:modelValue", (event.target as HTMLInputElement).value);
   };
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
 </script>
 <style scoped lang="scss">
   .base-input {

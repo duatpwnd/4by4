@@ -1,4 +1,5 @@
 const auth = {
-  signIn: "",
+  join: "/api/auth/join",
+  login: "/api/auth/login",
 };
 export default auth;

@@ -1,15 +1,20 @@
 <template>
-  <input type="checkbox" :id="id" @click="emit('update:checkModelValue', id)" />
+  <input
+    type="checkbox"
+    :id="id"
+    @click="emit('update:checkModelValue', value)"
+  />
   <label :for="id"></label>
 </template>
 <script setup lang="ts">
   import { toRefs } from "vue";
   interface Props {
     id: string;
+    value: string | { [key: string]: any };
   }
   const props = defineProps<Props>();
   const emit = defineEmits(["update:checkModelValue"]);
-  const { id } = toRefs(props);
+  const { id, value } = toRefs(props);
 </script>
 <style scoped lang="scss">
   input[type="checkbox"] {

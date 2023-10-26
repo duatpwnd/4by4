@@ -89,7 +89,7 @@
 <style scoped lang="scss">
   .close-button {
     position: absolute;
-    top: -40px;
+    top: 20px;
     right: 40px;
     font-size: 40px;
     cursor: pointer;
@@ -97,6 +97,7 @@
 
   .register-container {
     position: relative;
+    padding-top: 60px;
     width: 70%;
     margin: 0 auto;
     height: 100%;

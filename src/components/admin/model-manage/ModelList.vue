@@ -4,7 +4,17 @@
     class="add-button"
     @click="router.push(route.fullPath + '&type=register')"
   />
-  <BaseTable :ths="ths" :items="items">
+  <div class="filter-area">
+    <button
+      v-for="(item, index) in tab"
+      :key="index"
+      :class="currentStatus == item ? 'active' : ''"
+      @click="getModelList(currentPage, item)"
+    >
+      {{ item }}
+    </button>
+  </div>
+  <BaseTable v-if="list.length > 0">
     <template #thead>
       <tr>
         <th v-for="(th, index) in ths" :key="index">
@@ -13,59 +23,152 @@
       </tr>
     </template>
     <template #tbody>
-      <tr v-for="(item, index) in 100" :key="index">
+      <tr v-for="(item, index) in list" :key="index">
         <td>
-          {{ index }}
+          {{ index + 1 }}
         </td>
-        <td>192.168.12.13</td>
-        <td>test</td>
-        <td>test</td>
+        <td>{{ item.modelName }}</td>
+        <td>{{ item.projectName }}</td>
+        <td>{{ item.imageName }}</td>
         <td>
-          <BaseProgress value="80" />
+          {{ item.tag }}
         </td>
         <td class="control">
           <FontAwesomeIcon
             icon="gear"
             class="setting-button"
-            @click="router.push(route.fullPath + '&type=settings')"
+            @click="
+              router.push(
+                route.fullPath + `&type=settings&modelId=${item.modelId}`
+              )
+            "
           />
           <FontAwesomeIcon
             icon="trash"
             class="remove-button"
-            @click="remove(index)"
+            @click="remove(item.modelId)"
           />
         </td>
       </tr>
     </template>
   </BaseTable>
+  <Pagination
+    v-if="list.length > 0"
+    class="pagination"
+    :total-items="totalPages"
+    :show-icons="true"
+    :showLabels="false"
+    :slice-length="4"
+    v-model="currentPage"
+    @update:model-value="
+      (currentPage) => {
+        getModelList(currentPage, currentStatus);
+      }
+    "
+  ></Pagination>
 </template>
 <script setup lang="ts">
-  import { inject, ref } from "vue";
+  import {
+    inject,
+    ref,
+    toRefs,
+    computed,
+    onActivated,
+    onDeactivated,
+  } from "vue";
   import { useRoute, useRouter } from "vue-router";
   import { EventType, Emitter } from "mitt";
+  import serviceAPI from "@api/services";
+  import { Pagination } from "flowbite-vue";
+  import { AxiosInstance } from "axios";
+  import { getModelList } from "./model";
+  interface ModelListType {
+    modelId: string;
+    projectName: string;
+    modelName: string;
+    imageName: string;
+    tag: string;
+  }
+  const tab = <const>["REGISTERED", "UNREGISTERED", "ALL"];
+  const activeTab = ref<(typeof tab)[number] | null>(null);
+  const authInstance = inject("authInstance");
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
   >;
-  const ths = ["#", "Name", "Project", "Image", "Tag", "Control"];
+  const ths = <const>["#", "Name", "Project", "Image", "Tag", "Control"];
   const router = useRouter();
   const route = useRoute();
-  const items = ref([]);
-  const remove = (index: number) => {
-    console.log(index);
+  const currentPage =
+    route.query.currentPage == undefined ? 1 : Number(route.query.currentPage);
+  const currentStatus = computed<(typeof tab)[number]>(() => {
+    const status = route.query.currentStatus as (typeof tab)[number];
+    const getIndex = tab.indexOf(status);
+    return getIndex == -1 ? "ALL" : status;
+  });
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const remove = (modelId: string) => {
     emitter.emit("update:alert", {
       isActive: true,
       message: "삭제하시겠습니까?",
       fn: () => {
-        console.log("삭제api");
+        defaultInstance
+          .delete(serviceAPI.modelInfo + `?modelId=${modelId}`)
+          .then((result) => {
+            console.log(result);
+            emitter.emit("update:alert", {
+              isActive: true,
+              message: "삭제 완료 되었습니다.",
+            });
+            getModelList(currentPage, currentStatus.value);
+          });
       },
     });
   };
+  const { list, totalPages } = getModelList(currentPage, currentStatus.value);
+  // 모델 리스트 조회
+  // const getModelList = (page: number, status: (typeof tab)[number]) => {
+  //   console.log(`output-> page,status`, page, status);
+  //   defaultInstance
+  //     .get<ModelListResType>(
+  //       serviceAPI.modelList +
+  //         `?page=${
+  //           page - 1
+  //         }&size=10&sort=desc&status=${status.toLocaleLowerCase()}`
+  //     )
+  //     .then((result) => {
+  //       console.log(result);
+  //       modelList.value = result.data.content;
+  //       totalPages.value = result.data.totalPages;
+  //       router.push({
+  //         query: {
+  //           ...route.query,
+  //           currentPage: page,
+  //           currentStatus: status,
+  //         },
+  //       });
+  //     });
+  // };
+  onActivated(() => {
+    if (activeTab.value !== null) {
+      router.push({
+        query: {
+          mainCategory: "modelManage",
+          subCategory: "modelStatus",
+          currentPage: currentPage,
+          currentStatus: activeTab.value,
+        },
+      });
+    }
+  });
+  onDeactivated(() => {
+    activeTab.value = currentStatus.value;
+  });
 </script>
 <style scoped lang="scss">
   .add-button {
     position: fixed;
-    bottom: 40px;
-    right: 40px;
+    bottom: 50px;
+    right: 0px;
     color: white;
     z-index: 1;
     cursor: pointer;
@@ -75,32 +178,70 @@
     height: 40px;
     padding: 10px;
   }
-  thead {
-    tr {
-      th {
-        &:first-child {
-          width: 2%;
-        }
-        &:last-child {
-          width: 4%;
+  .pagination {
+    :deep(.inline-flex) {
+      display: flex;
+      width: 100%;
+      justify-content: space-around;
+      button {
+        height: 30px;
+        font-size: 30px;
+        &:not(.cursor-not-allowed) {
+          &:disabled {
+            color: #686de0;
+          }
         }
       }
     }
   }
-  tbody {
-    tr {
-      td {
-        &:first-child {
-          width: 2%;
-        }
-        &:last-child {
-          width: 4%;
+  .filter-area {
+    display: flex;
+    column-gap: 20px;
+    margin: 20px 0 20px 20px;
+    button {
+      padding-bottom: 6px;
+      color: #ccc;
+      &.active {
+        color: black;
+        border-bottom: 2px solid #0095ff;
+      }
+    }
+  }
+  .table-box {
+    height: calc(100% - 126px);
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(145, 158, 171, 0.24);
+    thead {
+      tr {
+        th {
+          &:first-child {
+            width: 2%;
+          }
+          &:last-child {
+            width: 4%;
+          }
         }
       }
     }
-    .control {
-      .setting-button {
-        margin-right: 10px;
+    tbody {
+      tr {
+        td {
+          &:first-child {
+            width: 2%;
+          }
+          &:last-child {
+            width: 4%;
+          }
+        }
+      }
+      .control {
+        .remove-button {
+          color: #ff4343;
+        }
+        .setting-button {
+          color: #818080;
+          margin-right: 10px;
+        }
       }
     }
   }

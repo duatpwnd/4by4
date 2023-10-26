@@ -12,15 +12,6 @@
 </template>
 <script setup lang="ts">
   import { onMounted, toRefs, ref } from "vue";
-
-  interface Props {
-    ths: string[];
-    items: any[];
-  }
-  const props = defineProps<Props>();
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
 </script>
 <style lang="scss">
   .table-box {
@@ -28,6 +19,7 @@
     table {
       width: 100%;
       height: 100%;
+      overflow: hidden;
       tr {
         th {
           background-color: rgb(244, 246, 248);
@@ -48,18 +40,22 @@
       }
     }
     tbody {
-      overflow-y: scroll;
-      overflow-x: hidden;
+      // overflow-y: scroll;
+      //overflow-x: hidden;
       display: block;
-      height: calc(100% - 56px);
+      height: calc(100% - 34px);
+      overflow-y: auto;
       tr {
         display: table;
         table-layout: fixed;
         width: 100%;
+        &:hover {
+          background-color: #e9f4ff;
+        }
       }
     }
     thead {
-      width: calc(100% - 1.1em);
+      width: 100%;
       position: relative;
       display: table;
       table-layout: fixed;

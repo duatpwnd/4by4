@@ -92,13 +92,13 @@
     } else if (category == "modelManage") {
       lnbNav.value.push({
         name: "모델현황",
-        path: "/admin?mainCategory=modelManage",
+        path: "/admin?mainCategory=modelManage&subCategory=modelStatus",
       });
       currComp.value = ModelStatus;
     } else if (category == "deployManage") {
       lnbNav.value.push({
         name: "배포현황",
-        path: "/admin?mainCategory=deployManage",
+        path: "/admin?mainCategory=deployManage&subCategory=deployStatus",
       });
       currComp.value = DeployStatus;
     }
@@ -162,9 +162,8 @@
     box-sizing: border-box;
     background-color: rgba(249, 250, 251, 0.8);
     main {
-      margin-top: 60px;
       position: relative;
-      height: calc(100% - 133px);
+      height: calc(100% - 73px);
     }
     .gnb {
       width: 100%;

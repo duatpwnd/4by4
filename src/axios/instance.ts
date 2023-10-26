@@ -2,7 +2,6 @@ import axios, { AxiosInstance } from "axios";
 import { inject } from "vue";
 import { useCookies } from "vue3-cookies";
 const { cookies } = useCookies();
-const signOut = inject("signOut");
 export const defaultInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
   headers: {
@@ -11,6 +10,7 @@ export const defaultInstance: AxiosInstance = axios.create({
 });
 export const authInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
+
   headers: {
     "Content-Type": "application/json",
     Authorization: "Bearer " + cookies.get("token"),
@@ -18,6 +18,7 @@ export const authInstance: AxiosInstance = axios.create({
 });
 authInstance.interceptors.request.use(
   function (config) {
+    const signOut = inject("signOut");
     // 요청이 전달되기 전에 작업 수행
     return config;
   },

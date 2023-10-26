@@ -1,12 +1,10 @@
 <template>
-  <keep-alive>
+  <keep-alive exclude="ServerSettings">
     <component :is="currComp" />
   </keep-alive>
 </template>
 <script setup lang="ts">
-  import { onMounted, watchEffect, shallowRef } from "vue";
-  import { defineAsyncComponent } from "vue";
-  import { DotLoader } from "vue3-spinner";
+  import { watchEffect, shallowRef } from "vue";
   import ServerRegister from "./ServerRegister.vue";
   import ServerSettings from "./ServerSettings.vue";
   import ServerList from "./ServerList.vue";
@@ -15,17 +13,16 @@
   const currComp = shallowRef();
 
   watchEffect(() => {
-    const type = route.query.type;
-    if (type == "register") {
-      currComp.value = ServerRegister;
-    } else if (type == "settings") {
-      currComp.value = ServerSettings;
-    } else {
-      currComp.value = ServerList;
+    if (route.query.subCategory == "serverStatus") {
+      const type = route.query.type;
+      if (type == "register") {
+        currComp.value = ServerRegister;
+      } else if (type == "settings") {
+        currComp.value = ServerSettings;
+      } else {
+        currComp.value = ServerList;
+      }
     }
-  });
-  onMounted(() => {
-    console.log("onmounted호출");
   });
 </script>
 <style scoped lang="scss">

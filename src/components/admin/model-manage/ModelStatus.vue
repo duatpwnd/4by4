@@ -1,5 +1,5 @@
 <template>
-  <keep-alive>
+  <keep-alive exclude="ModelSettings">
     <component :is="currComp" />
   </keep-alive>
 </template>
@@ -12,13 +12,15 @@
   const route = useRoute();
   const currComp = shallowRef(ModelList);
   watchEffect(() => {
-    const type = route.query.type;
-    if (type == "register") {
-      currComp.value = ModelRegister;
-    } else if (type == "settings") {
-      currComp.value = ModelSettings;
-    } else {
-      currComp.value = ModelList;
+    if (route.query.subCategory == "modelStatus") {
+      const type = route.query.type;
+      if (type == "register") {
+        currComp.value = ModelRegister;
+      } else if (type == "settings") {
+        currComp.value = ModelSettings;
+      } else {
+        currComp.value = ModelList;
+      }
     }
   });
   onMounted(() => {

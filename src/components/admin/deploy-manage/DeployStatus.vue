@@ -1,5 +1,5 @@
 <template>
-  <keep-alive>
+  <keep-alive exclude="DeploySettings">
     <component :is="currComp" />
   </keep-alive>
 </template>
@@ -12,13 +12,15 @@
   const route = useRoute();
   const currComp = shallowRef(DeployList);
   watchEffect(() => {
-    const type = route.query.type;
-    if (type == "register") {
-      currComp.value = DeployRegister;
-    } else if (type == "settings") {
-      currComp.value = DeploySettings;
-    } else {
-      currComp.value = DeployList;
+    if (route.query.subCategory == "deployStatus") {
+      const type = route.query.type;
+      if (type == "register") {
+        currComp.value = DeployRegister;
+      } else if (type == "settings") {
+        currComp.value = DeploySettings;
+      } else {
+        currComp.value = DeployList;
+      }
     }
   });
   onMounted(() => {
