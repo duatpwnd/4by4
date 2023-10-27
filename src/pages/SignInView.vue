@@ -1,6 +1,6 @@
 <template>
   <main>
-    <img src="https://th.bing.com/th/id/OIG.lVXjWwlHyIo4QdjnC1YE" class="bg" />
+    <img src="@/assets/images/ai.gif" class="bg" />
     <component
       :is="currentComp"
       @update:route="
