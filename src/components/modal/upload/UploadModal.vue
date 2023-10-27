@@ -154,7 +154,7 @@
       }
     }
   };
-  const getVideoList = () => {
+  const getVideoAndModelList = () => {
     Promise.all([
       defaultInstance.get(serviceAPI.videoList),
       defaultInstance.get(serviceAPI.inferenceModelList),
@@ -197,7 +197,7 @@
         })
         .then((result) => {
           console.log(`output-> result`, result);
-          getVideoList();
+          getVideoAndModelList();
           emitter.emit("update:alert", {
             isActive: false,
           });

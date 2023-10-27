@@ -24,6 +24,7 @@
     "@uppy/vue": "^1.1.0",
     "autoprefixer": "^10.4.16",
     "axios": "^1.5.0",
+    "floating-vue": "^2.0.0-beta.24",
     "flowbite-vue": "^0.0.17",
     "mitt": "^3.0.1",
     "pinia": "^2.1.6",

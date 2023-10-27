@@ -72,7 +72,7 @@
   .change-email-wrapper {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 50%;
     justify-content: center;
     .guide-message {
       margin-top: 10px;

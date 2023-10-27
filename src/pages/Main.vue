@@ -144,8 +144,8 @@
     <Video
       :isUploaded="isUploaded"
       :isInferred="isInferred"
-      :originalVideoSrc="s"
-      :inferredVideoSrc="s"
+      :originalVideoSrc="''"
+      :inferredVideoSrc="''"
     />
   </main>
 </template>
@@ -197,9 +197,14 @@
     return quality.value.indexOf("best quality") >= 0;
   });
   const getVideoList = () => {
-    defaultInstance.get(serviceAPI.videoList).then((result) => {
+    Promise.all([
+      defaultInstance.get(serviceAPI.videoList),
+      defaultInstance.get(serviceAPI.inferenceModelList),
+    ]).then((result) => {
       console.log(result);
-      videoFiles.value = result.data;
+
+      videoFiles.value = result[0].data;
+      aiModelOptions.value = result[1].data;
     });
   };
   const onCheck = (value: string) => {
@@ -242,21 +247,28 @@
               const percentage =
                 (progressEvent.loaded * 100) / (progressEvent.total as number);
               progressValue.value = percentage;
+              if (percentage == 100) {
+                isActiveProgressModal.value = false;
+              }
             },
           }
         )
         .then((result) => {
           console.log(result);
-          defaultInstance.get(serviceAPI.connectSSE).then((result) => {
-            console.log("connect sse", result);
-            const { status, data, error, close } = useEventSource(
-              serviceAPI.connectSSE
-            );
-            console.log(status, data, error);
-          });
+          connectSSE();
           isInferred.value = true;
         });
     }
+  };
+  // sse 연결
+  const connectSSE = () => {
+    defaultInstance.get(serviceAPI.connectSSE).then((result) => {
+      console.log("connect sse", result);
+      const { status, data, error, close } = useEventSource(
+        serviceAPI.connectSSE
+      );
+      console.log(status, data, error);
+    });
   };
   onMounted(() => {
     getVideoList();

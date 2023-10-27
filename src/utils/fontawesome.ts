@@ -12,6 +12,7 @@ import {
   faCircleMinus,
   faXmark,
   faPlus,
+  faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -25,7 +26,8 @@ library.add(
   faCirclePlus,
   faCircleMinus,
   faXmark,
-  faPlus
+  faPlus,
+  faRightFromBracket
 );
 
 export default FontAwesomeIcon;

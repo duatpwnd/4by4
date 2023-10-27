@@ -13,7 +13,18 @@
         </div>
         <div>
           <dt>Container ID</dt>
-          <dd>{{ containerInfo.containerId }}</dd>
+          <dd
+            v-tooltip="{
+              content: containerInfo.containerId,
+              placement: 'bottom',
+              delay: 0,
+              options: {
+                fontSize: 20,
+              },
+            }"
+          >
+            {{ containerInfo.containerId }}
+          </dd>
         </div>
         <div>
           <dt>Container Status</dt>

@@ -1,5 +1,10 @@
 <template>
   <nav class="lnb">
+    <FontAwesomeIcon
+      icon="right-from-bracket"
+      class="sign-out-button"
+      @click="signOut"
+    />
     <ul>
       <li v-for="(item, index) in lnbNav" :key="index">
         <button
@@ -65,11 +70,12 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, shallowRef } from "vue";
+  import { onMounted, ref, shallowRef, inject } from "vue";
   import { useRoute, useRouter } from "vue-router";
   import ServerStatus from "@/components/admin/server-manage/ServerStatus.vue";
   import ModelStatus from "@/components/admin/model-manage/ModelStatus.vue";
   import DeployStatus from "@/components/admin/deploy-manage/DeployStatus.vue";
+  const signOut = inject("signOut");
   const currComp = shallowRef();
   const lnbNav = ref<{ name: string; path: string }[]>([]); // 서브메뉴 배열
   const route = useRoute();
@@ -112,6 +118,12 @@
   .gnb,
   .lnb {
     font-size: 18px;
+    .sign-out-button {
+      height: 50px;
+      color: #ff4343;
+      cursor: pointer;
+    }
+
     li {
       display: inline-block;
       width: 100%;

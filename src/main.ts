@@ -7,6 +7,8 @@ import Utils from "./utils/index";
 import FontAwesomeIcon from "@utils/fontawesome";
 import vue3GoogleLogin from "vue3-google-login";
 import vue3Spinner from "vue3-spinner";
+import FloatingVue from "floating-vue";
+import "floating-vue/dist/style.css";
 const pinia = createPinia();
 const app = createApp(App);
 app
@@ -19,4 +21,5 @@ app
   .use(router)
   .use(vue3Spinner)
   .use(Utils)
+  .use(FloatingVue)
   .mount("#app");

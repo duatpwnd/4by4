@@ -131,7 +131,7 @@
           },
         })
         .then((result) => {
-          console.log(result);
+          console.log(result.headers.authorization);
           cookies.set("token", result.headers.authorization);
           userStore.putUserInfo({
             token: result.headers.authorization,

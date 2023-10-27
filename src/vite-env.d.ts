@@ -7,3 +7,4 @@ declare module "*.vue" {
 declare module "vue3-spinner";
 declare module "swiper/modules";
 declare module "@uppy/*";
+declare module "vue-follow-tooltip";

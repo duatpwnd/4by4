@@ -1,8 +1,8 @@
 import { authInstance, defaultInstance } from "@axios/instance";
 import mitt from "mitt";
 import { App } from "vue";
+import router from "@/router/index";
 import { useCookies } from "vue3-cookies";
-import { useRouter } from "vue-router";
 import { useUserStore } from "@store/user";
 import BaseButton from "@components/common/BaseButton.vue";
 import BaseInput from "@components/common/BaseInput.vue";
@@ -46,8 +46,7 @@ export default {
       };
     };
     const signOut = () => {
-      const router = useRouter();
-      cookies.remove("");
+      cookies.remove("token");
       userStore.putUserInfo(null);
       router.push("/sign-in");
     };

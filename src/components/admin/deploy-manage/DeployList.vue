@@ -30,7 +30,16 @@
         <td>{{ item.host }}</td>
         <td class="gpu">{{ item.gpu }}</td>
         <td>{{ item.image }}</td>
-        <td class="container-id">{{ item.containerId }}</td>
+        <td
+          class="container-id"
+          v-tooltip="{
+            content: item.containerId,
+            placement: 'bottom',
+            delay: 0,
+          }"
+        >
+          {{ item.containerId }}
+        </td>
         <td class="control">
           <FontAwesomeIcon
             icon="gear"

@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from "axios";
-import { inject } from "vue";
 import { useCookies } from "vue3-cookies";
 const { cookies } = useCookies();
 export const defaultInstance: AxiosInstance = axios.create({
@@ -19,8 +18,11 @@ export const authInstance: AxiosInstance = axios.create({
 });
 defaultInstance.interceptors.request.use(
   function (config) {
-    console.log("interceptor befroe", config);
-    const signOut = inject("signOut");
+    console.log(config);
+    if (cookies.get("token") !== null) {
+      config.headers.Authorization = cookies.get("token");
+    }
+    // const signOut = inject("signOut");
     // 요청이 전달되기 전에 작업 수행
     return config;
   },
@@ -39,6 +41,7 @@ defaultInstance.interceptors.response.use(
     return response;
   },
   function (error) {
+    console.log(error);
     // 2xx 외의 범위에 있는 상태 코드는 이 함수를 트리거 합니다.
     // 응답 오류가 있는 작업 수행
     return Promise.reject(error);

@@ -1,4 +1,9 @@
 <template>
+  <FontAwesomeIcon
+    icon="right-from-bracket"
+    class="sign-out-button"
+    @click="signOut"
+  />
   <div class="video-container" ref="videoContainerRef">
     <div id="teleport-upload-modal" class="contents">
       <div class="title-area">
@@ -15,7 +20,11 @@
       </div>
 
       <div class="video-area" ref="videoAreaRef">
-        <button ref="draggableButton" class="drag-btn"></button>
+        <button
+          v-if="isInferred"
+          ref="draggableButton"
+          class="drag-btn"
+        ></button>
         <video ref="originalVideo">
           <source :src="originalVideoSrc" />
         </video>
@@ -24,9 +33,9 @@
             <source :src="inferredVideoSrc" />
           </video>
         </div>
-        <button class="share-btn"></button>
+        <button v-if="isInferred" class="share-btn"></button>
       </div>
-      <div class="timeline-area">
+      <div class="timeline-area" v-if="isInferred">
         <TimeLine
           :isVideoPlay="isVideoPlay"
           :originalVideo="originalVideo"
@@ -54,7 +63,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, toRefs } from "vue";
+  import { onMounted, ref, toRefs, inject } from "vue";
   import TimeLine from "@components/video/TimeLine.vue";
   const videoContainerRef = ref<HTMLDivElement | null>(null);
   const videoAreaRef = ref<HTMLDivElement | null>(null);
@@ -64,6 +73,7 @@
   const draggableButton = ref<HTMLButtonElement | null>(null);
   const isVideoPlay = ref(false);
   const isMouseDownBtn = ref(false);
+  const signOut = inject("signOut");
   interface Props {
     isUploaded: boolean;
     isInferred: boolean;
@@ -194,6 +204,15 @@
   });
 </script>
 <style scoped lang="scss">
+  .sign-out-button {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    color: #ff4343;
+    z-index: 1;
+    height: 50px;
+    cursor: pointer;
+  }
   .video-container {
     display: inline-block;
     width: calc(100% - 320px);
