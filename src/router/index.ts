@@ -41,8 +41,22 @@ const router = createRouter({
   },
 });
 router.beforeEach((to, from, next) => {
-  const signOut = inject("signOut");
-  // console.log(cookies.get("accessToken"));
-  next();
+  console.log(to, from);
+  const token = cookies.get("token");
+  if (to.path === "/sign-in") {
+    if (token) {
+      return next({ path: "/main" });
+    } else {
+      next();
+    }
+  } else if (token) {
+    if (to.path === "/") {
+      return next({ path: "/" });
+    } else {
+      next();
+    }
+  } else {
+    return next({ path: "/sign-in" });
+  }
 });
 export default router;

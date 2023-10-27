@@ -1,8 +1,9 @@
 <script setup lang="ts">
   import { DotLoader } from "vue3-spinner";
-  import { ref, inject } from "vue";
+  import { ref, inject, watch } from "vue";
   import { EventType, Emitter } from "mitt";
   import BaseAlertModal from "@components/common/BaseAlertModal.vue";
+  import { useRoute } from "vue-router";
   const noticeMessage = ref("");
   const isActiveAlert = ref(false);
   const isLoading = ref(false);
@@ -18,6 +19,10 @@
       }
     >
   >;
+  const route = useRoute();
+  watch(route.query, (curr, prev) => {
+    console.log(curr, prev);
+  });
   emitter.on("update:alert", (obj) => {
     isActiveAlert.value = obj.isActive;
     fn.value = obj.fn;

@@ -146,7 +146,6 @@
     status: string;
     deployStatus: string;
   }
-  const authInstance = inject("authInstance");
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;

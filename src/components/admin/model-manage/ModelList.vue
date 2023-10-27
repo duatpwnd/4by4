@@ -68,38 +68,26 @@
   ></Pagination>
 </template>
 <script setup lang="ts">
-  import {
-    inject,
-    ref,
-    toRefs,
-    computed,
-    onActivated,
-    onDeactivated,
-  } from "vue";
+  import { inject, ref, computed, onActivated, onDeactivated } from "vue";
   import { useRoute, useRouter } from "vue-router";
   import { EventType, Emitter } from "mitt";
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
   import { getModelList } from "./model";
-  interface ModelListType {
-    modelId: string;
-    projectName: string;
-    modelName: string;
-    imageName: string;
-    tag: string;
-  }
   const tab = <const>["REGISTERED", "UNREGISTERED", "ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
-  const authInstance = inject("authInstance");
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
   >;
   const ths = <const>["#", "Name", "Project", "Image", "Tag", "Control"];
   const router = useRouter();
   const route = useRoute();
-  const currentPage =
-    route.query.currentPage == undefined ? 1 : Number(route.query.currentPage);
+  const routeCurrentPage = computed<number>(() => {
+    return route.query.currentPage == undefined
+      ? 1
+      : Number(route.query.currentPage);
+  });
   const currentStatus = computed<(typeof tab)[number]>(() => {
     const status = route.query.currentStatus as (typeof tab)[number];
     const getIndex = tab.indexOf(status);
@@ -119,12 +107,15 @@
               isActive: true,
               message: "삭제 완료 되었습니다.",
             });
-            getModelList(currentPage, currentStatus.value);
+            getModelList(1, "ALL");
           });
       },
     });
   };
-  const { list, totalPages } = getModelList(currentPage, currentStatus.value);
+  const { list, totalPages, currentPage } = getModelList(
+    routeCurrentPage.value,
+    currentStatus.value
+  );
   // 모델 리스트 조회
   // const getModelList = (page: number, status: (typeof tab)[number]) => {
   //   console.log(`output-> page,status`, page, status);
@@ -154,7 +145,7 @@
         query: {
           mainCategory: "modelManage",
           subCategory: "modelStatus",
-          currentPage: currentPage,
+          currentPage: currentPage.value,
           currentStatus: activeTab.value,
         },
       });

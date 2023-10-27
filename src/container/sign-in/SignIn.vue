@@ -38,18 +38,21 @@
         <span class="or">OR</span>
       </div>
       <div class="row">
-        <!-- <div class="google-sign-in-area">
+        <div class="google-sign-in-area">
           <button type="button" class="google-sign-in" @click="googleSignIn">
             Continue with Google
           </button>
-        </div> -->
-        <GoogleLogin :callback="callback" />
+        </div>
+        <!-- <GoogleLogin :callback="googleSignIn" /> -->
         <!-- prompt auto-login  -->
       </div>
       <div class="row">
-        <router-link to="/find-password" class="find-password-link"
-          >Forget password?</router-link
+        <button
+          class="find-password-link"
+          @click="emit('update:route', 'ChangePassword')"
         >
+          Forget password?
+        </button>
       </div>
       <div class="row">
         <span class="question-txt">Don’t Have a Acount?</span>
@@ -73,6 +76,7 @@
     decodeCredential,
   } from "vue3-google-login";
   import { useCookies } from "vue3-cookies";
+  import { EventType, Emitter } from "mitt";
   import { googleSdkLoaded } from "vue3-google-login";
   const emit = defineEmits(["update:route"]);
   const { cookies } = useCookies();
@@ -85,56 +89,27 @@
     id: false,
     pw: false,
   });
+  const emitter = inject("emitter") as Emitter<
+    Record<EventType, { isActive: boolean; message: string }>
+  >;
+
   const googleSignIn = () => {
     googleTokenLogin().then((response) => {
-      console.log(response);
-      console.log(
-        "Handle the response",
-        response.token_type + " " + response.access_token
-      );
-      const userData = decodeCredential(
-        response.token_type + "" + response.access_token
-      );
-      console.log(userData);
+      defaultInstance
+        .get(authAPI.googleLogin, {
+          headers: {
+            token: response.token_type + " " + response.access_token,
+          },
+        })
+        .then((result) => {
+          console.log(result);
+          cookies.set("token", result.data.data);
+          userStore.putUserInfo({
+            token: result.data.data,
+          });
+          router.push("/main");
+        });
     });
-    // googleSdkLoaded((google) => {
-    //   google.accounts.oauth2
-    //     .initCodeClient({
-    //       client_id:
-    //         "79754581908-ck8bsqf8bje473f2agm0omubc6voskjb.apps.googleusercontent.com",
-    //       scope: "email profile openid",
-    //       redirect_uri: "http://localhost:5173/main",
-    //       callback: (response) => {
-    //         console.log(response);
-    //         if (response.code) {
-    //           sendCodeToBackend(response.code);
-    //         }
-    //       },
-    //     })
-    //     .requestCode();
-    // });
-  };
-  const sendCodeToBackend = (code: string) => {
-    try {
-      // const headers = {
-      //   Authorization: code,
-      // };
-      // const response = await axios.post("http://localhost:4000/auth", null, {
-      //   headers,
-      // });
-      // const userDetails = response.data;
-      // console.log("User Details:", userDetails);
-      // this.userDetails = userDetails;
-      // Redirect to the homepage ("/")
-      //this.$router.push("/rex");
-    } catch (error) {
-      console.error("Failed to send authorization code:", error);
-    }
-  };
-  const callback: CallbackTypes.CredentialCallback = (response) => {
-    // decodeCredential will retrive the JWT payload from the credential
-    const userData = decodeCredential(response.credential);
-    console.log("Handle the userData", userData);
   };
   const signIn = () => {
     if (userId.value.trim().length == 0) {
@@ -149,14 +124,26 @@
     }
     if (!validCheck.id && !validCheck.pw) {
       defaultInstance
-        .post(authAPI.login, { userId: userId.value, password: userPw.value })
+        .get(authAPI.login, {
+          headers: {
+            userId: userId.value,
+            password: userPw.value,
+          },
+        })
         .then((result) => {
           console.log(result);
-          // userStore.putUserInfo({ name: "duatpwnd" });
-          // router.push("/main");
+          cookies.set("token", result.headers.authorization);
+          userStore.putUserInfo({
+            token: result.headers.authorization,
+          });
+          router.push("/main");
         })
         .catch((err: Error) => {
           console.log(err);
+          // emitter.emit("update:alert", {
+          //   isActive: true,
+          //   message: "존재하지 않는 회원입니다.",
+          // });
         });
     }
   };

@@ -4,15 +4,19 @@
     <dl v-if="'imageName' in modelInfo">
       <div>
         <dt>Model Name</dt>
+        <dd>{{ modelInfo.modelName }}</dd>
+      </div>
+      <div>
+        <dt>Project Name</dt>
+        <dd>{{ modelInfo.projectName }}</dd>
+      </div>
+      <div>
+        <dt>Image Name</dt>
         <dd>{{ modelInfo.imageName }}</dd>
       </div>
       <div>
         <dt>Tag</dt>
         <dd>{{ modelInfo.tag }}</dd>
-      </div>
-      <div>
-        <dt>Project Name</dt>
-        <dd>{{ modelInfo.projectName }}</dd>
       </div>
     </dl>
   </div>

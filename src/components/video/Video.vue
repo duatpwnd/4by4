@@ -3,21 +3,25 @@
     <div id="teleport-upload-modal" class="contents">
       <div class="title-area">
         <div class="original">
-          <strong>Original </strong>
+          <strong :class="isUploaded ? 'uploaded' : 'not-uploaded'"
+            >Original
+          </strong>
         </div>
         <div class="pixell-ai">
-          <strong>PIXELL AI</strong>
+          <strong :class="isInferred ? 'uploaded' : 'not-uploaded'"
+            >PIXELL AI</strong
+          >
         </div>
       </div>
 
       <div class="video-area" ref="videoAreaRef">
         <button ref="draggableButton" class="drag-btn"></button>
         <video ref="originalVideo">
-          <source src="@images/before_3m.mp4" />
+          <source :src="originalVideoSrc" />
         </video>
         <div id="video-clipper" ref="videoClipperRef">
           <video ref="inferenceVideo">
-            <source src="@images/after_3m.mp4" />
+            <source :src="inferredVideoSrc" />
           </video>
         </div>
         <button class="share-btn"></button>
@@ -50,7 +54,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref } from "vue";
+  import { onMounted, ref, toRefs } from "vue";
   import TimeLine from "@components/video/TimeLine.vue";
   const videoContainerRef = ref<HTMLDivElement | null>(null);
   const videoAreaRef = ref<HTMLDivElement | null>(null);
@@ -60,6 +64,15 @@
   const draggableButton = ref<HTMLButtonElement | null>(null);
   const isVideoPlay = ref(false);
   const isMouseDownBtn = ref(false);
+  interface Props {
+    isUploaded: boolean;
+    isInferred: boolean;
+    originalVideoSrc: string;
+    inferredVideoSrc: string;
+  }
+  const props = defineProps<Props>();
+  const { isUploaded, isInferred, originalVideoSrc, inferredVideoSrc } =
+    toRefs(props);
   const draggable = ($target: HTMLButtonElement) => {
     const videoContainer = videoContainerRef.value;
     let isPress = false;
@@ -206,11 +219,17 @@
             text-align: center;
             border-radius: 4px;
             font-size: 25px;
-            border: 3px solid #44f641;
-            color: #44f641;
             padding: 13px 0;
             width: 150px;
             margin: 0 auto;
+            &.uploaded {
+              border: 3px solid #44f641;
+              color: #44f641;
+            }
+            &.not-uploaded {
+              border: 3px solid white;
+              color: white;
+            }
           }
         }
       }

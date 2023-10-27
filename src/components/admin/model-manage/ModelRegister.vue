@@ -41,18 +41,6 @@
 
       <div class="input-area">
         <div>
-          <label class="title">Project Name</label>
-          <BaseInput
-            @update:modelValue="(newValue:string) => (modelData.projectName = newValue)"
-            :modelValue="modelData.projectName"
-            type="text"
-            placeholder="Insert Project Name"
-          />
-          <p class="notice-message" v-if="validCheck.projectName">
-            project name을 입력해주세요.
-          </p>
-        </div>
-        <div>
           <label class="title">Model Name</label>
           <BaseInput
             @update:modelValue="(newValue:string) => (modelData.modelName = newValue)"
@@ -62,6 +50,43 @@
           />
           <p class="notice-message" v-if="validCheck.modelName">
             model name을 입력해주세요.
+          </p>
+        </div>
+        <div>
+          <label class="title"
+            >Project Name(denoise, colorgrade, superresol)</label
+          >
+          <BaseSelect
+            @update:select-box="(obj:ProjectListType) => selectedProject = obj"
+            :options="projectList"
+            name="name"
+            :text="
+              selectedProject == null
+                ? 'Select Project name'
+                : selectedProject.name
+            "
+          />
+
+          <!-- <BaseInput
+            @update:modelValue="(newValue:string) => (modelData.projectName = newValue)"
+            :modelValue="modelData.projectName"
+            type="text"
+            placeholder="Insert Project Name"
+          /> -->
+          <p class="notice-message" v-if="validCheck.projectName">
+            project name을 선택해주세요.
+          </p>
+        </div>
+        <div>
+          <label class="title">Image Name(image repo)</label>
+          <BaseInput
+            @update:modelValue="(newValue:string) => (modelData.imageName = newValue)"
+            :modelValue="modelData.imageName"
+            type="text"
+            placeholder="Insert Image Name"
+          />
+          <p class="notice-message" v-if="validCheck.imageName">
+            image name을 입력해주세요.
           </p>
         </div>
         <div>
@@ -95,14 +120,32 @@
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
   import { getModelList } from "./model";
   import { AxiosInstance } from "axios";
-  import { onMounted, ref, inject, reactive } from "vue";
+  import { ref, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";
-  import { useRoute, useRouter } from "vue-router";
+  import { useRouter } from "vue-router";
   import BaseInput from "@/components/common/BaseInput.vue";
   import serviceAPI from "@api/services";
+  interface ProjectListType {
+    name: string;
+    value: string;
+  }
   const router = useRouter();
-  const route = useRoute();
-  const registrationItem = ref([{ hostName: "", hostIP: "" }]);
+  const projectList = ref<ProjectListType[]>([
+    {
+      name: "enhance",
+      value: "enhance",
+    },
+    {
+      name: "colorize",
+      value: "colorize",
+    },
+    {
+      name: "upscale",
+      value: "upscale",
+    },
+  ]); // 프로젝트 리스트
+  const selectedProject = ref<ProjectListType | null>(null); // 선택된 프로젝트
+
   const isDragged = ref(false);
   const files = ref<File | null>(null);
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
@@ -111,18 +154,22 @@
   const controller = new AbortController();
   const validCheck = reactive({
     files: false,
+    imageName: false,
     projectName: false,
     modelName: false,
     tagName: false,
   });
   const modelData = reactive({
-    projectName: "",
     modelName: "",
     tagName: "",
+    imageName: "",
   });
 
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isLoading: boolean }>
+    Record<
+      EventType,
+      { isLoading?: boolean; isActive?: boolean; message?: string }
+    >
   >;
   const onDragenter = () => {
     isDragged.value = true;
@@ -155,7 +202,7 @@
   };
 
   const register = () => {
-    if (modelData.projectName.trim().length == 0) {
+    if (selectedProject.value == null) {
       validCheck.projectName = true;
     } else {
       validCheck.projectName = false;
@@ -170,6 +217,12 @@
     } else {
       validCheck.tagName = false;
     }
+    if (modelData.imageName.trim().length == 0) {
+      validCheck.imageName = true;
+    } else {
+      validCheck.imageName = false;
+    }
+
     if (files.value == null) {
       validCheck.files = true;
     } else {
@@ -212,10 +265,13 @@
       //   // Start the upload
       //   upload.start();
       // });
-
       const form = new FormData();
-      form.append("projectName", modelData.projectName);
-      form.append("imageName", modelData.modelName);
+      form.append(
+        "projectName",
+        (selectedProject.value as ProjectListType).value
+      );
+      form.append("modelName", modelData.modelName);
+      form.append("imageName", modelData.imageName);
       form.append("tag", modelData.tagName);
       form.append("file", file);
       defaultInstance
@@ -227,7 +283,11 @@
             progressValue.value = Number(percentage.toFixed(0));
             console.log(percentage);
             if (percentage == 100) {
-              emitter.emit("update:loading", { isLoading: true });
+              isActiveProgressModal.value = false;
+              emitter.emit("update:alert", {
+                isActive: true,
+                message: "잠시만 기다려 주세요!",
+              });
             }
           },
           headers: {
@@ -237,8 +297,9 @@
         })
         .then((result) => {
           console.log(`output-> result`, result);
-          emitter.emit("update:loading", { isLoading: false });
-          isActiveProgressModal.value = false;
+          emitter.emit("update:alert", {
+            isActive: false,
+          });
           router.push(
             "/admin?mainCategory=modelManage&subCategory=modelStatus"
           );

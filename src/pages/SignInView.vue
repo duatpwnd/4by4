@@ -8,6 +8,8 @@
           console.log(comp);
           if (comp == 'SignUp') {
             currentComp = SignUp;
+          }else if(comp == 'ChangePassword'){
+            currentComp = ChangePassword;
           } else {
             currentComp = SignIn;
           }
@@ -19,15 +21,11 @@
 <script setup lang="ts">
   import SignIn from "@/container/sign-in/SignIn.vue";
   import SignUp from "@pages/SignUp.vue";
+  import ChangePassword from "./ChangePassword.vue";
   import { InstanceType } from "@axios/types";
   import { onMounted, inject, ref, watch, shallowRef } from "vue";
   import { useRouter, useRoute } from "vue-router";
   const currentComp = shallowRef(SignIn);
-  const route = useRoute();
-  const authInstance = inject("authInstance");
-  watch(route, (curr, prev) => {
-    console.log(curr, prev);
-  });
 </script>
 <style scoped lang="scss">
   main {

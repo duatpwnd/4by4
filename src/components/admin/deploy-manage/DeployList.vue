@@ -14,7 +14,7 @@
       {{ item }}
     </button>
   </div>
-  <BaseTable v-if="deployList.length > 0">
+  <BaseTable v-if="list.length > 0">
     <template #thead>
       <tr>
         <th v-for="(th, index) in ths" :key="index">
@@ -23,7 +23,7 @@
       </tr>
     </template>
     <template #tbody>
-      <tr v-for="(item, index) in deployList" :key="index">
+      <tr v-for="(item, index) in list" :key="index">
         <td>
           {{ index + 1 }}
         </td>
@@ -52,7 +52,7 @@
     </template>
   </BaseTable>
   <Pagination
-    v-if="deployList.length > 0"
+    v-if="list.length > 0"
     class="pagination"
     v-model="currentPage"
     :total-items="totalPages"
@@ -80,19 +80,7 @@
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
-  import { APIResponse } from "@axios/types";
-  interface DeployListType {
-    host: string;
-    image: string;
-    gpu: string;
-    containerId: string;
-    status: string;
-  }
-  interface DeployListResType extends APIResponse {
-    content: DeployListType[];
-    totalPages: number;
-    totalElements: number;
-  }
+  import { getContainerList } from "./deploy";
   const router = useRouter();
   const route = useRoute();
   const emitter = inject("emitter") as Emitter<
@@ -101,17 +89,17 @@
   const ths = <const>["#", "Host", "GPU", "Image", "ContainerID", "Control"];
   const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
-  const currentPage =
-    route.query.currentPage == undefined ? 1 : Number(route.query.currentPage);
+  const routeCurrentPage = computed<number>(() => {
+    return route.query.currentPage == undefined
+      ? 1
+      : Number(route.query.currentPage);
+  });
   const currentStatus = computed<(typeof tab)[number]>(() => {
     const status = route.query.currentStatus as (typeof tab)[number];
     const getIndex = tab.indexOf(status);
     return getIndex == -1 ? "ALL" : status;
   });
-  const authInstance = inject("authInstance");
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
-  const totalPages = ref(1);
-  const deployList = ref<DeployListType[]>([]);
   const remove = (containerId: string) => {
     emitter.emit("update:alert", {
       isActive: true,
@@ -122,51 +110,24 @@
           .delete(serviceAPI.container + `?containerId=${containerId}`)
           .then((result) => {
             console.log(result);
-            getContainerList(currentPage, currentStatus.value);
+            getContainerList(1, "ALL");
             // modelList.value = result.data
           });
       },
     });
   };
+  const { list, totalPages, currentPage } = getContainerList(
+    routeCurrentPage.value,
+    currentStatus.value
+  );
   // 배포 리스트 조회
-  const getContainerList = (page: number, status: (typeof tab)[number]) => {
-    let changedStatus;
-    if (status == "DEPLOYED") {
-      changedStatus = "RUNNING";
-    } else if (status == "DEPLOYING") {
-      changedStatus = "STARTING";
-    } else if (status == "ERROR") {
-      changedStatus = "CREATED,RESTARTING,EXITED,PAUSED,DEAD";
-    } else {
-      changedStatus = "ALL";
-    }
-    defaultInstance
-      .get<DeployListResType>(
-        serviceAPI.containerList +
-          `?page=${
-            page - 1
-          }&size=10&sort=desc&status=${changedStatus?.toLocaleLowerCase()}`
-      )
-      .then((result) => {
-        console.log(result);
-        deployList.value = result.data.content;
-        totalPages.value = result.data.totalPages;
-        router.push({
-          query: {
-            ...route.query,
-            currentPage: page,
-            currentStatus: status,
-          },
-        });
-      });
-  };
   onActivated(() => {
     if (activeTab.value !== null) {
       router.push({
         query: {
           mainCategory: "deployManage",
           subCategory: "deployStatus",
-          currentPage: currentPage,
+          currentPage: currentPage.value,
           currentStatus: activeTab.value,
         },
       });
@@ -174,9 +135,6 @@
   });
   onDeactivated(() => {
     activeTab.value = currentStatus.value;
-  });
-  onMounted(() => {
-    getContainerList(currentPage, currentStatus.value);
   });
 </script>
 <style scoped lang="scss">

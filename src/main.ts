@@ -13,7 +13,7 @@ app
   .component("FontAwesomeIcon", FontAwesomeIcon)
   .use(vue3GoogleLogin, {
     clientId:
-      "79754581908-ck8bsqf8bje473f2agm0omubc6voskjb.apps.googleusercontent.com",
+      "510670340157-veces6pqflcbg0mgjin9tsf6k245qsjq.apps.googleusercontent.com",
   })
   .use(pinia)
   .use(router)

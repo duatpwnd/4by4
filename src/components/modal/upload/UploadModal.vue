@@ -1,4 +1,11 @@
 <template>
+  <ProgressModal
+    v-if="isActiveProgressModal"
+    text="tar file uploading..."
+    :progressValue="progressValue"
+    @update:close-progress-modal=""
+  />
+
   <div class="upload-modal-container">
     <button class="close-btn" @click="close"></button>
     <div class="contents">
@@ -13,7 +20,13 @@
         <strong>
           Drop Video File here to upload or
           <label class="file-upload-txt" for="file-upload">Choose File</label>
-          <input type="file" id="file-upload" @change="fileUpload" multiple />
+          <input
+            type="file"
+            id="file-upload"
+            accept=".mp4, .mov, .mkv"
+            @change="fileUpload"
+            multiple
+          />
         </strong>
       </div>
       <p class="guide-msg">
@@ -48,13 +61,18 @@
   </div>
 </template>
 <script setup lang="ts">
+  import { AxiosInstance } from "axios";
   import * as tus from "tus-js-client";
   import { onMounted, ref, inject } from "vue";
   import serviceAPI from "@api/services";
   import { EventType, Emitter } from "mitt";
-  import { authInstance } from "@/axios/instance";
+  import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string }>
+    Record<
+      EventType,
+      { isLoading?: boolean; isActive?: boolean; message?: string }
+    >
   >;
   const sampleVideos = ref([
     {
@@ -67,6 +85,8 @@
       name: "tes3.mp4",
     },
   ]);
+  const isActiveProgressModal = ref(false);
+  const progressValue = ref(0);
   const selectedSampleVideo = ref(-1);
   const emit = defineEmits(["update:close", "update:upload"]);
   const files = ref<FileList | null>(null);
@@ -104,10 +124,20 @@
       });
     } else {
       event.preventDefault();
+      const allowedExtensions = /(\.mov|\.mp4|\.mkv)$/i;
       isDragged.value = false;
       const target = event.dataTransfer;
       if (target && target.files) {
-        files.value = target.files;
+        for (const file of target.files) {
+          if (!allowedExtensions.exec(file.name)) {
+            emitter.emit("update:alert", {
+              isActive: true,
+              message: "mp4,mov,mkv 확장자만 지원합니다.",
+            });
+          } else {
+            files.value = target.files;
+          }
+        }
       }
     }
   };
@@ -124,54 +154,58 @@
       }
     }
   };
-  const submit = () => {
-    console.log("submit");
-    if (files.value !== null) {
-      const file = files.value && files.value[0];
-      console.log(file);
-
-      const chunkSize = 1024 * 1024 * 5;
-      const upload = new tus.Upload(file, {
-        endpoint: serviceAPI.videoFileUpload,
-        chunkSize,
-        retryDelays: [0, 1000, 3000, 5000],
-        // metadata: {
-        //   projectName: modelData.projectName,
-        //   imageName: modelData.modelName,
-        //   tag: modelData.tagName,
-        // },
-        onError: (error) => {
-          console.log("Failed because: " + error);
-        },
-        onProgress: (bytesUploaded, bytesTotal) => {
-          const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-          console.log(bytesUploaded, bytesTotal, percentage + "%");
-        },
-        onSuccess: () => {
-          authInstance.get(serviceAPI.videoList).then((result) => {
-            console.log(result);
-            emit(
-              "update:upload",
-              files.value == null
-                ? [sampleVideos.value[selectedSampleVideo.value]]
-                : result.data
-            );
-            close();
-          });
-
-          console.log("Download %s from %s", upload.file.name, upload.url);
-        },
+  const getVideoList = () => {
+    Promise.all([
+      defaultInstance.get(serviceAPI.videoList),
+      defaultInstance.get(serviceAPI.inferenceModelList),
+    ]).then((result) => {
+      emit("update:upload", {
+        videoList: result[0].data,
+        inferenceModelList: result[1].data,
       });
-
-      // Check if there are any previous uploads to continue.
-      upload.findPreviousUploads().then(function (previousUploads) {
-        // Found previous uploads so we select the first one.
-        if (previousUploads.length) {
-          upload.resumeFromPreviousUpload(previousUploads[0]);
-        }
-
-        // Start the upload
-        upload.start();
+      close();
+    });
+  };
+  const submit = () => {
+    if (files.value !== null) {
+      isActiveProgressModal.value = true;
+      const file = files.value;
+      console.log(file);
+      const form = new FormData();
+      for (let i = 0; i < file.length; i++) {
+        form.append("file", file[i]);
+      }
+      defaultInstance
+        .postForm(serviceAPI.upload, form, {
+          onUploadProgress: (progressEvent) => {
+            const percentage =
+              (progressEvent.loaded * 100) / (progressEvent.total as number);
+            progressValue.value = Number(percentage.toFixed(0));
+            console.log(percentage);
+            if (percentage == 100) {
+              isActiveProgressModal.value = false;
+              emitter.emit("update:alert", {
+                isActive: true,
+                message: "잠시만 기다려 주세요!",
+              });
+            }
+          },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            type: "video",
+          },
+        })
+        .then((result) => {
+          console.log(`output-> result`, result);
+          getVideoList();
+          emitter.emit("update:alert", {
+            isActive: false,
+          });
+        });
+    } else {
+      emitter.emit("update:alert", {
+        isActive: true,
+        message: "파일 업로드 또는 샘플 비디오를 선택해주세요.",
       });
     }
   };
@@ -188,7 +222,7 @@
     height: 100%;
     box-sizing: border-box;
     background: white;
-    z-index: 4;
+    z-index: 1;
 
     .close-btn {
       @include background("close_ico.svg", 25px, 25px, center);

@@ -55,14 +55,15 @@
     box-sizing: border-box;
     box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.1);
     .label {
+      text-align: left;
       padding: 20px;
-      display: flex;
       align-items: center;
       width: inherit;
       height: inherit;
       border: 0 none;
       outline: 0 none;
       background: transparent;
+      @include ellipsis(1);
       cursor: pointer;
     }
     .optionList {
@@ -80,6 +81,7 @@
       min-height: 56px;
       background-color: #dfdfdf;
       max-height: 280px;
+      overflow-y: auto;
       .optionItem {
         padding: 20px;
         &:hover {

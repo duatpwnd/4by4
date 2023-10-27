@@ -10,9 +10,12 @@
       <UploadModal
         @update:close="isActiveUploadModal = false"
         @update:upload="
-          (files) => {
+          (list) => {
             selectedVideoFile = null;
-            videoFiles = [...files];
+            aiModelOptions = [];
+            videoFiles = [];
+            aiModelOptions = list.inferenceModelList;
+            videoFiles = list.videoList;
           }
         "
       />
@@ -26,13 +29,15 @@
         <div class="row">
           <label class="label">video File</label>
           <BaseSelect
-            @update:select-box="(file:File)=>selectedVideoFile = file"
-            name="name"
+            @update:select-box="(video:VideoListType)=>{
+              isUploaded = true;
+              selectedVideoFile = video}"
+            name="fileName"
             :options="videoFiles"
             :text="
               selectedVideoFile == null
                 ? '<span class=not-selected>Please Upload Video Files</span>'
-                : selectedVideoFile.name
+                : selectedVideoFile.fileName
             "
           />
         </div>
@@ -43,13 +48,17 @@
           <label class="label">AI Model</label>
           <BaseSelect
             @update:select-box="
-              {
-                (obj: SelectedType) => (selectedAiModel = obj);
-              }
+                (obj: SelectedType) => {
+                  selectedAiModel = obj
+                }
             "
             :options="aiModelOptions"
             name="name"
-            :text="selectedAiModel.name"
+            :text="
+              selectedAiModel == null
+                ? '<span class=not-selected>Select AI Model</span>'
+                : selectedAiModel.name
+            "
           />
         </div>
         <div class="row">
@@ -79,7 +88,7 @@
             />
             <label for="BestQuality">Best Quality</label>
           </div>
-          <div>
+          <div v-if="!isCheckedBestQuality">
             <BaseCheckBox
               @update:checkModelValue="onCheck"
               id="2PassEncoding"
@@ -88,7 +97,7 @@
             <label for="2PassEncoding">2-Pass Encoding</label>
           </div>
         </div>
-        <div class="row check-area">
+        <div class="row check-area" v-if="!isCheckedBestQuality">
           <div>
             <BaseRadio
               @update:modelValue="(newValue:string) => (vbrOrCbr = newValue)"
@@ -122,34 +131,59 @@
         <div class="row">
           <BaseButton
             text="Preview"
-            :class="selectedVideoFile == null ? 'inActive' : 'active'"
+            :class="
+              selectedVideoFile == null || selectedAiModel == null
+                ? 'inActive'
+                : 'active'
+            "
             @click="preview"
           />
         </div>
       </section>
     </aside>
-    <Video />
+    <Video
+      :isUploaded="isUploaded"
+      :isInferred="isInferred"
+      :originalVideoSrc="s"
+      :inferredVideoSrc="s"
+    />
   </main>
 </template>
 <script setup lang="ts">
+  import { useEventSource } from "@vueuse/core";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
   import Video from "@components/video/Video.vue";
   import UploadModal from "@components/modal/upload/UploadModal.vue";
+  import { EventType, Emitter } from "mitt";
   import { AxiosInstance } from "axios";
-  import { ref, inject, onMounted } from "vue";
+  import { ref, inject, onMounted, computed } from "vue";
   import serviceAPI from "@api/services";
-
+  interface VideoListType {
+    videoId: string;
+    fileName: string;
+  }
   interface SelectedType {
     name: string;
   }
-  const authInstance = inject("authInstance") as AxiosInstance;
-  const videoFiles = ref<any[]>([]); // 비디오 파일 리스트
-  const selectedVideoFile = ref<File | null>(null); // 선택된 비디오 파일
-  const aiModelOptions = ref([{ name: "DeNoising" }]); // aiModel 리스트
-  const selectedAiModel = ref<SelectedType>({ name: "DeNoising" }); // 선택된 aiModel
-  const formatOptions = ref([{ name: "MP4" }]); // format 리스트
-  const selectedFormat = ref<SelectedType>({ name: "MP4" }); // 선택된 format
-  const encoderOptions = ref([{ name: "H.264" }]); // encoder 리스트
+  const emitter = inject("emitter") as Emitter<
+    Record<EventType, { isActive: boolean; message: string }>
+  >;
+  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
+  const selectedVideoFile = ref<VideoListType | null>(null); // 선택된 비디오 파일
+  const aiModelOptions = ref([]); // aiModel 리스트
+  const selectedAiModel = ref<SelectedType | null>(null); // 선택된 aiModel
+  const formatOptions = ref([
+    { name: "mp4" },
+    { name: "mov" },
+    { name: "mkv" },
+  ]); // format 리스트
+  const selectedFormat = ref<SelectedType>({ name: "mp4" }); // 선택된 format
+  const encoderOptions = ref([
+    { name: "H.264" },
+    { name: "H.265" },
+    { name: "ProRes" },
+  ]); // encoder 리스트
   const selectedEncoder = ref<SelectedType>({ name: "H.264" }); // 선택된 encoder
   const quality = ref<string[]>([]);
   const vbrOrCbr = ref("VBR");
@@ -157,6 +191,17 @@
   const isActiveProgressModal = ref(false);
   const bitrate = ref("128");
   const progressValue = ref(0);
+  const isUploaded = ref(false); // 업로드 여부
+  const isInferred = ref(false); // 추론 여부
+  const isCheckedBestQuality = computed<boolean>(() => {
+    return quality.value.indexOf("best quality") >= 0;
+  });
+  const getVideoList = () => {
+    defaultInstance.get(serviceAPI.videoList).then((result) => {
+      console.log(result);
+      videoFiles.value = result.data;
+    });
+  };
   const onCheck = (value: string) => {
     const getIndex = quality.value.indexOf(value);
     if (getIndex >= 0) {
@@ -166,20 +211,30 @@
     }
   };
   const preview = () => {
-    if (selectedVideoFile == null) {
+    if (selectedVideoFile.value == null) {
+      emitter.emit("update:alert", {
+        isActive: true,
+        message: "비디오 파일을 선택해주세요.",
+      });
+    } else if (selectedAiModel.value == null) {
+      emitter.emit("update:alert", {
+        isActive: true,
+        message: "ai model을 선택해주세요.",
+      });
     } else {
       isActiveProgressModal.value = true;
-      authInstance
+      defaultInstance
         .post(
           serviceAPI.videoInference,
           {
-            videoId: "",
+            videoId: selectedVideoFile.value && selectedVideoFile.value.videoId,
             containerId: "string",
-            format: selectedFormat.value,
-            encoder: selectedEncoder.value,
-            bestQuality: 0,
-            twoPassEncoding: 0,
-            avgBitrate: 0,
+            format: selectedFormat.value.name,
+            encoder: selectedEncoder.value.name,
+            bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
+            twoPassEncoding:
+              quality.value.indexOf("2-Pass Encoding") >= 0 ? 1 : 0,
+            avgBitrate: vbrOrCbr.value == "VBR" ? 0 : 1,
             variableBitrate: bitrate.value,
           },
           {
@@ -192,17 +247,19 @@
         )
         .then((result) => {
           console.log(result);
+          defaultInstance.get(serviceAPI.connectSSE).then((result) => {
+            console.log("connect sse", result);
+            const { status, data, error, close } = useEventSource(
+              serviceAPI.connectSSE
+            );
+            console.log(status, data, error);
+          });
+          isInferred.value = true;
         });
     }
   };
   onMounted(() => {
-    // setInterval(() => {
-    //   if (progressValue.value == 100) {
-    //     return;
-    //   } else {
-    //     progressValue.value += 1;
-    //   }
-    // }, 50);
+    getVideoList();
   });
 </script>
 <style scoped lang="scss">
@@ -220,6 +277,9 @@
       @include background("arrow_bottom_ico.svg", 10px, 5px, center right 20px);
       .not-selected {
         color: #b3b3b3;
+      }
+      .label {
+        width: calc(100% - 10px);
       }
     }
     aside {

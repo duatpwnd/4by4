@@ -78,6 +78,7 @@
   import BaseSelect from "@/components/common/BaseSelect.vue";
   import BaseSelectCheckBox from "@/components/common/BaseSelectCheckBox.vue";
   import { EventType, Emitter } from "mitt";
+  import { getContainerList } from "./deploy";
   interface HostListType {
     host: string;
     serverId: number;
@@ -102,7 +103,6 @@
     Record<EventType, { isLoading: boolean }>
   >;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
-  const authInstance = inject("authInstance");
   const router = useRouter();
   const containerName = ref("");
   const selectedHost = ref<HostListType | null>(null); // 선택된 host
@@ -147,12 +147,12 @@
         containerName: containerName.value,
       })
       .then((result) => {
+        console.log(result);
         emitter.emit("update:loading", { isLoading: false });
         router.push(
           "/admin?mainCategory=deployManage&subCategory=deployStatus"
         );
-
-        console.log(result);
+        getContainerList(1, "ALL");
       });
   };
 

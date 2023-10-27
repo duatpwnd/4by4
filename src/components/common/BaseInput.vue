@@ -23,6 +23,9 @@
     const target = event.target as HTMLInputElement;
     if (onlyText.value) {
       target.value = target.value.replace(/[^0-9]/g, "");
+      if (target.value == "0") {
+        target.value = "";
+      }
     }
     emit("update:modelValue", (event.target as HTMLInputElement).value);
   };

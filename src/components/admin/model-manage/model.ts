@@ -12,6 +12,9 @@ interface ModelListType {
 }
 interface ModelListResType extends APIResponse {
   content: ModelListType[];
+  pageable: {
+    pageNumber: number;
+  };
   totalPages: number;
   totalElements: number;
 }
@@ -19,6 +22,7 @@ const tab = <const>["REGISTERED", "UNREGISTERED", "ALL"];
 // 모델 리스트 조회
 const list = ref<ModelListType[]>([]);
 const totalPages = ref(1);
+const currentPage = ref(1);
 export const getModelList = (page: number, status: (typeof tab)[number]) => {
   defaultInstance
     .get<ModelListResType>(
@@ -28,8 +32,10 @@ export const getModelList = (page: number, status: (typeof tab)[number]) => {
         }&size=10&sort=desc&status=${status.toLocaleLowerCase()}`
     )
     .then((result) => {
+      console.log(result);
       list.value = result.data.content;
       totalPages.value = result.data.totalElements;
+      currentPage.value = result.data.pageable.pageNumber + 1;
       router.push({
         query: {
           ...router.currentRoute.value.query,
@@ -41,5 +47,6 @@ export const getModelList = (page: number, status: (typeof tab)[number]) => {
   return {
     list,
     totalPages,
+    currentPage,
   };
 };
