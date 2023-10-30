@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { useCookies } from "vue3-cookies";
+import { inject } from "vue";
 const { cookies } = useCookies();
 export const defaultInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
@@ -22,7 +23,6 @@ defaultInstance.interceptors.request.use(
     if (cookies.get("token") !== null) {
       config.headers.Authorization = cookies.get("token");
     }
-    // const signOut = inject("signOut");
     // 요청이 전달되기 전에 작업 수행
     return config;
   },
@@ -36,12 +36,17 @@ defaultInstance.interceptors.request.use(
 // 응답 인터셉터 추가하기
 defaultInstance.interceptors.response.use(
   function (response) {
+    console.log(response);
     // 2xx 범위에 있는 상태 코드는 이 함수를 트리거 합니다.
     // 응답 데이터가 있는 작업 수행
     return response;
   },
   function (error) {
     console.log(error);
+    if (error.response.data.status == 401) {
+      const signOut = inject("signOut") as any;
+      signOut();
+    }
     // 2xx 외의 범위에 있는 상태 코드는 이 함수를 트리거 합니다.
     // 응답 오류가 있는 작업 수행
     return Promise.reject(error);

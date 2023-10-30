@@ -63,7 +63,7 @@
 <script setup lang="ts">
   import { AxiosInstance } from "axios";
   import * as tus from "tus-js-client";
-  import { onMounted, ref, inject } from "vue";
+  import { ref, inject } from "vue";
   import serviceAPI from "@api/services";
   import { EventType, Emitter } from "mitt";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
@@ -161,7 +161,9 @@
     ]).then((result) => {
       emit("update:upload", {
         videoList: result[0].data,
-        inferenceModelList: result[1].data,
+        inferenceModelList: result[1].data.data.filter(
+          (el: string | null) => el !== null
+        ),
       });
       close();
     });
@@ -170,7 +172,6 @@
     if (files.value !== null) {
       isActiveProgressModal.value = true;
       const file = files.value;
-      console.log(file);
       const form = new FormData();
       for (let i = 0; i < file.length; i++) {
         form.append("file", file[i]);
@@ -181,13 +182,8 @@
             const percentage =
               (progressEvent.loaded * 100) / (progressEvent.total as number);
             progressValue.value = Number(percentage.toFixed(0));
-            console.log(percentage);
             if (percentage == 100) {
               isActiveProgressModal.value = false;
-              emitter.emit("update:alert", {
-                isActive: true,
-                message: "잠시만 기다려 주세요!",
-              });
             }
           },
           headers: {
@@ -198,9 +194,6 @@
         .then((result) => {
           console.log(`output-> result`, result);
           getVideoAndModelList();
-          emitter.emit("update:alert", {
-            isActive: false,
-          });
         });
     } else {
       emitter.emit("update:alert", {

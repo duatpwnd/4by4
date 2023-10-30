@@ -2,6 +2,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useCookies } from "vue3-cookies";
 const { cookies } = useCookies();
 import { inject } from "vue";
+import { EventType, Emitter } from "mitt";
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
@@ -70,6 +72,17 @@ router.beforeEach((to, from, next) => {
   } else {
     // 토큰이 없는 상태에서 인증이 필요한 페이지에 접속시도 할 경우 로그인 페이지로 리다이렉트 시키기.
     if (to.matched.some((record) => record.meta.requiresAuth)) {
+      const emitter = inject("emitter") as Emitter<
+        Record<
+          EventType,
+          { isLoading?: boolean; isActive?: boolean; message?: string }
+        >
+      >;
+      emitter.emit("update:alert", {
+        isActive: true,
+        message: "Please log in.",
+      });
+
       return next({ path: "/sign-in" });
     } else {
       return next();

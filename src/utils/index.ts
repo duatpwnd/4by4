@@ -49,6 +49,10 @@ export default {
       cookies.remove("token");
       userStore.putUserInfo(null);
       router.push("/sign-in");
+      emitter.emit("update:alert", {
+        isActive: true,
+        message: "Logout has been processed.",
+      });
     };
     app.provide("emitter", emitter);
     app.provide("debounce", debounce);

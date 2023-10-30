@@ -1,7 +1,7 @@
 <template>
   <ProgressModal
     v-if="isActiveProgressModal"
-    text="Inferencing is in progress..."
+    text="Inference is in progress..."
     :progressValue="progressValue"
     @update:close-progress-modal="isActiveProgressModal = false"
   />
@@ -171,7 +171,7 @@
     name: string;
   }
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message: string }>
+    Record<EventType, { isActive?: boolean; message?: string }>
   >;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
@@ -209,27 +209,36 @@
       console.log(result[1].data);
 
       videoFiles.value = result[0].data;
-      aiModelOptions.value = result[1].data.data;
+      aiModelOptions.value = result[1].data.data.filter(
+        (el: string | null) => el !== null
+      );
     });
   };
   const onCheck = (value: string) => {
     const getIndex = quality.value.indexOf(value);
+    console.log(getIndex, value);
     if (getIndex >= 0) {
       quality.value.splice(getIndex, 1);
     } else {
-      quality.value.push(value);
+      if (value == "best quality") {
+        quality.value = [];
+        quality.value.push("best quality");
+      } else {
+        quality.value.push(value);
+      }
     }
   };
+  // 추론함수
   const preview = () => {
     if (selectedVideoFile.value == null) {
       emitter.emit("update:alert", {
         isActive: true,
-        message: "비디오 파일을 선택해주세요.",
+        message: "Please select a video file.",
       });
     } else if (selectedAiModel.value == null) {
       emitter.emit("update:alert", {
         isActive: true,
-        message: "ai model을 선택해주세요.",
+        message: "Please select ai model.",
       });
     } else {
       isActiveProgressModal.value = true;
@@ -276,6 +285,7 @@
     });
   };
   onMounted(() => {
+    connectSSE();
     getVideoList();
   });
 </script>

@@ -5,6 +5,7 @@
       <li
         class="optionItem"
         v-for="(option, index) in options"
+        v-if="options.length > 0"
         :key="index"
         @click="select(option)"
       >

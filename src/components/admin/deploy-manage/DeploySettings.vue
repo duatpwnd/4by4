@@ -158,7 +158,7 @@
     deployStatus: string;
   }
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string }>
+    Record<EventType, { isLoading: boolean }>
   >;
   const router = useRouter();
   const route = useRoute();
@@ -166,6 +166,7 @@
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const containerInfo = reactive<ContainerInfoType | {}>({});
   const containerUpdate = (status: string) => {
+    emitter.emit("update:loading", { isLoading: true });
     defaultInstance
       .patch(serviceAPI.container, {
         containerId: containerId,
@@ -173,17 +174,20 @@
       })
       .then((result) => {
         console.log(result);
-        // modelList.value = result.data
+        getContainerInfo();
       });
   };
-  onMounted(() => {
-    console.log(containerId);
+  const getContainerInfo = () => {
     defaultInstance
       .get(serviceAPI.container + `?container-id=${containerId}`)
       .then((result) => {
         console.log(result);
+        emitter.emit("update:loading", { isLoading: false });
         Object.assign(containerInfo, result.data);
       });
+  };
+  onMounted(() => {
+    getContainerInfo();
   });
 </script>
 <style scoped lang="scss">

@@ -15,7 +15,6 @@
         <BaseInput
           type="password"
           @update:modelValue="(newValue:string) => {
-            console.log('test',newValue);
             userPw = newValue;
           }"
           :modelValue="userPw"
@@ -37,8 +36,6 @@
             Continue with Google
           </button>
         </div>
-        <!-- <GoogleLogin :callback="googleSignIn" /> -->
-        <!-- prompt auto-login  -->
       </div>
       <div class="row">
         <button

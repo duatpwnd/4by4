@@ -43,13 +43,14 @@
         <div>
           <label class="title">Model Name</label>
           <BaseInput
-            @update:modelValue="(newValue:string) => (modelData.modelName = newValue)"
+            @update:modelValue="(newValue:string) => onChange(newValue,'modelName')"
             :modelValue="modelData.modelName"
             type="text"
             placeholder="Insert Model Name"
           />
           <p class="notice-message" v-if="validCheck.modelName">
-            model name을 입력해주세요.
+            Only English, numbers, underscores (_), and dashes (-) can be used.
+            However, it is not possible to start with an underscore or a dash.
           </p>
         </div>
         <div>
@@ -80,25 +81,27 @@
         <div>
           <label class="title">Image Name(image repo)</label>
           <BaseInput
-            @update:modelValue="(newValue:string) => (modelData.imageName = newValue)"
+            @update:modelValue="(newValue:string) => onChange(newValue,'imageName')"
             :modelValue="modelData.imageName"
             type="text"
             placeholder="Insert Image Name"
           />
           <p class="notice-message" v-if="validCheck.imageName">
-            image name을 입력해주세요.
+            Only English, numbers, underscores (_), and dashes (-) can be used.
+            However, it is not possible to start with an underscore or a dash.
           </p>
         </div>
         <div>
           <label class="title">Tag Name(Version)</label>
           <BaseInput
-            @update:modelValue="(newValue:string) => (modelData.tagName = newValue)"
+            @update:modelValue="(newValue:string) => onChange(newValue,'tagName')"
             :modelValue="modelData.tagName"
             type="text"
             placeholder="Insert Tag Name"
           />
           <p class="notice-message" v-if="validCheck.tagName">
-            tag name을 입력해주세요.
+            Only English, numbers, underscores (_), and dashes (-) can be used.
+            However, it is not possible to start with an underscore or a dash.
           </p>
         </div>
       </div>
@@ -129,7 +132,21 @@
     name: string;
     value: string;
   }
+  interface ModelInfoType {
+    modelName: string;
+    imageName: string;
+    tagName: string;
+  }
   const router = useRouter();
+  const regType = /^[A-Za-z0-9]+[A-Za-z0-9_-]*$/;
+  const onChange = (newValue: string, key: keyof ModelInfoType) => {
+    modelData[key] = newValue;
+    if (regType.test(newValue)) {
+      validCheck[key] = false;
+    } else {
+      validCheck[key] = true;
+    }
+  };
   const projectList = ref<ProjectListType[]>([
     {
       name: "enhance",
@@ -159,7 +176,7 @@
     modelName: false,
     tagName: false,
   });
-  const modelData = reactive({
+  const modelData = reactive<ModelInfoType>({
     modelName: "",
     tagName: "",
     imageName: "",
@@ -207,17 +224,17 @@
     } else {
       validCheck.projectName = false;
     }
-    if (modelData.modelName.trim().length == 0) {
+    if (!regType.test(modelData.modelName)) {
       validCheck.modelName = true;
     } else {
       validCheck.modelName = false;
     }
-    if (modelData.tagName.trim().length == 0) {
+    if (!regType.test(modelData.tagName)) {
       validCheck.tagName = true;
     } else {
       validCheck.tagName = false;
     }
-    if (modelData.imageName.trim().length == 0) {
+    if (!regType.test(modelData.imageName)) {
       validCheck.imageName = true;
     } else {
       validCheck.imageName = false;
@@ -304,6 +321,11 @@
             "/admin?mainCategory=modelManage&subCategory=modelStatus"
           );
           getModelList(1, "ALL");
+        })
+        .catch((err) => {
+          emitter.emit("update:alert", {
+            isActive: false,
+          });
         });
     }
   };
