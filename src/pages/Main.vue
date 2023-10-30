@@ -48,16 +48,16 @@
           <label class="label">AI Model</label>
           <BaseSelect
             @update:select-box="
-                (obj: SelectedType) => {
+                (obj: SelectedAiType) => {
                   selectedAiModel = obj
                 }
             "
             :options="aiModelOptions"
-            name="name"
+            name="projectName,modelName"
             :text="
               selectedAiModel == null
                 ? '<span class=not-selected>Select AI Model</span>'
-                : selectedAiModel.name
+                : selectedAiModel.projectName + '/' + selectedAiModel.modelName
             "
           />
         </div>
@@ -162,6 +162,11 @@
     videoId: string;
     fileName: string;
   }
+  interface SelectedAiType {
+    projectName: string;
+    modelName: string;
+    containerId: string;
+  }
   interface SelectedType {
     name: string;
   }
@@ -172,7 +177,7 @@
   const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
   const selectedVideoFile = ref<VideoListType | null>(null); // 선택된 비디오 파일
   const aiModelOptions = ref([]); // aiModel 리스트
-  const selectedAiModel = ref<SelectedType | null>(null); // 선택된 aiModel
+  const selectedAiModel = ref<SelectedAiType | null>(null); // 선택된 aiModel
   const formatOptions = ref([
     { name: "mp4" },
     { name: "mov" },
@@ -201,10 +206,10 @@
       defaultInstance.get(serviceAPI.videoList),
       defaultInstance.get(serviceAPI.inferenceModelList),
     ]).then((result) => {
-      console.log(result);
+      console.log(result[1].data);
 
       videoFiles.value = result[0].data;
-      aiModelOptions.value = result[1].data;
+      aiModelOptions.value = result[1].data.data;
     });
   };
   const onCheck = (value: string) => {
@@ -233,7 +238,7 @@
           serviceAPI.videoInference,
           {
             videoId: selectedVideoFile.value && selectedVideoFile.value.videoId,
-            containerId: "string",
+            containerId: selectedAiModel.value.containerId,
             format: selectedFormat.value.name,
             encoder: selectedEncoder.value.name,
             bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,

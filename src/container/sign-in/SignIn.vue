@@ -1,14 +1,5 @@
 <template>
-  <form
-    class="sign-in-form"
-    @keydown="
-      (event) => {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-        }
-      }
-    "
-  >
+  <form class="sign-in-form">
     <fieldset>
       <legend class="legend">PIXELL AI</legend>
       <div class="row">
@@ -24,6 +15,7 @@
         <BaseInput
           type="password"
           @update:modelValue="(newValue:string) => {
+            console.log('test',newValue);
             userPw = newValue;
           }"
           :modelValue="userPw"
@@ -50,6 +42,7 @@
       </div>
       <div class="row">
         <button
+          type="button"
           class="find-password-link"
           @click="emit('update:route', 'ChangePassword')"
         >
@@ -58,7 +51,11 @@
       </div>
       <div class="row">
         <span class="question-txt">Don’t Have a Acount?</span>
-        <button class="sign-up-link" @click="emit('update:route', 'SignUp')">
+        <button
+          type="button"
+          class="sign-up-link"
+          @click="emit('update:route', 'SignUp')"
+        >
           Sign Up
         </button>
       </div>
@@ -100,6 +97,7 @@
 
   const googleSignIn = () => {
     googleTokenLogin().then((response) => {
+      console.log(response);
       defaultInstance
         .get(authAPI.googleLogin, {
           headers: {
@@ -155,7 +153,7 @@
   // 회원가입을 위한 로직
   const successSignUp = () => {
     defaultInstance
-      .patch(serviceAPI.requestPasswordChange + `?mailConfirmCode=${code}`)
+      .patch(serviceAPI.userJoin + `?mailConfirmCode=${code}`)
       .then((result) => {
         console.log(result);
         emitter.emit("update:alert", {

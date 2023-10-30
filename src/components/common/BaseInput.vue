@@ -21,7 +21,6 @@
   const emit = defineEmits(["update:modelValue"]);
   const { type, placeholder, onlyText, modelValue } = toRefs(props);
   const onInput = (event: Event) => {
-    console.log("event");
     const target = event.target as HTMLInputElement;
     if (onlyText.value) {
       target.value = target.value.replace(/[^0-9]/g, "");
@@ -42,5 +41,9 @@
     color: black;
     background-color: #f3f7fa;
     border-radius: 10px;
+    border: 2px solid #f3f7fa;
+    &:focus {
+      border: 2px solid #686de0;
+    }
   }
 </style>

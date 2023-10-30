@@ -76,8 +76,8 @@
     if (!validCheck.password && !validCheck.passwordConfirm) {
       defaultInstance
         .patch(
-          serviceAPI.requestPasswordChange + `?code=${code}`,
-          password.value
+          serviceAPI.requestPasswordChange +
+            `?code=${code}&password=${password.value}`
         )
         .then((result) => {
           console.log(result);
