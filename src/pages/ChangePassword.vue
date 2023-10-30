@@ -1,5 +1,9 @@
 <template>
   <div class="change-email-wrapper">
+    <p class="notice-message">
+      Enter your user account's verified email address and we will send you a
+      password reset link.
+    </p>
     <BaseInput
       @update:modelValue="emailValidCheck"
       :modelValue="email"
@@ -10,7 +14,11 @@
       올바른 이메일 형식을 입력해주세요.
     </p>
 
-    <BaseButton type="button" text="이메일 발송" @click="request" />
+    <BaseButton
+      type="button"
+      text="Send password reset email"
+      @click="request"
+    />
   </div>
 </template>
 
@@ -32,7 +40,7 @@
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message: string }>
   >;
-
+  // 이메일 정규식 체크
   const emailValidCheck = (value: string) => {
     const test = emailReg.test(value);
     email.value = value;
@@ -49,7 +57,7 @@
     }
     if (!validCheck.email) {
       defaultInstance
-        .get(serviceAPI.changePassword + `?email=${email.value}`)
+        .get(serviceAPI.sendEmailPassword + `?email=${email.value}`)
         .then((result) => {
           console.log(result);
           emitter.emit("update:alert", {
@@ -74,13 +82,19 @@
     flex-direction: column;
     width: 50%;
     justify-content: center;
+    .notice-message {
+      margin-bottom: 20px;
+      font : {
+        size: 20px;
+        weight: 600;
+      }
+    }
     .guide-message {
-      margin-top: 10px;
+      margin-bottom: 20px;
       color: red;
     }
-
-    .base-button {
-      margin-top: 20px;
+    .base-input {
+      margin-bottom: 20px;
     }
   }
 </style>

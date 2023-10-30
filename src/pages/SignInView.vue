@@ -23,8 +23,7 @@
   import SignUp from "@pages/SignUp.vue";
   import ChangePassword from "./ChangePassword.vue";
   import { InstanceType } from "@axios/types";
-  import { onMounted, inject, ref, watch, shallowRef } from "vue";
-  import { useRouter, useRoute } from "vue-router";
+  import { shallowRef } from "vue";
   const currentComp = shallowRef(SignIn);
 </script>
 <style scoped lang="scss">

@@ -8,19 +8,31 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/main",
   },
   {
-    path: "/sign-in",
+    path: "/sign-in/:code(.*)*", // 로그인
     name: "signIn",
     component: () =>
       import(/* webpackChunkName: "signIn" */ "@pages/SignInView.vue"),
   },
   {
-    path: "/main",
+    path: "/main", // 추론 영상 페이지
     name: "main",
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import(/* webpackChunkName: "main" */ "@pages/Main.vue"),
   },
   {
-    path: "/admin",
+    path: "/password-setting/:code(.*)", // 비밀번호 변경
+    name: "passwordSetting",
+    component: () =>
+      import(/* webpackChunkName: "main" */ "@pages/PasswordSetting.vue"),
+  },
+  {
+    path: "/admin", // 관리자
     name: "admin",
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import(/* webpackChunkName: "admin" */ "@pages/Admin.vue"),
   },
 ];
@@ -41,9 +53,9 @@ const router = createRouter({
   },
 });
 router.beforeEach((to, from, next) => {
-  console.log(to, from);
   const token = cookies.get("token");
   if (to.path === "/sign-in") {
+    // 로그인 된 상태에서 로그인 페이지로 접속 시도 할 경우 리다이렉트 시키기.
     if (token) {
       return next({ path: "/main" });
     } else {
@@ -56,7 +68,12 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else {
-    return next({ path: "/sign-in" });
+    // 토큰이 없는 상태에서 인증이 필요한 페이지에 접속시도 할 경우 로그인 페이지로 리다이렉트 시키기.
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
+      return next({ path: "/sign-in" });
+    } else {
+      return next();
+    }
   }
 });
 export default router;

@@ -27,7 +27,7 @@
             placeholder="first name"
           />
           <p class="guide-message" v-if="validCheck.firstName">
-            첫번째 이름을 입력해주세요.
+            Please enter your first name.
           </p>
         </div>
         <div class="last-name-area">
@@ -39,7 +39,7 @@
             placeholder="last name"
           />
           <p class="guide-message" v-if="validCheck.lastName">
-            마지막 이름을 입력해주세요.
+            Please enter your last name.
           </p>
         </div>
       </div>
@@ -52,7 +52,7 @@
           placeholder="email"
         />
         <p class="guide-message" v-if="validCheck.email">
-          올바른 이메일 형식을 입력해주세요.
+          Please enter the correct email format.
         </p>
       </div>
       <div class="row">
@@ -64,7 +64,8 @@
           placeholder="password"
         />
         <p class="guide-message" v-if="validCheck.pw">
-          8자이상 16자이하 영어,숫자를 혼용해서 입력해주세요.
+          Please enter between 8 and 16 characters using a mixture of English
+          and numbers.
         </p>
       </div>
       <div class="row">
@@ -76,7 +77,7 @@
           placeholder="password confirm"
         />
         <p class="guide-message" v-if="validCheck.pwConfirm">
-          비밀번호가 일치하지 않습니다.
+          Passwords do not match.
         </p>
       </div>
       <div class="row">

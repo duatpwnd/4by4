@@ -18,17 +18,19 @@
           :modelValue="userId"
           placeholder="ID"
         />
-        <p v-if="validCheck.id" class="guide-message">아이디를 입력해주세요.</p>
+        <p v-if="validCheck.id" class="guide-message">Please enter your ID.</p>
       </div>
       <div class="row">
         <BaseInput
           type="password"
-          @update:modelValue="(newValue:string) => (userPw = newValue)"
+          @update:modelValue="(newValue:string) => {
+            userPw = newValue;
+          }"
           :modelValue="userPw"
           placeholder="Password"
         />
         <p v-if="validCheck.pw" class="guide-message">
-          비밀번호를 입력해주세요.
+          Please enter a password.
         </p>
       </div>
       <div class="row">
@@ -66,7 +68,8 @@
 <script setup lang="ts">
   import { onMounted, reactive, ref, inject } from "vue";
   import { AxiosInstance } from "axios";
-  import { useRouter } from "vue-router";
+  import { useRouter, useRoute } from "vue-router";
+  import serviceAPI from "@api/services";
   import authAPI from "@api/auth";
   import { useUserStore } from "@/store/user";
   import type { CallbackTypes } from "vue3-google-login";
@@ -81,6 +84,8 @@
   const emit = defineEmits(["update:route"]);
   const { cookies } = useCookies();
   const router = useRouter();
+  const route = useRoute();
+  const code = route.params.code;
   const userStore = useUserStore();
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const userId = ref("");
@@ -147,6 +152,25 @@
         });
     }
   };
+  // 회원가입을 위한 로직
+  const successSignUp = () => {
+    defaultInstance
+      .patch(serviceAPI.requestPasswordChange + `?mailConfirmCode=${code}`)
+      .then((result) => {
+        console.log(result);
+        emitter.emit("update:alert", {
+          isActive: true,
+          message: "Sign up is complete.",
+        });
+        router.push("/sign-in");
+      });
+  };
+  onMounted(() => {
+    // 회원가입일 경우
+    if (code.length == 1) {
+      successSignUp();
+    }
+  });
 </script>
 <style scoped lang="scss">
   .sign-in-form {
