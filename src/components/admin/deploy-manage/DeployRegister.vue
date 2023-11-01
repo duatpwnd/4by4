@@ -5,24 +5,36 @@
       <div>
         <label class="title">Host</label>
         <BaseSelect
-          @update:select-box="(obj:HostListType) => hostChange(obj)"
+          @update:select-box="(obj:HostListType) => {
+            hostChange(obj)}"
           :options="hostList"
           name="serverName"
           :text="
             selectedHost == null ? 'Select Server IP' : selectedHost.serverName
           "
         />
+        <p class="notice-message" v-if="validationCheck.selectedHost">
+          Please select the server IP.
+        </p>
       </div>
       <div>
         <label class="title">GPU</label>
         <div class="gpu-area">
           <BaseSelectCheckBox
-            @update:select-box="(obj) => gpuChange(obj)"
+            @update:select-box="
+              (obj) => {
+                gpuChange(obj);
+              }
+            "
             :options="gpuList"
             name="gpuName"
             :text="selectedGpu.length == 0 ? 'Select GPU ID' : selectedGpu"
           />
         </div>
+        <p class="notice-message" v-if="validationCheck.selectedGpu">
+          Please select the GPU ID.
+        </p>
+
         <!-- <BaseSelect
           @update:select-box="(obj:SelectedType) => (selectedGpu = obj)"
           :options="gpuList"
@@ -33,7 +45,8 @@
       <div>
         <label class="title">Model</label>
         <BaseSelect
-          @update:select-box="(obj:ModelListType) => modelChange(obj)"
+          @update:select-box="(obj:ModelListType) =>{
+            modelChange(obj)}"
           :options="modelList"
           name="projectName,imageName"
           :text="
@@ -42,26 +55,37 @@
               : selectedModel.projectName + '/' + selectedModel.imageName
           "
         />
+        <p class="notice-message" v-if="validationCheck.selectedModel">
+          Please select the Model.
+        </p>
       </div>
       <div>
         <label class="title">Tags</label>
         <BaseSelect
-          @update:select-box="(obj:TagListType) => (selectedTags = obj)"
+          @update:select-box="(obj:TagListType) => {
+            validationCheck.selectedTags = false;
+            selectedTags = obj;}"
           :options="tagList"
           name="tag"
           :text="
             selectedTags == null ? 'Select Tag[version]' : selectedTags.tag
           "
         />
+        <p class="notice-message" v-if="validationCheck.selectedTags">
+          Please select a tag.
+        </p>
       </div>
       <div class="container-name-area">
         <label class="title">Container</label>
         <BaseInput
-          @update:modelValue="(newValue:string) => (containerName = newValue)"
+          @update:modelValue="(newValue:string) => changeContainerName(newValue)"
           :modelValue="containerName"
           type="text"
           placeholder="Insert Container Name"
         />
+        <p class="notice-message" v-if="validationCheck.containerName">
+          Please enter the container name.
+        </p>
       </div>
     </div>
     <div class="deploy-register">
@@ -71,7 +95,7 @@
 </template>
 <script setup lang="ts">
   import { AxiosInstance } from "axios";
-  import { onMounted, ref, inject } from "vue";
+  import { onMounted, ref, inject, reactive } from "vue";
   import { useRouter } from "vue-router";
   import serviceAPI from "@api/services";
   import BaseInput from "@/components/common/BaseInput.vue";
@@ -113,11 +137,28 @@
   const modelList = ref<ModelListType[]>([]); // model 리스트
   const tagList = ref<TagListType[]>([]); // tag 리스트
   const gpuList = ref<GpuListType[]>([]); // gpu 리스트
+  const validationCheck = reactive({
+    selectedHost: false,
+    selectedGpu: false,
+    selectedModel: false,
+    selectedTags: false,
+    containerName: false,
+  });
+  const changeContainerName = (newValue: string) => {
+    containerName.value = newValue;
+    if (containerName.value.trim().length == 0) {
+      validationCheck.containerName = true;
+    } else {
+      validationCheck.containerName = false;
+    }
+  };
   const gpuChange = (gpu: string) => {
     selectedGpu.value = JSON.parse(gpu);
+    validationCheck.selectedGpu = false;
   };
   const hostChange = (host: HostListType) => {
     selectedHost.value = host;
+    validationCheck.selectedHost = false;
     defaultInstance
       .get(serviceAPI.gpuList + `?serverId=${selectedHost.value.serverId}`)
       .then((result) => {
@@ -127,6 +168,7 @@
   };
   const modelChange = (model: ModelListType) => {
     selectedModel.value = model;
+    validationCheck.selectedModel = false;
     defaultInstance
       .get(serviceAPI.modelTagList + `?modelId=${selectedModel.value.modelId}`)
       .then((result) => {
@@ -135,25 +177,52 @@
       });
   };
   const register = () => {
-    emitter.emit("update:loading", { isLoading: true });
-    defaultInstance
-      .post(serviceAPI.container, {
-        serverId: selectedHost.value && selectedHost.value.serverId,
-        gpuIdList:
-          selectedGpu.value &&
-          selectedGpu.value.map((el: GpuListType) => el.id),
-        modelId: selectedModel.value && selectedModel.value.modelId,
-        tag: selectedTags.value && selectedTags.value.tag,
-        containerName: containerName.value,
-      })
-      .then((result) => {
-        console.log(result);
-        emitter.emit("update:loading", { isLoading: false });
-        router.push(
-          "/admin?mainCategory=deployManage&subCategory=deployStatus"
-        );
-        getContainerList(1, "ALL");
-      });
+    if (selectedHost.value == null) {
+      validationCheck.selectedHost = true;
+    } else {
+      validationCheck.selectedHost = false;
+    }
+    if (selectedGpu.value.length == 0) {
+      validationCheck.selectedGpu = true;
+    } else {
+      validationCheck.selectedGpu = false;
+    }
+    if (selectedModel.value == null) {
+      validationCheck.selectedModel = true;
+    } else {
+      validationCheck.selectedModel = false;
+    }
+    if (selectedTags.value == null) {
+      validationCheck.selectedTags = true;
+    } else {
+      validationCheck.selectedTags = false;
+    }
+    if (containerName.value.trim().length == 0) {
+      validationCheck.containerName = true;
+    } else {
+      validationCheck.containerName = false;
+    }
+    if (Object.values(validationCheck).indexOf(true) == -1) {
+      emitter.emit("update:loading", { isLoading: true });
+      defaultInstance
+        .post(serviceAPI.container, {
+          serverId: selectedHost.value && selectedHost.value.serverId,
+          gpuIdList:
+            selectedGpu.value &&
+            selectedGpu.value.map((el: GpuListType) => el.id),
+          modelId: selectedModel.value && selectedModel.value.modelId,
+          tag: selectedTags.value && selectedTags.value.tag,
+          containerName: containerName.value,
+        })
+        .then((result) => {
+          console.log(result);
+          emitter.emit("update:loading", { isLoading: false });
+          router.push(
+            "/admin?mainCategory=deployManage&subCategory=deployStatus"
+          );
+          getContainerList(1, "ALL");
+        });
+    }
   };
 
   onMounted(() => {
@@ -183,6 +252,11 @@
     height: 100%;
     overflow-y: auto;
     box-sizing: border-box;
+    .notice-message {
+      color: red;
+      margin-top: 10px;
+    }
+
     .select-box-area {
       display: grid;
       grid-template-columns: 1fr 1fr;

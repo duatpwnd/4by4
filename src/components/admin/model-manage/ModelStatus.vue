@@ -1,5 +1,5 @@
 <template>
-  <keep-alive exclude="ModelSettings">
+  <keep-alive exclude="ModelSettings,ModelRegister">
     <component :is="currComp" />
   </keep-alive>
 </template>

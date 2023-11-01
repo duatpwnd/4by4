@@ -4,6 +4,7 @@
     autocomplete="true"
     autofocus
     @input="onInput"
+    @keyup.enter="enterEvent"
     :value="modelValue"
     :type="type"
     :placeholder="placeholder"
@@ -18,8 +19,11 @@
     onlyText?: boolean;
   }
   const props = defineProps<Props>();
-  const emit = defineEmits(["update:modelValue"]);
+  const emit = defineEmits(["update:modelValue", "update:enterEvent"]);
   const { type, placeholder, onlyText, modelValue } = toRefs(props);
+  const enterEvent = (event: KeyboardEvent) => {
+    emit("update:enterEvent");
+  };
   const onInput = (event: Event) => {
     const target = event.target as HTMLInputElement;
     if (onlyText.value) {

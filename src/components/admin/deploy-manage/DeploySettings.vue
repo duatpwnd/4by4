@@ -101,12 +101,14 @@
         text="Restart"
         :class="
           containerInfo.status == 'paused' ||
+          containerInfo.status == 'running' ||
           containerInfo.status == 'restarting'
             ? 'active'
             : 'inactive'
         "
         :disabled="
           containerInfo.status == 'paused' ||
+          containerInfo.status == 'running' ||
           containerInfo.status == 'restarting'
             ? false
             : true
@@ -116,9 +118,19 @@
       <BaseButton
         type="button"
         text="Pause"
-        :disabled="containerInfo.status == 'restarting' ? false : true"
+        :disabled="
+          containerInfo.status == 'restarting' ||
+          containerInfo.status == 'running'
+            ? false
+            : true
+        "
         @click="containerUpdate('pause')"
-        :class="containerInfo.status == 'restarting' ? 'active' : 'inactive'"
+        :class="
+          containerInfo.status == 'restarting' ||
+          containerInfo.status == 'running'
+            ? 'active'
+            : 'inactive'
+        "
       />
       <BaseButton
         type="button"

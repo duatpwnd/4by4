@@ -3,9 +3,8 @@
     v-if="isActiveProgressModal"
     text="tar file uploading..."
     :progressValue="progressValue"
-    @update:close-progress-modal=""
+    @update:close-progress-modal="abort"
   />
-
   <div class="upload-modal-container">
     <button class="close-btn" @click="close"></button>
     <div class="contents">
@@ -46,7 +45,8 @@
       </div>
       <ul class="file-name-area" v-if="files != null">
         <li v-for="(file, index) in files" :key="index">
-          {{ file.name }}
+          <span class="file-name">{{ file.name }}</span
+          ><img class="thumbnail" :src="thumb[index]" />
         </li>
       </ul>
       <ul class="file-name-area" v-if="selectedSampleVideo != -1">
@@ -88,9 +88,9 @@
   const isActiveProgressModal = ref(false);
   const progressValue = ref(0);
   const selectedSampleVideo = ref(-1);
-  const emit = defineEmits(["update:close", "update:upload"]);
+  const emit = defineEmits(["update:close", "update:upload", "update:abort"]);
   const files = ref<FileList | null>(null);
-  const videoUrl = ref("");
+  const thumb = ref<string[]>([]);
   const isDragged = ref(false);
   const handleClickVideo = (index: number) => {
     if (files.value && files.value.length > 0) {
@@ -101,9 +101,6 @@
     } else {
       selectedSampleVideo.value = index;
     }
-  };
-  const close = () => {
-    emit("update:close");
   };
   const onDragenter = () => {
     isDragged.value = true;
@@ -148,11 +145,43 @@
         message: "이미 샘플비디오를 선택하셨습니다.",
       });
     } else {
+      // 썸네일 추출
       const target = event.target as HTMLInputElement;
       if (target && target.files) {
-        files.value = target.files;
+        if (target.files.length > 0) {
+          thumb.value = [];
+        }
+        for (let i = 0; i < target.files.length; i++) {
+          const createBlobURL = URL.createObjectURL(target.files[i]);
+          const video = document.createElement("video");
+          const source = document.createElement("source");
+          const canvas = document.createElement("canvas");
+          video.preload = "metadata";
+          video.muted = true;
+          video.autoplay = true;
+          source.src = createBlobURL;
+          video.append(source);
+          document.body.append(video);
+          video.addEventListener("loadeddata", () => {
+            canvas.getContext("2d")?.drawImage(video, 0, 0, 300, 150);
+            document.body.append(canvas);
+            const dataURI = canvas.toDataURL("image/jpeg");
+            files.value = target.files;
+            thumb.value.push(dataURI);
+            URL.revokeObjectURL(createBlobURL);
+            video.remove();
+            canvas.remove();
+          });
+        }
       }
     }
+  };
+  const close = () => {
+    emit("update:close");
+  };
+  const abort = () => {
+    emit("update:abort");
+    controller.abort();
   };
   const getVideoAndModelList = () => {
     Promise.all([
@@ -168,6 +197,7 @@
       close();
     });
   };
+  const controller = new AbortController();
   const submit = () => {
     if (files.value !== null) {
       isActiveProgressModal.value = true;
@@ -178,6 +208,7 @@
       }
       defaultInstance
         .postForm(serviceAPI.upload, form, {
+          signal: controller.signal,
           onUploadProgress: (progressEvent) => {
             const percentage =
               (progressEvent.loaded * 100) / (progressEvent.total as number);
@@ -194,7 +225,8 @@
         .then((result) => {
           console.log(`output-> result`, result);
           getVideoAndModelList();
-        });
+        })
+        .catch((err) => {});
     } else {
       emitter.emit("update:alert", {
         isActive: true,
@@ -227,12 +259,14 @@
     }
     .contents {
       position: absolute;
-      bottom: 0;
       width: 80%;
-      bottom: 40px;
-      left: 0;
-      right: 0;
-      margin: auto;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      overflow-y: auto;
+      max-height: 80%;
+      padding-right: 20px;
+      box-sizing: border-box;
       .file-upload-area {
         text-align: center;
         border-bottom: 3px solid #a9a8a8;
@@ -271,6 +305,18 @@
         padding: 20px;
         margin-top: 30px;
         border-radius: 10px;
+        max-height: 280px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        .file-name {
+          @include ellipsis(1);
+          vertical-align: middle;
+          width: calc(100% - 100px);
+          margin-right: 20px;
+        }
+        .thumbnail {
+          width: 80px;
+        }
         li {
           &:not(:first-child) {
             margin-top: 10px;

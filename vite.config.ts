@@ -2,9 +2,10 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath, URL } from "url";
+import mkcert from "vite-plugin-mkcert";
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), tsconfigPaths()],
+  plugins: [vue(), tsconfigPaths()], // https설정시에 넣기 mkcert()
   base: "http://183.111.175.101:49090",
   server: {
     port: 5173,

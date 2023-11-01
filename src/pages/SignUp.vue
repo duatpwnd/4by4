@@ -13,6 +13,11 @@
       <legend class="legend">Create an Account</legend>
       <div class="row">
         <button class="google-sign-up"></button>
+        <FontAwesomeIcon
+          icon="xmark"
+          class="close-button"
+          @click="emit('update:route', 'SignIn')"
+        />
       </div>
       <div class="row">
         <span class="or">OR Create Acount via Email</span>
@@ -217,6 +222,14 @@
       }
       .row {
         margin-top: 22px;
+        position: relative;
+        .close-button {
+          position: absolute;
+          top: 0;
+          right: 0;
+          height: 58px;
+          cursor: pointer;
+        }
         label {
           margin-bottom: 10px;
           display: inline-block;

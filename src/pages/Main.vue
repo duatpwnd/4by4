@@ -8,16 +8,10 @@
   <main>
     <Teleport to="#teleport-upload-modal" v-if="isActiveUploadModal">
       <UploadModal
+        :key="updateKey"
         @update:close="isActiveUploadModal = false"
-        @update:upload="
-          (list) => {
-            selectedVideoFile = null;
-            aiModelOptions = [];
-            videoFiles = [];
-            aiModelOptions = list.inferenceModelList;
-            videoFiles = list.videoList;
-          }
-        "
+        @update:upload="(list) => upload(list)"
+        @update:abort="updateKey += 1"
       />
     </Teleport>
     <aside>
@@ -173,10 +167,11 @@
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive?: boolean; message?: string }>
   >;
+  const updateKey = ref(0);
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
   const selectedVideoFile = ref<VideoListType | null>(null); // 선택된 비디오 파일
-  const aiModelOptions = ref([]); // aiModel 리스트
+  const aiModelOptions = ref<SelectedAiType[]>([]); // aiModel 리스트
   const selectedAiModel = ref<SelectedAiType | null>(null); // 선택된 aiModel
   const formatOptions = ref([
     { name: "mp4" },
@@ -198,6 +193,18 @@
   const progressValue = ref(0);
   const isUploaded = ref(false); // 업로드 여부
   const isInferred = ref(false); // 추론 여부
+
+  // upload 처리 함수
+  const upload = (list: {
+    videoList: VideoListType[];
+    inferenceModelList: SelectedAiType[];
+  }) => {
+    selectedVideoFile.value = null;
+    aiModelOptions.value = [];
+    videoFiles.value = [];
+    aiModelOptions.value = list.inferenceModelList;
+    videoFiles.value = list.videoList;
+  };
   const isCheckedBestQuality = computed<boolean>(() => {
     return quality.value.indexOf("best quality") >= 0;
   });
@@ -206,8 +213,6 @@
       defaultInstance.get(serviceAPI.videoList),
       defaultInstance.get(serviceAPI.inferenceModelList),
     ]).then((result) => {
-      console.log(result[1].data);
-
       videoFiles.value = result[0].data;
       aiModelOptions.value = result[1].data.data.filter(
         (el: string | null) => el !== null
@@ -285,7 +290,6 @@
     });
   };
   onMounted(() => {
-    connectSSE();
     getVideoList();
   });
 </script>

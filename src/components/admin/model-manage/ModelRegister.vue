@@ -3,7 +3,7 @@
     v-if="isActiveProgressModal"
     text="tar file uploading..."
     :progressValue="progressValue"
-    @update:close-progress-modal="cancel"
+    @update:close-progress-modal="close"
   />
   <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
   <div class="register-container">
@@ -36,7 +36,7 @@
         </ul>
       </div>
       <p class="notice-message" v-if="validCheck.files">
-        tar파일을 업로드해주세요..
+        Please upload the tar file.
       </p>
 
       <div class="input-area">
@@ -58,7 +58,10 @@
             >Project Name(denoise, colorgrade, superresol)</label
           >
           <BaseSelect
-            @update:select-box="(obj:ProjectListType) => selectedProject = obj"
+            @update:select-box="(obj:ProjectListType) => {
+              validCheck.projectName = false;
+              selectedProject = obj;
+            }"
             :options="projectList"
             name="name"
             :text="
@@ -75,7 +78,7 @@
             placeholder="Insert Project Name"
           /> -->
           <p class="notice-message" v-if="validCheck.projectName">
-            project name을 선택해주세요.
+            Please select a project name.
           </p>
         </div>
         <div>
@@ -123,7 +126,7 @@
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
   import { getModelList } from "./model";
   import { AxiosInstance } from "axios";
-  import { ref, inject, reactive } from "vue";
+  import { ref, inject, reactive, nextTick } from "vue";
   import { EventType, Emitter } from "mitt";
   import { useRouter } from "vue-router";
   import BaseInput from "@/components/common/BaseInput.vue";
@@ -211,11 +214,13 @@
     const target = event.target as HTMLInputElement;
     if (target && target.files) {
       files.value = target.files[0];
+      validCheck.files = false;
     }
   };
-  const cancel = () => {
+  const close = () => {
     isActiveProgressModal.value = false;
     controller.abort();
+    router.push("/admin?mainCategory=modelManage&subCategory=modelStatus");
   };
 
   const register = () => {

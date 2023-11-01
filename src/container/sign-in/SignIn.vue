@@ -5,6 +5,7 @@
       <div class="row">
         <BaseInput
           type="text"
+          @update:enterEvent="signIn"
           @update:modelValue="(newValue:string) => (userId = newValue)"
           :modelValue="userId"
           placeholder="ID"
@@ -14,6 +15,7 @@
       <div class="row">
         <BaseInput
           type="password"
+          @update:enterEvent="signIn"
           @update:modelValue="(newValue:string) => {
             userPw = newValue;
           }"
@@ -139,11 +141,10 @@
           router.push("/main");
         })
         .catch((err: Error) => {
-          console.log(err);
-          // emitter.emit("update:alert", {
-          //   isActive: true,
-          //   message: "존재하지 않는 회원입니다.",
-          // });
+          emitter.emit("update:alert", {
+            isActive: true,
+            message: "Please enter your ID or password correctly..",
+          });
         });
     }
   };

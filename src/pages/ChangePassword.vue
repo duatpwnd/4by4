@@ -1,5 +1,11 @@
 <template>
   <div class="change-email-wrapper">
+    <FontAwesomeIcon
+      icon="xmark"
+      class="close-button"
+      @click="emit('update:route', 'SignIn')"
+    />
+
     <p class="notice-message">
       Enter your user account's verified email address and we will send you a
       password reset link.
@@ -37,6 +43,7 @@
   const validCheck = reactive({
     email: false,
   });
+  const emit = defineEmits(["update:route"]);
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message: string }>
   >;
@@ -78,10 +85,18 @@
 
 <style lang="scss" scope>
   .change-email-wrapper {
+    position: relative;
     display: flex;
     flex-direction: column;
     width: 50%;
     justify-content: center;
+    .close-button {
+      cursor: pointer;
+      font-size: 50px;
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
     .notice-message {
       margin-bottom: 20px;
       font : {
