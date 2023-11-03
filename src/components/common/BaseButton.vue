@@ -4,7 +4,7 @@
   </button>
 </template>
 <script setup lang="ts">
-  import { onMounted, toRefs } from "vue";
+  import { toRefs } from "vue";
   interface Props {
     text: string;
     style?: CSSStyleValue;

@@ -26,8 +26,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, toRefs, toRaw } from "vue";
-  import BaseButton from "./BaseButton.vue";
+  import { onMounted, ref, toRefs } from "vue";
   interface Props {
     options: any[];
     name: string;

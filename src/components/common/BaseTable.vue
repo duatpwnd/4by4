@@ -10,9 +10,7 @@
     </table>
   </div>
 </template>
-<script setup lang="ts">
-  import { onMounted, toRefs, ref } from "vue";
-</script>
+<script setup lang="ts"></script>
 <style lang="scss">
   .table-box {
     height: 100%;

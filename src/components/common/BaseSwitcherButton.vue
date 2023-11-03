@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { onMounted, toRefs, defineProps } from "vue";
+  import { toRefs, defineProps } from "vue";
   interface Props {
     isChecked?: boolean;
     value?: string;

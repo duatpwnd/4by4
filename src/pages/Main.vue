@@ -347,8 +347,9 @@
           display: inline-block;
         }
         .base-input {
+          font-size: 16px;
           border: 1px solid #ccc;
-          padding: 6px;
+          padding: 10px;
           text-align: center;
           background-color: white;
           width: 100px;

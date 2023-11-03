@@ -68,15 +68,9 @@
   import serviceAPI from "@api/services";
   import authAPI from "@api/auth";
   import { useUserStore } from "@/store/user";
-  import type { CallbackTypes } from "vue3-google-login";
-  import {
-    googleAuthCodeLogin,
-    googleTokenLogin,
-    decodeCredential,
-  } from "vue3-google-login";
+  import { googleTokenLogin } from "vue3-google-login";
   import { useCookies } from "vue3-cookies";
   import { EventType, Emitter } from "mitt";
-  import { googleSdkLoaded } from "vue3-google-login";
   const emit = defineEmits(["update:route"]);
   const { cookies } = useCookies();
   const router = useRouter();
@@ -143,7 +137,7 @@
         .catch((err: Error) => {
           emitter.emit("update:alert", {
             isActive: true,
-            message: "Please enter your ID or password correctly..",
+            message: "Please enter your ID or password correctly.",
           });
         });
     }

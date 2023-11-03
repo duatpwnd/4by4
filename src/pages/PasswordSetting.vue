@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, ref, inject, onMounted } from "vue";
+  import { reactive, ref, inject } from "vue";
   import { AxiosInstance } from "axios";
   import { EventType, Emitter } from "mitt";
   import { useRoute, useRouter } from "vue-router";

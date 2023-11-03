@@ -20,10 +20,12 @@
           Drop Video File here to upload or
           <label class="file-upload-txt" for="file-upload">Choose File</label>
           <input
+            :key="updateKey"
             type="file"
             id="file-upload"
             accept=".mp4, .mov, .mkv"
             @change="fileUpload"
+            @click="updateKey += 1"
             multiple
           />
         </strong>
@@ -43,10 +45,16 @@
           </li>
         </ul>
       </div>
-      <ul class="file-name-area" v-if="files != null">
-        <li v-for="(file, index) in files" :key="index">
-          <span class="file-name">{{ file.name }}</span
-          ><img class="thumbnail" :src="thumb[index]" />
+
+      <ul class="file-name-area" v-if="thumb.length > 0">
+        <li v-for="(obj, index) in thumb" :key="index">
+          <span class="file-name">{{ obj.file.name }}</span
+          ><img class="thumbnail" :src="obj.URI" />
+          <FontAwesomeIcon
+            icon="xmark"
+            class="delete-button"
+            @click="deleteFile(index)"
+          />
         </li>
       </ul>
       <ul class="file-name-area" v-if="selectedSampleVideo != -1">
@@ -67,6 +75,7 @@
   import serviceAPI from "@api/services";
   import { EventType, Emitter } from "mitt";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
+  import { Img } from "flowbite-vue";
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const emitter = inject("emitter") as Emitter<
     Record<
@@ -85,15 +94,21 @@
       name: "tes3.mp4",
     },
   ]);
+  interface ThumbType {
+    title: string;
+    URI: string;
+    file: File;
+  }
+  const updateKey = ref(0);
   const isActiveProgressModal = ref(false);
   const progressValue = ref(0);
   const selectedSampleVideo = ref(-1);
   const emit = defineEmits(["update:close", "update:upload", "update:abort"]);
-  const files = ref<FileList | null>(null);
-  const thumb = ref<string[]>([]);
+  const thumb = ref<ThumbType[]>([]);
   const isDragged = ref(false);
+  // 샘플 비디오 선택
   const handleClickVideo = (index: number) => {
-    if (files.value && files.value.length > 0) {
+    if (thumb.value.length > 0) {
       emitter.emit("update:alert", {
         isActive: true,
         message: "이미 업로드된 파일이 존재합니다.",
@@ -131,12 +146,61 @@
               isActive: true,
               message: "mp4,mov,mkv 확장자만 지원합니다.",
             });
-          } else {
-            files.value = target.files;
+            break;
           }
         }
+        createThumbNail(target.files, "drop");
       }
     }
+  };
+  const createThumbNail = (
+    target: HTMLInputElement | FileList,
+    eventType: string
+  ) => {
+    let files: FileList | null;
+    if (eventType == "change") {
+      files = (target as HTMLInputElement).files;
+    } else {
+      files = target as FileList;
+    }
+    if (files !== null) {
+      for (let i = 0; i < files.length; i++) {
+        const createBlobURL = URL.createObjectURL(files[i]);
+        const video = document.createElement("video");
+        const source = document.createElement("source");
+        video.muted = true;
+        video.play();
+        source.src = createBlobURL;
+        video.append(source);
+        document.body.append(video);
+        video.addEventListener("loadeddata", () => {
+          const canvas = document.createElement("canvas");
+          canvas.getContext("2d")?.drawImage(video, 0, 0, 300, 150);
+          document.body.append(canvas);
+          const dataURI = canvas.toDataURL("image/jpeg");
+          thumb.value.push({
+            title: files![i].name,
+            URI: dataURI,
+            file: files![i],
+          });
+          const removeDuplicates = thumb.value.filter(
+            (arr, index, callback) =>
+              index ===
+              callback.findIndex((t) => {
+                return t.title === arr.title;
+              })
+          );
+          thumb.value = removeDuplicates;
+          video.remove();
+          canvas.remove();
+          URL.revokeObjectURL(createBlobURL);
+        });
+      }
+    }
+  };
+  // 파일 삭제
+  const deleteFile = (index: number) => {
+    thumb.value.splice(index, 1);
   };
   const fileUpload = (event: Event) => {
     if (selectedSampleVideo.value !== -1) {
@@ -148,31 +212,7 @@
       // 썸네일 추출
       const target = event.target as HTMLInputElement;
       if (target && target.files) {
-        if (target.files.length > 0) {
-          thumb.value = [];
-        }
-        for (let i = 0; i < target.files.length; i++) {
-          const createBlobURL = URL.createObjectURL(target.files[i]);
-          const video = document.createElement("video");
-          const source = document.createElement("source");
-          const canvas = document.createElement("canvas");
-          video.preload = "metadata";
-          video.muted = true;
-          video.autoplay = true;
-          source.src = createBlobURL;
-          video.append(source);
-          document.body.append(video);
-          video.addEventListener("loadeddata", () => {
-            canvas.getContext("2d")?.drawImage(video, 0, 0, 300, 150);
-            document.body.append(canvas);
-            const dataURI = canvas.toDataURL("image/jpeg");
-            files.value = target.files;
-            thumb.value.push(dataURI);
-            URL.revokeObjectURL(createBlobURL);
-            video.remove();
-            canvas.remove();
-          });
-        }
+        createThumbNail(target, "change");
       }
     }
   };
@@ -198,13 +238,15 @@
     });
   };
   const controller = new AbortController();
+  // 파일 업로드
   const submit = () => {
-    if (files.value !== null) {
+    if (thumb.value.length > 0) {
       isActiveProgressModal.value = true;
-      const file = files.value;
+      const file = thumb.value;
       const form = new FormData();
       for (let i = 0; i < file.length; i++) {
-        form.append("file", file[i]);
+        console.log(file[i].file);
+        form.append("file", file[i].file);
       }
       defaultInstance
         .postForm(serviceAPI.upload, form, {
@@ -225,12 +267,11 @@
         .then((result) => {
           console.log(`output-> result`, result);
           getVideoAndModelList();
-        })
-        .catch((err) => {});
+        });
     } else {
       emitter.emit("update:alert", {
         isActive: true,
-        message: "파일 업로드 또는 샘플 비디오를 선택해주세요.",
+        message: "파일을 업로드 해주세요.",
       });
     }
   };
@@ -305,17 +346,26 @@
         padding: 20px;
         margin-top: 30px;
         border-radius: 10px;
-        max-height: 280px;
+        max-height: 282px;
         box-sizing: border-box;
         overflow-y: auto;
         .file-name {
           @include ellipsis(1);
           vertical-align: middle;
-          width: calc(100% - 100px);
+          width: calc(100% - 135px);
+          height: 40px;
+          line-height: 40px;
           margin-right: 20px;
+        }
+        .delete-button {
+          vertical-align: middle;
+          color: red;
+          cursor: pointer;
+          font-size: 20px;
         }
         .thumbnail {
           width: 80px;
+          margin-right: 20px;
         }
         li {
           &:not(:first-child) {

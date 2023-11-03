@@ -11,7 +11,7 @@
   />
 </template>
 <script setup lang="ts">
-  import { onMounted, toRefs, ref } from "vue";
+  import { toRefs } from "vue";
   interface Props {
     modelValue: string;
     type: string;

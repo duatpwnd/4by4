@@ -6,6 +6,7 @@
   />
   <div class="video-container" ref="videoContainerRef">
     <div id="teleport-upload-modal" class="contents">
+      <!-- 헤더 :: S -->
       <div class="title-area">
         <div class="original">
           <strong :class="isUploaded ? 'uploaded' : 'not-uploaded'"
@@ -18,23 +19,28 @@
           >
         </div>
       </div>
-
+      <!-- 헤더 :: E -->
       <div class="video-area" ref="videoAreaRef">
         <button
           v-if="isInferred"
           ref="draggableButton"
           class="drag-btn"
         ></button>
+        <!-- 원본 비디오 :: S -->
         <video ref="originalVideo">
           <source :src="originalVideoSrc" />
         </video>
+        <!-- 원본 비디오 :: E -->
         <div id="video-clipper" ref="videoClipperRef">
+          <!-- 추론된 비디오 :: S -->
           <video ref="inferenceVideo">
             <source :src="inferredVideoSrc" />
           </video>
+          <!-- 추론된 비디오 :: E -->
         </div>
         <button v-if="isInferred" class="share-btn"></button>
       </div>
+      <!-- 타임라인 :: S -->
       <div class="timeline-area" v-if="isInferred">
         <TimeLine
           :isVideoPlay="isVideoPlay"
@@ -59,6 +65,7 @@
           />
         </div>
       </div>
+      <!-- 타임라인 :: E -->
     </div>
   </div>
 </template>
@@ -180,7 +187,6 @@
   onMounted(() => {
     const videoContainer = videoContainerRef.value;
     const draggableButtonRef = draggableButton.value;
-
     if (draggableButtonRef !== null && videoContainer !== null) {
       draggable(draggableButtonRef);
       videoContainer.addEventListener("mousemove", trackLocation, false);

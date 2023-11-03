@@ -2,7 +2,7 @@
   <div class="mask"></div>
   <div class="progress-modal">
     <p>
-      {{ text }}.<strong class="progress-value">{{ progressValue }}%</strong>
+      {{ text }}<strong class="progress-value">{{ progressValue }}%</strong>
     </p>
     <div class="progress-bar-area">
       <span
@@ -15,7 +15,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, toRefs, ref } from "vue";
+  import { toRefs } from "vue";
   interface Props {
     text: string;
     progressValue: number;
@@ -23,9 +23,6 @@
   const props = defineProps<Props>();
   const { progressValue, text } = toRefs(props);
   const emit = defineEmits(["update:close-progress-modal"]);
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
 </script>
 <style scoped lang="scss">
   .mask {

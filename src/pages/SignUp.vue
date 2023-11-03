@@ -94,11 +94,8 @@
 <script setup lang="ts">
   import { onMounted, ref, inject, reactive } from "vue";
   import { AxiosInstance } from "axios";
-  import { APIResponse } from "@axios/types";
-  import { useRoute, useRouter } from "vue-router";
   import { EventType, Emitter } from "mitt";
   import authAPI from "@api/auth";
-  const router = useRouter();
   const userFirstName = ref("");
   const userLastName = ref("");
   const userEmail = ref("");

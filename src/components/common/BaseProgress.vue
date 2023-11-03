@@ -2,7 +2,7 @@
   <progress :value="value" max="100" />
 </template>
 <script setup lang="ts">
-  import { onMounted, toRefs, ref } from "vue";
+  import { toRefs } from "vue";
   interface Props {
     value: string;
   }
