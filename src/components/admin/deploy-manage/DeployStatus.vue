@@ -1,5 +1,5 @@
 <template>
-  <keep-alive exclude="DeploySettings">
+  <keep-alive exclude="DeploySettings,DeployRegister">
     <component :is="currComp" />
   </keep-alive>
 </template>

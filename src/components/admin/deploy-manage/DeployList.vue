@@ -28,7 +28,16 @@
           {{ index + 1 }}
         </td>
         <td>{{ item.host }}</td>
-        <td class="gpu">{{ item.gpu }}</td>
+        <td
+          class="gpu"
+          v-tooltip="{
+            content: item.gpu,
+            placement: 'bottom',
+            delay: 0,
+          }"
+        >
+          {{ item.gpu }}
+        </td>
         <td>{{ item.image }}</td>
         <td
           class="container-id"
