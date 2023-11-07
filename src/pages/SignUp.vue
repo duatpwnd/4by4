@@ -92,7 +92,7 @@
   </form>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, inject, reactive } from "vue";
+  import { ref, inject, reactive } from "vue";
   import { AxiosInstance } from "axios";
   import { EventType, Emitter } from "mitt";
   import authAPI from "@api/auth";
@@ -201,7 +201,6 @@
         });
     }
   };
-  onMounted(() => {});
 </script>
 <style scoped lang="scss">
   .sign-up-form {

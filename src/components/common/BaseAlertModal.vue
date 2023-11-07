@@ -38,10 +38,6 @@
     fn && fn.value && fn.value();
     emitter.emit("update:alert", { isActive: false });
   };
-
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
 </script>
 <style scoped lang="scss">
   .mask {
@@ -51,7 +47,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
-    z-index: 5;
+    z-index: 6;
   }
   .alert-modal-container {
     background-color: white;

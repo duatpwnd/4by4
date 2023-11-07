@@ -103,9 +103,10 @@
   const isActiveProgressModal = ref(false);
   const progressValue = ref(0);
   const selectedSampleVideo = ref(-1);
-  const emit = defineEmits(["update:close", "update:upload", "update:abort"]);
   const thumb = ref<ThumbType[]>([]);
   const isDragged = ref(false);
+  const controller = new AbortController();
+  const emit = defineEmits(["update:close", "update:upload", "update:abort"]);
   // 샘플 비디오 선택
   const handleClickVideo = (index: number) => {
     if (thumb.value.length > 0) {
@@ -155,7 +156,7 @@
   };
   const createThumbNail = (
     target: HTMLInputElement | FileList,
-    eventType: string
+    eventType: "change" | "drop"
   ) => {
     let files: FileList | null;
     if (eventType == "change") {
@@ -175,7 +176,7 @@
         document.body.append(video);
         video.addEventListener("loadeddata", () => {
           const canvas = document.createElement("canvas");
-          canvas.getContext("2d")?.drawImage(video, 0, 0, 300, 150);
+          canvas.getContext("2d")!.drawImage(video, 0, 0, 300, 150);
           document.body.append(canvas);
           const dataURI = canvas.toDataURL("image/jpeg");
           thumb.value.push({
@@ -237,7 +238,6 @@
       close();
     });
   };
-  const controller = new AbortController();
   // 파일 업로드
   const submit = () => {
     if (thumb.value.length > 0) {

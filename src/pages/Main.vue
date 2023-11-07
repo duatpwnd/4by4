@@ -3,7 +3,7 @@
     v-if="isActiveProgressModal"
     text="Inference is in progress..."
     :progressValue="progressValue"
-    @update:close-progress-modal="isActiveProgressModal = false"
+    @update:close-progress-modal="close"
   />
   <main>
     <Teleport to="#teleport-upload-modal" v-if="isActiveUploadModal">
@@ -144,7 +144,6 @@
   </main>
 </template>
 <script setup lang="ts">
-  import { useEventSource } from "@vueuse/core";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
   import Video from "@components/video/Video.vue";
   import UploadModal from "@components/modal/upload/UploadModal.vue";
@@ -152,6 +151,16 @@
   import { AxiosInstance } from "axios";
   import { ref, inject, onMounted, computed } from "vue";
   import serviceAPI from "@api/services";
+  interface StreamType {
+    data: {
+      progress: number;
+      container_id: string;
+      task_uuid: string;
+      result: boolean;
+      status: string;
+      step: string;
+    };
+  }
   interface VideoListType {
     videoId: string;
     fileName: string;
@@ -164,8 +173,9 @@
   interface SelectedType {
     name: string;
   }
+
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive?: boolean; message?: string }>
+    Record<EventType, { isActive?: boolean; message?: string; fn?: () => void }>
   >;
   const updateKey = ref(0);
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
@@ -173,17 +183,13 @@
   const selectedVideoFile = ref<VideoListType | null>(null); // 선택된 비디오 파일
   const aiModelOptions = ref<SelectedAiType[]>([]); // aiModel 리스트
   const selectedAiModel = ref<SelectedAiType | null>(null); // 선택된 aiModel
-  const formatOptions = ref([
-    { name: "mp4" },
-    { name: "mov" },
-    { name: "mkv" },
-  ]); // format 리스트
+  const formatOptions = [{ name: "mp4" }, { name: "mov" }, { name: "mkv" }]; // format 리스트
   const selectedFormat = ref<SelectedType>({ name: "mp4" }); // 선택된 format
-  const encoderOptions = ref([
+  const encoderOptions = [
     { name: "H.264" },
     { name: "H.265" },
     { name: "ProRes" },
-  ]); // encoder 리스트
+  ]; // encoder 리스트
   const selectedEncoder = ref<SelectedType>({ name: "H.264" }); // 선택된 encoder
   const quality = ref<string[]>([]);
   const vbrOrCbr = ref("VBR");
@@ -194,6 +200,7 @@
   const isUploaded = ref(false); // 업로드 여부
   const isInferred = ref(false); // 추론 여부
 
+  let sseEvents: EventSource;
   // upload 처리 함수
   const upload = (list: {
     videoList: VideoListType[];
@@ -246,48 +253,60 @@
         message: "Please select ai model.",
       });
     } else {
-      isActiveProgressModal.value = true;
       defaultInstance
-        .post(
-          serviceAPI.videoInference,
-          {
-            videoId: selectedVideoFile.value && selectedVideoFile.value.videoId,
-            containerId: selectedAiModel.value.containerId,
-            format: selectedFormat.value.name,
-            encoder: selectedEncoder.value.name,
-            bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
-            twoPassEncoding:
-              quality.value.indexOf("2-Pass Encoding") >= 0 ? 1 : 0,
-            avgBitrate: vbrOrCbr.value == "VBR" ? 0 : 1,
-            variableBitrate: bitrate.value,
-          },
-          {
-            onUploadProgress: (progressEvent) => {
-              const percentage =
-                (progressEvent.loaded * 100) / (progressEvent.total as number);
-              progressValue.value = percentage;
-              if (percentage == 100) {
-                isActiveProgressModal.value = false;
-              }
-            },
-          }
-        )
+        .post(serviceAPI.videoInference, {
+          videoId: selectedVideoFile.value && selectedVideoFile.value.videoId,
+          containerId: selectedAiModel.value.containerId,
+          format: selectedFormat.value.name,
+          encoder: selectedEncoder.value.name,
+          bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
+          twoPassEncoding:
+            quality.value.indexOf("2-Pass Encoding") >= 0 ? 1 : 0,
+          avgBitrate: vbrOrCbr.value == "VBR" ? 0 : 1,
+          variableBitrate: bitrate.value,
+        })
         .then((result) => {
           console.log(result);
-          connectSSE();
-          isInferred.value = true;
+          connectSSE(result.data.uuid);
         });
     }
   };
-  // sse 연결
-  const connectSSE = () => {
-    defaultInstance.get(serviceAPI.connectSSE).then((result) => {
-      console.log("connect sse", result);
-      const { status, data, error, close } = useEventSource(
-        serviceAPI.connectSSE
-      );
-      console.log(status, data, error);
+  const close = () => {
+    emitter.emit("update:alert", {
+      isActive: true,
+      message: "취소하시겠습니까?",
+      fn: () => {
+        sseEvents.close();
+        isActiveProgressModal.value = false;
+        isInferred.value = false;
+        console.log(serviceAPI.connectSSE + "----closed");
+      },
     });
+  };
+  // sse 연결
+  const connectSSE = (uuid: string) => {
+    sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
+    sseEvents.onopen = () => {
+      isActiveProgressModal.value = true;
+      console.log(serviceAPI.connectSSE + `?uuid=${uuid}` + "----connect");
+    };
+    sseEvents.onmessage = (stream: StreamType) => {
+      console.log(stream);
+      progressValue.value = stream.data.progress;
+      if (stream.data.progress == 100) {
+        sseEvents.close();
+        isInferred.value = true;
+        isActiveProgressModal.value = false;
+        defaultInstance
+          .get(serviceAPI.videoDownload + `?path=$`)
+          .then((result) => {
+            console.log("video download", result);
+          });
+      }
+    };
+    sseEvents.onerror = (err) => {
+      console.log(err);
+    };
   };
   onMounted(() => {
     getVideoList();

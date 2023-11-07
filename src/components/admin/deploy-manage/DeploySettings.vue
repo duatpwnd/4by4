@@ -9,7 +9,18 @@
         </div>
         <div>
           <dt>GPU</dt>
-          <dd>{{ containerInfo.gpu ?? "null" }}</dd>
+          <dd
+            v-tooltip="{
+              content: containerInfo.gpu ?? 'null',
+              placement: 'bottom',
+              delay: 0,
+              options: {
+                fontSize: 20,
+              },
+            }"
+          >
+            {{ containerInfo.gpu ?? "null" }}
+          </dd>
         </div>
         <div>
           <dt>Container ID</dt>
