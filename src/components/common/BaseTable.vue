@@ -43,7 +43,7 @@
       // overflow-y: scroll;
       //overflow-x: hidden;
       display: block;
-      height: calc(100% - 34px);
+      height: calc(100% - 56px);
       overflow-y: auto;
       tr {
         display: table;

@@ -25,7 +25,7 @@
     <template #tbody>
       <tr v-for="(item, index) in serverList" :key="index">
         <td>
-          {{ index + 1 }}
+          {{ index + 1 + 10 * (currentPage - 1) }}
         </td>
         <td>{{ item.hostName }}</td>
         <td>{{ item.publicIp }}</td>

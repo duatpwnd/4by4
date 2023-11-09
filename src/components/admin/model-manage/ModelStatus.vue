@@ -4,7 +4,7 @@
   </keep-alive>
 </template>
 <script setup lang="ts">
-  import { onMounted, watchEffect, shallowRef } from "vue";
+  import { watchEffect, shallowRef } from "vue";
   import ModelRegister from "./ModelRegister.vue";
   import ModelList from "./ModelList.vue";
   import ModelSettings from "./ModelSettings.vue";
@@ -22,9 +22,6 @@
         currComp.value = ModelList;
       }
     }
-  });
-  onMounted(() => {
-    console.log("onmounted호출");
   });
 </script>
 <style scoped lang="scss"></style>

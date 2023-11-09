@@ -25,7 +25,7 @@
     <template #tbody>
       <tr v-for="(item, index) in list" :key="index">
         <td>
-          {{ index + 1 }}
+          {{ index + 1 + 10 * (currentPage - 1) }}
         </td>
         <td>{{ item.modelName }}</td>
         <td>{{ item.projectName }}</td>

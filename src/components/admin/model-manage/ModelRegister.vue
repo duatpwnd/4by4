@@ -123,6 +123,7 @@
 </template>
 <script setup lang="ts">
   import * as tus from "tus-js-client";
+  import { APIResponse } from "@axios/types";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
   import { getModelList } from "./model";
   import { AxiosInstance } from "axios";
@@ -140,6 +141,13 @@
     imageName: string;
     tagName: string;
   }
+  interface DeploymentRegistration extends APIResponse {
+    data: {
+      data: boolean;
+      resultMsg: string;
+    };
+  }
+
   const router = useRouter();
   const regType = /^[A-Za-z0-9]+[A-Za-z0-9_-]*$/;
   const onChange = (newValue: string, key: keyof ModelInfoType) => {
@@ -297,7 +305,7 @@
       form.append("tag", modelData.tagName);
       form.append("file", file);
       defaultInstance
-        .postForm(serviceAPI.upload, form, {
+        .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
           signal: controller.signal,
           onUploadProgress: (progressEvent) => {
             const percentage =

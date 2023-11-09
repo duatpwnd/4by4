@@ -18,6 +18,12 @@ interface DeployListResType extends APIResponse {
   totalPages: number;
   totalElements: number;
 }
+const reqStatus = <const>[
+  "running",
+  "starting",
+  "created,restarting,exited,paused,dead",
+  "all",
+];
 const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
 const list = ref<DeployListType[]>([]);
 const totalPages = ref(1);
@@ -26,22 +32,12 @@ export const getContainerList = (
   page: number,
   status: (typeof tab)[number]
 ) => {
-  let changedStatus;
-  if (status == "DEPLOYED") {
-    changedStatus = "RUNNING";
-  } else if (status == "DEPLOYING") {
-    changedStatus = "STARTING";
-  } else if (status == "ERROR") {
-    changedStatus = "CREATED,RESTARTING,EXITED,PAUSED,DEAD";
-  } else {
-    changedStatus = "ALL";
-  }
+  const findIndex = tab.findIndex((el) => el == status);
+  console.log(findIndex);
   defaultInstance
     .get<DeployListResType>(
       serviceAPI.containerList +
-        `?page=${
-          page - 1
-        }&size=10&sort=desc&status=${changedStatus?.toLocaleLowerCase()}`
+        `?page=${page - 1}&size=10&sort=desc&status=${reqStatus[findIndex]}`
     )
     .then((result) => {
       console.log(result);
