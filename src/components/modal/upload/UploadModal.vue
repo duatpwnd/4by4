@@ -1,7 +1,7 @@
 <template>
   <ProgressModal
     v-if="isActiveProgressModal"
-    text="tar file uploading..."
+    text="video file uploading..."
     :progressValue="progressValue"
     @update:close-progress-modal="abort"
   />
@@ -48,8 +48,7 @@
 
       <ul class="file-name-area" v-if="thumb.length > 0">
         <li v-for="(obj, index) in thumb" :key="index">
-          <span class="file-name">{{ obj.file.name }}</span
-          ><img class="thumbnail" :src="obj.URI" />
+          <span class="file-name">{{ obj.file.name }}</span>
           <FontAwesomeIcon
             icon="xmark"
             class="delete-button"
@@ -96,7 +95,7 @@
   ]);
   interface ThumbType {
     title: string;
-    URI: string;
+    // URI: string;
     file: File;
   }
   const updateKey = ref(0);
@@ -174,28 +173,33 @@
         source.src = createBlobURL;
         video.append(source);
         document.body.append(video);
-        video.addEventListener("loadeddata", () => {
-          const canvas = document.createElement("canvas");
-          canvas.getContext("2d")!.drawImage(video, 0, 0, 300, 150);
-          document.body.append(canvas);
-          const dataURI = canvas.toDataURL("image/jpeg");
-          thumb.value.push({
-            title: files![i].name,
-            URI: dataURI,
-            file: files![i],
-          });
-          const removeDuplicates = thumb.value.filter(
-            (arr, index, callback) =>
-              index ===
-              callback.findIndex((t) => {
-                return t.title === arr.title;
-              })
-          );
-          thumb.value = removeDuplicates;
-          video.remove();
-          canvas.remove();
-          URL.revokeObjectURL(createBlobURL);
+        thumb.value.push({
+          title: files![i].name,
+          file: files![i],
         });
+
+        // video.addEventListener("loadeddata", () => {
+        //   const canvas = document.createElement("canvas");
+        //   canvas.getContext("2d")!.drawImage(video, 0, 0, 300, 150);
+        //   document.body.append(canvas);
+        //   const dataURI = canvas.toDataURL("image/jpeg");
+        //   thumb.value.push({
+        //     title: files![i].name,
+        //     URI: dataURI,
+        //     file: files![i],
+        //   });
+        //   const removeDuplicates = thumb.value.filter(
+        //     (arr, index, callback) =>
+        //       index ===
+        //       callback.findIndex((t) => {
+        //         return t.title === arr.title;
+        //       })
+        //   );
+        //   thumb.value = removeDuplicates;
+        //   video.remove();
+        //   canvas.remove();
+        //   URL.revokeObjectURL(createBlobURL);
+        // });
       }
     }
   };
@@ -352,7 +356,7 @@
         .file-name {
           @include ellipsis(1);
           vertical-align: middle;
-          width: calc(100% - 135px);
+          width: calc(100% - 35px);
           height: 40px;
           line-height: 40px;
           margin-right: 20px;
