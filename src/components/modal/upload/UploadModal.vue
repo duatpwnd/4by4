@@ -165,14 +165,14 @@
     }
     if (files !== null) {
       for (let i = 0; i < files.length; i++) {
-        const createBlobURL = URL.createObjectURL(files[i]);
-        const video = document.createElement("video");
-        const source = document.createElement("source");
-        video.muted = true;
-        video.play();
-        source.src = createBlobURL;
-        video.append(source);
-        document.body.append(video);
+        // const createBlobURL = URL.createObjectURL(files[i]);
+        // const video = document.createElement("video");
+        // const source = document.createElement("source");
+        // video.muted = true;
+        // video.play();
+        // source.src = createBlobURL;
+        // video.append(source);
+        // document.body.append(video);
         thumb.value.push({
           title: files![i].name,
           file: files![i],
