@@ -4,6 +4,7 @@
     :checked="value == modelValue"
     :name="name"
     :id="value"
+    :disabled="isDisabled"
     @click="emit('update:modelValue', value)"
   />
 </template>
@@ -13,10 +14,11 @@
     name: string;
     modelValue: string;
     value: string;
+    isDisabled: boolean;
   }
   const props = defineProps<Props>();
   const emit = defineEmits(["update:modelValue"]);
-  const { name, value, modelValue } = toRefs(props);
+  const { name, value, modelValue, isDisabled = false } = toRefs(props);
 </script>
 <style scoped lang="scss">
   [type="radio"] {

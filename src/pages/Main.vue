@@ -82,33 +82,110 @@
             />
             <label for="BestQuality">Best Quality</label>
           </div>
-          <div v-if="!isCheckedBestQuality">
-            <BaseCheckBox
-              @update:checkModelValue="onCheck"
-              id="2PassEncoding"
-              value="2-Pass Encoding"
-            />
-            <label for="2PassEncoding">2-Pass Encoding</label>
+          <div>
+            <span
+              class="check-box"
+              :class="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? 'active'
+                  : 'inActive'
+              "
+            >
+              <BaseCheckBox
+                @update:checkModelValue="onCheck"
+                :id="
+                  (quality.indexOf('best quality') < 0 &&
+                    quality.indexOf('2-Pass Encoding') < 0) ||
+                  quality.indexOf('2-Pass Encoding') >= 0
+                    ? '2PassEncoding'
+                    : ''
+                "
+                value="2-Pass Encoding"
+              />
+            </span>
+            <label
+              for="2PassEncoding"
+              :class="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? 'active'
+                  : 'inActive'
+              "
+              >2-Pass Encoding</label
+            >
           </div>
         </div>
-        <div class="row check-area" v-if="!isCheckedBestQuality">
+        <div class="row check-area">
           <div>
             <BaseRadio
+              class="radio"
               @update:modelValue="(newValue:string) => (vbrOrCbr = newValue)"
               name="vbrOrCbr"
               value="VBR"
+              :class="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? 'active'
+                  : 'inActive'
+              "
+              :isDisabled="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? false
+                  : true
+              "
               v-model="vbrOrCbr"
             />
-            <label for="VBR">VBR</label>
+            <label
+              for="VBR"
+              :class="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? 'active'
+                  : 'inActive'
+              "
+              >VBR</label
+            >
           </div>
           <div>
             <BaseRadio
+              class="radio"
               @update:modelValue="(newValue:string) => (vbrOrCbr = newValue)"
               name="vbrOrCbr"
               value="CBR"
+              :class="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? 'active'
+                  : 'inActive'
+              "
+              :isDisabled="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? false
+                  : true
+              "
               v-model="vbrOrCbr"
             />
-            <label for="CBR">CBR</label>
+            <label
+              for="CBR"
+              :class="
+                (quality.indexOf('best quality') < 0 &&
+                  quality.indexOf('2-Pass Encoding') < 0) ||
+                quality.indexOf('2-Pass Encoding') >= 0
+                  ? 'active'
+                  : 'inActive'
+              "
+              >CBR</label
+            >
           </div>
         </div>
         <div class="row">
@@ -212,9 +289,6 @@
     aiModelOptions.value = list.inferenceModelList;
     videoFiles.value = list.videoList;
   };
-  const isCheckedBestQuality = computed<boolean>(() => {
-    return quality.value.indexOf("best quality") >= 0;
-  });
   const getVideoList = () => {
     Promise.all([
       defaultInstance.get(serviceAPI.videoList),
@@ -228,12 +302,13 @@
   };
   const onCheck = (value: string) => {
     const getIndex = quality.value.indexOf(value);
-    console.log(getIndex, value);
     if (getIndex >= 0) {
       quality.value.splice(getIndex, 1);
     } else {
       if (value == "best quality") {
-        quality.value = [];
+        if (quality.value.indexOf("2-Pass Encoding") < 0) {
+          quality.value = [];
+        }
         quality.value.push("best quality");
       } else {
         quality.value.push(value);
@@ -261,23 +336,24 @@
           encoder: selectedEncoder.value.name,
           bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
           twoPassEncoding:
-            quality.value.indexOf("best quality") >= 0
-              ? 0
-              : quality.value.indexOf("2-Pass Encoding") >= 0
+            quality.value.indexOf("best quality") >= 0 &&
+            quality.value.indexOf("2-Pass Encoding") >= 0
               ? 1
               : 0,
           avgBitrate: bitrate.value,
           vbr:
-            quality.value.indexOf("best quality") >= 0
-              ? false
-              : vbrOrCbr.value == "VBR"
-              ? true
+            quality.value.indexOf("best quality") >= 0 &&
+            quality.value.indexOf("2-Pass Encoding") >= 0
+              ? vbrOrCbr.value == "VBR"
+                ? true
+                : false
               : false,
           cbr:
-            quality.value.indexOf("best quality") >= 0
-              ? false
-              : vbrOrCbr.value == "CBR"
-              ? true
+            quality.value.indexOf("best quality") >= 0 &&
+            quality.value.indexOf("2-Pass Encoding") >= 0
+              ? vbrOrCbr.value == "CBR"
+                ? true
+                : false
               : false,
         })
         .then((result) => {
@@ -363,6 +439,24 @@
           display: flex;
           div {
             width: 50%;
+            .check-box {
+              height: 24px;
+              &.inActive {
+                display: inline-block;
+                opacity: 0.3;
+                background-color: #ccc;
+              }
+            }
+            :deep(.radio) {
+              &.inActive {
+                background-color: #ccc;
+                border: 0.4em solid #dfdfdf;
+
+                &:checked {
+                  border: 0.4em solid #dfdfdf;
+                }
+              }
+            }
           }
           label {
             vertical-align: middle;
@@ -371,6 +465,9 @@
             vertical-align: 6px;
             margin-left: 8px;
             color: #616161;
+            &.inActive {
+              color: #ccc;
+            }
           }
         }
         .label {
