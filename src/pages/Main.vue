@@ -261,9 +261,24 @@
           encoder: selectedEncoder.value.name,
           bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
           twoPassEncoding:
-            quality.value.indexOf("2-Pass Encoding") >= 0 ? 1 : 0,
-          avgBitrate: vbrOrCbr.value == "VBR" ? 0 : 1,
-          variableBitrate: bitrate.value,
+            quality.value.indexOf("best quality") >= 0
+              ? 0
+              : quality.value.indexOf("2-Pass Encoding") >= 0
+              ? 1
+              : 0,
+          avgBitrate: bitrate.value,
+          vbr:
+            quality.value.indexOf("best quality") >= 0
+              ? false
+              : vbrOrCbr.value == "VBR"
+              ? true
+              : false,
+          cbr:
+            quality.value.indexOf("best quality") >= 0
+              ? false
+              : vbrOrCbr.value == "CBR"
+              ? true
+              : false,
         })
         .then((result) => {
           console.log(result);
