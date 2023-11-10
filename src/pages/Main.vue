@@ -86,33 +86,19 @@
             <span
               class="check-box"
               :class="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? 'active'
-                  : 'inActive'
+                quality.indexOf('best quality') < 0 ? 'active' : 'inActive'
               "
             >
               <BaseCheckBox
                 @update:checkModelValue="onCheck"
-                :id="
-                  (quality.indexOf('best quality') < 0 &&
-                    quality.indexOf('2-Pass Encoding') < 0) ||
-                  quality.indexOf('2-Pass Encoding') >= 0
-                    ? '2PassEncoding'
-                    : ''
-                "
+                :id="quality.indexOf('best quality') < 0 ? '2PassEncoding' : ''"
                 value="2-Pass Encoding"
               />
             </span>
             <label
               for="2PassEncoding"
               :class="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? 'active'
-                  : 'inActive'
+                quality.indexOf('best quality') < 0 ? 'active' : 'inActive'
               "
               >2-Pass Encoding</label
             >
@@ -126,29 +112,15 @@
               name="vbrOrCbr"
               value="VBR"
               :class="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? 'active'
-                  : 'inActive'
+                quality.indexOf('best quality') < 0 ? 'active' : 'inActive'
               "
-              :isDisabled="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? false
-                  : true
-              "
+              :isDisabled="quality.indexOf('best quality') < 0 ? false : true"
               v-model="vbrOrCbr"
             />
             <label
               for="VBR"
               :class="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? 'active'
-                  : 'inActive'
+                quality.indexOf('best quality') < 0 ? 'active' : 'inActive'
               "
               >VBR</label
             >
@@ -160,29 +132,15 @@
               name="vbrOrCbr"
               value="CBR"
               :class="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? 'active'
-                  : 'inActive'
+                quality.indexOf('best quality') < 0 ? 'active' : 'inActive'
               "
-              :isDisabled="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? false
-                  : true
-              "
+              :isDisabled="quality.indexOf('best quality') < 0 ? false : true"
               v-model="vbrOrCbr"
             />
             <label
               for="CBR"
               :class="
-                (quality.indexOf('best quality') < 0 &&
-                  quality.indexOf('2-Pass Encoding') < 0) ||
-                quality.indexOf('2-Pass Encoding') >= 0
-                  ? 'active'
-                  : 'inActive'
+                quality.indexOf('best quality') < 0 ? 'active' : 'inActive'
               "
               >CBR</label
             >
@@ -195,7 +153,9 @@
             placeholder=""
             type="text"
             :onlyText="true"
-            :modelValue="bitrate"
+            :modelValue="quality.indexOf('best quality') >= 0 ? 0 : bitrate"
+            :class="quality.indexOf('best quality') < 0 ? 'active' : 'inActive'"
+            :isDisabled="quality.indexOf('best quality') < 0 ? false : true"
           />
           <span class="unit">(kbps)</span>
         </div>
@@ -306,9 +266,7 @@
       quality.value.splice(getIndex, 1);
     } else {
       if (value == "best quality") {
-        if (quality.value.indexOf("2-Pass Encoding") < 0) {
-          quality.value = [];
-        }
+        quality.value = [];
         quality.value.push("best quality");
       } else {
         quality.value.push(value);
@@ -336,24 +294,24 @@
           encoder: selectedEncoder.value.name,
           bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
           twoPassEncoding:
-            quality.value.indexOf("best quality") >= 0 &&
-            quality.value.indexOf("2-Pass Encoding") >= 0
+            quality.value.indexOf("best quality") >= 0
+              ? 0
+              : quality.value.indexOf("2-Pass Encoding") >= 0
               ? 1
               : 0,
-          avgBitrate: bitrate.value,
+          avgBitrate:
+            quality.value.indexOf("best quality") >= 0 ? 0 : bitrate.value,
           vbr:
-            quality.value.indexOf("best quality") >= 0 &&
-            quality.value.indexOf("2-Pass Encoding") >= 0
-              ? vbrOrCbr.value == "VBR"
-                ? true
-                : false
+            quality.value.indexOf("best quality") >= 0
+              ? false
+              : vbrOrCbr.value == "VBR"
+              ? true
               : false,
           cbr:
-            quality.value.indexOf("best quality") >= 0 &&
-            quality.value.indexOf("2-Pass Encoding") >= 0
-              ? vbrOrCbr.value == "CBR"
-                ? true
-                : false
+            quality.value.indexOf("best quality") >= 0
+              ? false
+              : vbrOrCbr.value == "CBR"
+              ? true
               : false,
         })
         .then((result) => {
@@ -486,6 +444,9 @@
           width: 100px;
           margin-left: 7px;
           margin-right: 2px;
+          &.inActive {
+            color: #ccc;
+          }
         }
         .base-button {
           &.inActive {

@@ -8,6 +8,7 @@
     :value="modelValue"
     :type="type"
     :placeholder="placeholder"
+    :disabled="isDisabled"
   />
 </template>
 <script setup lang="ts">
@@ -17,10 +18,17 @@
     type: string;
     placeholder: string;
     onlyText?: boolean;
+    isDisabled: boolean;
   }
   const props = defineProps<Props>();
   const emit = defineEmits(["update:modelValue", "update:enterEvent"]);
-  const { type, placeholder, onlyText, modelValue } = toRefs(props);
+  const {
+    type,
+    placeholder,
+    onlyText,
+    modelValue,
+    isDisabled = false,
+  } = toRefs(props);
   const enterEvent = (event: KeyboardEvent) => {
     emit("update:enterEvent");
   };
