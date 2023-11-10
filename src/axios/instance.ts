@@ -45,7 +45,6 @@ defaultInstance.interceptors.response.use(
     return response;
   },
   function (error) {
-    console.log(error);
     if (error.response.status == 401) {
       const userStore = useUserStore();
       cookies.remove("token");
