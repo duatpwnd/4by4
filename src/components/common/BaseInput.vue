@@ -12,7 +12,7 @@
   />
 </template>
 <script setup lang="ts">
-  import { toRefs } from "vue";
+  import { toRefs, withDefaults } from "vue";
   interface Props {
     modelValue: string;
     type: string;
@@ -20,15 +20,11 @@
     onlyText?: boolean;
     isDisabled?: boolean;
   }
-  const props = defineProps<Props>();
+  const props = withDefaults(defineProps<Props>(), {
+    isDisabled: false,
+  });
   const emit = defineEmits(["update:modelValue", "update:enterEvent"]);
-  const {
-    type,
-    placeholder,
-    onlyText,
-    modelValue,
-    isDisabled = false,
-  } = toRefs(props);
+  const { type, placeholder, onlyText, modelValue, isDisabled } = toRefs(props);
   const enterEvent = (event: KeyboardEvent) => {
     emit("update:enterEvent");
   };
