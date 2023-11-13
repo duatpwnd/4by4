@@ -360,7 +360,6 @@
   };
   const reloadEvent = (event: Event) => {
     if (isActiveUploadModal.value) {
-      sseEvents.close();
       event.preventDefault();
       event.stopImmediatePropagation();
       return "";

@@ -3,7 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath, URL } from "url";
 import mkcert from "vite-plugin-mkcert";
-const PROXY = window.location.hostname === "localhost" ? "" : "/proxy";
+console.log(process.env);
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), tsconfigPaths(), mkcert()], // https설정시에 넣기 mkcert()
@@ -18,7 +18,7 @@ export default defineConfig({
         // target: "http://172.168.10.91:49090", // private
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, `${PROXY}`),
+        rewrite: (path) => path.replace(/^\/api/, `/proxy`),
       },
     },
   },
