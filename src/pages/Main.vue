@@ -186,8 +186,9 @@
   import UploadModal from "@components/modal/upload/UploadModal.vue";
   import { EventType, Emitter } from "mitt";
   import { AxiosInstance } from "axios";
-  import { ref, inject, onMounted, computed } from "vue";
+  import { ref, inject, onMounted, onBeforeUnmount } from "vue";
   import serviceAPI from "@api/services";
+  import { useRoute } from "vue-router";
   interface StreamType {
     data: {
       progress: number;
@@ -236,7 +237,7 @@
   const progressValue = ref(0);
   const isUploaded = ref(false); // 업로드 여부
   const isInferred = ref(false); // 추론 여부
-
+  const route = useRoute();
   let sseEvents: EventSource;
   // upload 처리 함수
   const upload = (list: {
@@ -357,9 +358,21 @@
       console.log(err);
     };
   };
+  const reloadEvent = (event: Event) => {
+    if (isActiveUploadModal.value) {
+      event.preventDefault();
+      return "";
+    }
+  };
+  // 새로고침 감지 :: S
+  onBeforeUnmount(() => {
+    window.removeEventListener("beforeunload", reloadEvent);
+  });
   onMounted(() => {
+    window.addEventListener("beforeunload", reloadEvent);
     getVideoList();
   });
+  // 새로고침 감지 :: E
 </script>
 <style scoped lang="scss">
   main {

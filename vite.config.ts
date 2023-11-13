@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from "url";
 import mkcert from "vite-plugin-mkcert";
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), tsconfigPaths()], // https설정시에 넣기 mkcert()
+  plugins: [vue(), tsconfigPaths(), mkcert()], // https설정시에 넣기 mkcert()
   base: "http://222.107.124.161:64000", // public
   // base: "http://172.168.10.91:49090", // private
   server: {
