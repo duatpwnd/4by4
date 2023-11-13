@@ -12,7 +12,7 @@
   />
 </template>
 <script setup lang="ts">
-  import { toRefs, withDefaults } from "vue";
+  import { toRefs } from "vue";
   interface Props {
     modelValue: string;
     type: string;
