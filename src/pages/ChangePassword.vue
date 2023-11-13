@@ -45,7 +45,10 @@
   });
   const emit = defineEmits(["update:route"]);
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message: string }>
+    Record<
+      EventType,
+      { isLoading?: boolean; isActive?: boolean; message?: string }
+    >
   >;
   // 이메일 정규식 체크
   const emailValidCheck = (value: string) => {
@@ -63,6 +66,7 @@
       validCheck.email = true;
     }
     if (!validCheck.email) {
+      emitter.emit("update:loading", { isLoading: true });
       defaultInstance
         .get(serviceAPI.sendEmailPassword + `?email=${email.value}`)
         .then((result) => {
@@ -71,9 +75,11 @@
             isActive: true,
             message: "이메일로 발송되었습니다.",
           });
+          emitter.emit("update:loading", { isLoading: false });
         })
         .catch((err) => {
           console.log(err);
+          emitter.emit("update:loading", { isLoading: false });
           emitter.emit("update:alert", {
             isActive: true,
             message: "존재하지 않는 회원입니다.",

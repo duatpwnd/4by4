@@ -103,8 +103,9 @@
             placeholder="Insert Tag Name"
           />
           <p class="notice-message" v-if="validCheck.tagName">
-            Only English, numbers, underscores (_), and dashes (-) can be used.
-            However, it is not possible to start with an underscore or a dash.
+            Only English, numbers, dot, underscores (_), and dashes (-) can be
+            used. However, it is not possible to start with an underscore or a
+            dash.
           </p>
         </div>
       </div>
@@ -150,12 +151,21 @@
 
   const router = useRouter();
   const regType = /^[A-Za-z0-9]+[A-Za-z0-9_-]*$/;
+  const tagRegType = /^[A-Za-z0-9]+[A-Za-z0-9_.-]*$/;
   const onChange = (newValue: string, key: keyof ModelInfoType) => {
     modelData[key] = newValue;
-    if (regType.test(newValue)) {
-      validCheck[key] = false;
+    if (key == "tagName") {
+      if (tagRegType.test(newValue)) {
+        validCheck[key] = false;
+      } else {
+        validCheck[key] = true;
+      }
     } else {
-      validCheck[key] = true;
+      if (regType.test(newValue)) {
+        validCheck[key] = false;
+      } else {
+        validCheck[key] = true;
+      }
     }
   };
   const projectList = ref<ProjectListType[]>([

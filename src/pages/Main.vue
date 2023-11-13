@@ -213,7 +213,15 @@
   }
 
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive?: boolean; message?: string; fn?: () => void }>
+    Record<
+      EventType,
+      {
+        isLoading?: boolean;
+        isActive?: boolean;
+        message?: string;
+        fn?: () => void;
+      }
+    >
   >;
   const updateKey = ref(0);
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
@@ -287,6 +295,7 @@
         message: "Please select ai model.",
       });
     } else {
+      emitter.emit("update:loading", { isLoading: true });
       defaultInstance
         .post(serviceAPI.videoInference, {
           videoId: selectedVideoFile.value && selectedVideoFile.value.videoId,
@@ -317,7 +326,7 @@
         })
         .then((result) => {
           console.log(result);
-          connectSSE(result.data);
+          connectSSE(result.data.data);
         });
     }
   };
@@ -337,6 +346,7 @@
   const connectSSE = (uuid: string) => {
     sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
     sseEvents.onopen = () => {
+      emitter.emit("update:loading", { isLoading: false });
       isActiveProgressModal.value = true;
       console.log(serviceAPI.connectSSE + `?uuid=${uuid}` + "----connect");
     };
@@ -355,11 +365,12 @@
       }
     };
     sseEvents.onerror = (err) => {
+      emitter.emit("update:loading", { isLoading: false });
       console.log(err);
     };
   };
   const reloadEvent = (event: Event) => {
-    if (isActiveUploadModal.value) {
+    if (isActiveProgressModal.value) {
       event.preventDefault();
       event.stopImmediatePropagation();
       return "";

@@ -106,7 +106,15 @@
     /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
+    Record<
+      EventType,
+      {
+        isActive?: boolean;
+        isLoading?: boolean;
+        message?: string;
+        fn?: () => void;
+      }
+    >
   >;
   const emit = defineEmits(["update:route"]);
   const validCheck = reactive({
@@ -176,6 +184,7 @@
       validCheck.pwConfirm = true;
     }
     if (Object.values(validCheck).indexOf(true) == -1) {
+      emitter.emit("update:loading", { isLoading: true });
       defaultInstance
         .post(authAPI.join, {
           firstName: userFirstName.value,
@@ -187,6 +196,7 @@
         .then((result) => {
           if ("data" in result.data) {
             emit("update:route", "SignIn");
+            emitter.emit("update:loading", { isLoading: false });
             emitter.emit("update:alert", {
               isActive: true,
               message: "회원가입이 완료되었으며, 인증 메일이 발송되었습니다.",
@@ -194,6 +204,7 @@
           }
         })
         .catch((err) => {
+          emitter.emit("update:loading", { isLoading: false });
           emitter.emit("update:alert", {
             isActive: true,
             message: "이미 존재하는 아이디입니다.",
