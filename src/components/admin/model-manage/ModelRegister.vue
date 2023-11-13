@@ -252,7 +252,7 @@
     } else {
       validCheck.modelName = false;
     }
-    if (!regType.test(modelData.tagName)) {
+    if (!tagRegType.test(modelData.tagName)) {
       validCheck.tagName = true;
     } else {
       validCheck.tagName = false;

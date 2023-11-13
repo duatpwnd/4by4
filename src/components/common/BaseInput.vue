@@ -1,4 +1,5 @@
 <template>
+  {{ isDisabled }}
   <input
     class="base-input"
     autocomplete="true"
@@ -12,7 +13,7 @@
   />
 </template>
 <script setup lang="ts">
-  import { toRefs } from "vue";
+  import { toRefs, onMounted } from "vue";
   interface Props {
     modelValue: string;
     type: string;
