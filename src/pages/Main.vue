@@ -316,7 +316,7 @@
         })
         .then((result) => {
           console.log(result);
-          connectSSE(result.data.uuid);
+          connectSSE(result.data);
         });
     }
   };

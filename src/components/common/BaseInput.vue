@@ -18,7 +18,7 @@
     type: string;
     placeholder: string;
     onlyText?: boolean;
-    isDisabled: boolean;
+    isDisabled?: boolean;
   }
   const props = defineProps<Props>();
   const emit = defineEmits(["update:modelValue", "update:enterEvent"]);

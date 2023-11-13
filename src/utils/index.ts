@@ -30,21 +30,6 @@ export default {
         app.component(el.__name, el);
       }
     });
-    const debounce = <T extends any[]>(
-      fn: (...params: T) => void,
-      wait: number
-    ) => {
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      return function (...args: T) {
-        if (timer) {
-          clearTimeout(timer);
-        }
-        const context = this;
-        timer = setTimeout(() => {
-          fn.apply(context, args);
-        }, wait);
-      };
-    };
     const signOut = () => {
       cookies.remove("token");
       userStore.putUserInfo(null);
@@ -55,7 +40,6 @@ export default {
       });
     };
     app.provide("emitter", emitter);
-    app.provide("debounce", debounce);
     app.provide("authInstance", authInstance);
     app.provide("defaultInstance", defaultInstance);
     app.provide("signOut", signOut);

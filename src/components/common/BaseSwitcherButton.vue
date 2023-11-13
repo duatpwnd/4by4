@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { toRefs, defineProps } from "vue";
+  import { toRefs } from "vue";
   interface Props {
     isChecked?: boolean;
     value?: string;
