@@ -18,7 +18,7 @@ export default defineConfig({
         // target: "http://172.168.10.91:49090", // private
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, `/proxy`),
+        rewrite: (path) => path.replace(/^\/api/, ``), // /proxy
       },
     },
   },
