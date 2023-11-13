@@ -1,5 +1,4 @@
 <template>
-  {{ isDisabled }}
   <input
     class="base-input"
     autocomplete="true"
