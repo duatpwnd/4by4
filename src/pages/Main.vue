@@ -245,7 +245,7 @@
   const progressValue = ref(0);
   const isUploaded = ref(false); // 업로드 여부
   const isInferred = ref(false); // 추론 여부
-  const route = useRoute();
+  const uuid = ref("");
   let sseEvents: EventSource;
   // upload 처리 함수
   const upload = (list: {
@@ -326,6 +326,7 @@
         })
         .then((result) => {
           console.log(result);
+          uuid.value = result.data.data;
           connectSSE(result.data.data);
         });
     }
@@ -338,12 +339,17 @@
         sseEvents.close();
         isActiveProgressModal.value = false;
         isInferred.value = false;
-        defaultInstance.delete(
-          serviceAPI.videoInference +
-            `?containerId=${
-              selectedAiModel.value && selectedAiModel.value.containerId
-            }`
-        );
+        emitter.emit("update:loading", { isLoading: true });
+        defaultInstance
+          .delete(
+            serviceAPI.videoInference +
+              `?containerId=${
+                selectedAiModel.value && selectedAiModel.value.containerId
+              }&uuid=${uuid.value}`
+          )
+          .then((result) => {
+            emitter.emit("update:loading", { isLoading: false });
+          });
       },
     });
   };
@@ -351,23 +357,35 @@
   const connectSSE = (uuid: string) => {
     sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
     sseEvents.onopen = () => {
-      emitter.emit("update:loading", { isLoading: false });
-      isActiveProgressModal.value = true;
       console.log(serviceAPI.connectSSE + `?uuid=${uuid}` + "----connect");
     };
-    sseEvents.onmessage = (stream: StreamType) => {
-      console.log(stream);
-      progressValue.value = stream.data.progress;
-      if (stream.data.progress == 100) {
-        sseEvents.close();
-        isInferred.value = true;
-        isActiveProgressModal.value = false;
-        defaultInstance
-          .get(serviceAPI.videoDownload + `?path=$`)
-          .then((result) => {
-            console.log("video download", result);
-          });
-      }
+    sseEvents.onmessage = (stream: any) => {
+      try {
+        if (typeof JSON.parse(stream.data) == "object") {
+          const data = JSON.parse(stream.data);
+          console.log(data);
+          if (data.step == "inference") {
+            isActiveProgressModal.value = true;
+            emitter.emit("update:loading", { isLoading: false });
+            progressValue.value = data.progress;
+            if (data.progress == 100) {
+              sseEvents.close();
+              isInferred.value = true;
+              isActiveProgressModal.value = false;
+              defaultInstance
+                .get(
+                  serviceAPI.videoDownload +
+                    `?video_id=${
+                      selectedVideoFile.value && selectedVideoFile.value.videoId
+                    }`
+                )
+                .then((result) => {
+                  console.log("video download", result);
+                });
+            }
+          }
+        }
+      } catch (error) {}
     };
     sseEvents.onerror = (err) => {
       emitter.emit("update:loading", { isLoading: false });
@@ -378,14 +396,17 @@
     if (isActiveProgressModal.value) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      defaultInstance.delete(
-        serviceAPI.videoInference +
-          `?containerId=${
-            selectedAiModel.value && selectedAiModel.value.containerId
-          }`
-      );
       return "";
     }
+  };
+  window.onunload = function (e) {
+    console.log("unload event");
+    defaultInstance.delete(
+      serviceAPI.videoInference +
+        `?containerId=${
+          selectedAiModel.value && selectedAiModel.value.containerId
+        }`
+    );
   };
   // 새로고침 감지 :: S
   onBeforeUnmount(() => {
