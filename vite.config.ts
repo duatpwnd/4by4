@@ -8,19 +8,19 @@ export default defineConfig({
   plugins: [vue(), tsconfigPaths(), mkcert()], // https설정시에 넣기 mkcert()
   base: "http://222.107.124.161:64000", // public
   // base: "http://172.168.10.91:49090", // private
-  server: {
-    port: 5173,
-    proxy: {
-      "/api": {
-        // target: "http://183.111.175.101:49090",
-        target: "http://222.107.124.161:64000", // public
-        // target: "http://172.168.10.91:49090", // private
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
+  // server: {
+  //   port: 5173,
+  //   proxy: {
+  //     "/api": {
+  //       // target: "http://183.111.175.101:49090",
+  //       target: "http://222.107.124.161:64000", // public
+  //       // target: "http://172.168.10.91:49090", // private
+  //       changeOrigin: true,
+  //       secure: false,
+  //       rewrite: (path) => path.replace(/^\/api/, ""),
+  //     },
+  //   },
+  // },
   css: {
     preprocessorOptions: {
       scss: {
