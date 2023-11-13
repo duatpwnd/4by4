@@ -6,7 +6,7 @@ import mkcert from "vite-plugin-mkcert";
 console.log(process.env);
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), tsconfigPaths(), mkcert()], // https설정시에 넣기 mkcert()
+  plugins: [vue(), tsconfigPaths()], // https설정시에 넣기 mkcert()
   base: "http://222.107.124.161:64000", // public
   // base: "http://172.168.10.91:49090", // private
   server: {
@@ -18,7 +18,7 @@ export default defineConfig({
         // target: "http://172.168.10.91:49090", // private
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ``), // /proxy
+        rewrite: (path) => path.replace(/^\/api/, ``),
       },
     },
   },
