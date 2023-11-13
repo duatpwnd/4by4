@@ -24,7 +24,13 @@
     isDisabled: false,
   });
   const emit = defineEmits(["update:modelValue", "update:enterEvent"]);
-  const { type, placeholder, onlyText, modelValue, isDisabled } = toRefs(props);
+  const {
+    type,
+    placeholder,
+    onlyText,
+    modelValue,
+    isDisabled = false,
+  } = toRefs(props);
   const enterEvent = (event: KeyboardEvent) => {
     emit("update:enterEvent");
   };
