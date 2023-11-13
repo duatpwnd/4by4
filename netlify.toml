@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/proxy/*"
+  to = "http://222.107.124.161:64000/:splat"
+  status = 200
+  force = true
