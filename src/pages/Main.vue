@@ -338,7 +338,12 @@
         sseEvents.close();
         isActiveProgressModal.value = false;
         isInferred.value = false;
-        console.log(serviceAPI.connectSSE + "----closed");
+        defaultInstance.delete(
+          serviceAPI.videoInference +
+            `?containerId=${
+              selectedAiModel.value && selectedAiModel.value.containerId
+            }`
+        );
       },
     });
   };
@@ -373,6 +378,12 @@
     if (isActiveProgressModal.value) {
       event.preventDefault();
       event.stopImmediatePropagation();
+      defaultInstance.delete(
+        serviceAPI.videoInference +
+          `?containerId=${
+            selectedAiModel.value && selectedAiModel.value.containerId
+          }`
+      );
       return "";
     }
   };
