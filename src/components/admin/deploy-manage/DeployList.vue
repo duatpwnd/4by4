@@ -102,7 +102,15 @@
   const router = useRouter();
   const route = useRoute();
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
+    Record<
+      EventType,
+      {
+        isLoading?: boolean;
+        isActive?: boolean;
+        message?: string;
+        fn?: () => void;
+      }
+    >
   >;
   const ths = <const>["#", "Host", "GPU", "Image", "ContainerID", "Control"];
   const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
@@ -124,12 +132,13 @@
       message: "삭제하시겠습니까?",
       fn: () => {
         console.log("삭제api");
+        emitter.emit("update:loading", { isLoading: true });
         defaultInstance
           .delete(serviceAPI.container + `?containerId=${containerId}`)
           .then((result) => {
             console.log(result);
             getContainerList(1, "ALL");
-            // modelList.value = result.data
+            emitter.emit("update:loading", { isLoading: false });
           });
       },
     });
