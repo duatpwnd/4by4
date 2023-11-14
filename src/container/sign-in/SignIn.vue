@@ -49,7 +49,7 @@
         </button>
       </div>
       <div class="row">
-        <span class="question-txt">Don’t Have a Acount?</span>
+        <span class="question-txt">Don’t Have a Account?</span>
         <button
           type="button"
           class="sign-up-link"

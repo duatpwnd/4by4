@@ -388,15 +388,31 @@
             isActiveProgressModal.value = false; // 프로그레스 모달 닫기
             localStorage.removeItem("inference"); // 로컬 삭제
             emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
-            defaultInstance
-              .get(serviceAPI.videoDownload + `?uuid=${uuid}`)
-              .then((result) => {
-                console.log("video download", result);
-                originalVideoSrc.value = "";
-                inferredVideoSrc.value = "";
-                isInferred.value = true; // 녹색으로 테두리 변경 신호
-                emitter.emit("update:loading", { isLoading: false });
-              });
+            Promise.all([
+              defaultInstance.get(
+                serviceAPI.videoDownload +
+                  `?videoId=${
+                    selectedVideoFile.value && selectedVideoFile.value.videoId
+                  }`
+              ),
+              defaultInstance.get(serviceAPI.videoDownload + `?uuid=${uuid}`),
+            ]).then((result) => {
+              console.log("video download", result);
+              originalVideoSrc.value = "";
+              inferredVideoSrc.value = "";
+              isInferred.value = true; // 녹색으로 테두리 변경 신호
+              emitter.emit("update:loading", { isLoading: false });
+            });
+
+            // defaultInstance
+            //   .get(serviceAPI.videoDownload + `?uuid=${uuid}`)
+            //   .then((result) => {
+            //     console.log("video download", result);
+            //     originalVideoSrc.value = "";
+            //     inferredVideoSrc.value = "";
+            //     isInferred.value = true; // 녹색으로 테두리 변경 신호
+            //     emitter.emit("update:loading", { isLoading: false });
+            //   });
           }
         }
       } catch (error) {}
