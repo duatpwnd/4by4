@@ -371,25 +371,32 @@
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
+          console.log(data);
+          // 진행
           if (data.step == "inference") {
             isActiveProgressModal.value = true; // 프로그레스 돌리기
             emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
             progressValue.value = data.progress; // 프로그레스 값 할당
-            if (data.progress == 100) {
-              isActiveProgressModal.value = false; // 프로그레스 모달 닫기
-              emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
-              defaultInstance
-                .get(serviceAPI.videoDownload + `?video_id=${uuid}`)
-                .then((result) => {
-                  console.log("video download", result);
-                  originalVideoSrc.value = "";
-                  inferredVideoSrc.value = "";
-                  sseEvents.close(); // sse 연결 끊기
-                  isInferred.value = true; // 녹색으로 테두리 변경 신호
-                  localStorage.removeItem("inference"); // 로컬 삭제
-                  emitter.emit("update:loading", { isLoading: false });
-                });
-            }
+          }
+          // 완료
+          if (
+            data.step == "all" &&
+            data.progress == 100 &&
+            data.result == "true"
+          ) {
+            sseEvents.close(); // sse 연결 끊기
+            isActiveProgressModal.value = false; // 프로그레스 모달 닫기
+            localStorage.removeItem("inference"); // 로컬 삭제
+            emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
+            defaultInstance
+              .get(serviceAPI.videoDownload + `?uuid=${uuid}`)
+              .then((result) => {
+                console.log("video download", result);
+                originalVideoSrc.value = "";
+                inferredVideoSrc.value = "";
+                isInferred.value = true; // 녹색으로 테두리 변경 신호
+                emitter.emit("update:loading", { isLoading: false });
+              });
           }
         }
       } catch (error) {}
@@ -397,7 +404,6 @@
     sseEvents.onerror = (err) => {
       console.log(err);
       reset();
-      emitter.emit("update:loading", { isLoading: false });
     };
   };
   // 새로고침 물어보기

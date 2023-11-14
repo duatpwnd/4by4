@@ -77,7 +77,6 @@
 <script setup lang="ts">
   import { onMounted, ref, toRefs, inject } from "vue";
   import TimeLine from "@components/video/TimeLine.vue";
-  import { defaultInstance } from "../../axios/instance";
   const videoContainerRef = ref<HTMLDivElement | null>(null);
   const videoAreaRef = ref<HTMLDivElement | null>(null);
   const videoClipperRef = ref<HTMLDivElement | null>(null);
@@ -100,25 +99,16 @@
     toRefs(props);
   // 다운로드 및 공유
   const copy = () => {
-    const getExtension = "test.mp4".split(".").pop();
+    const getExtension = inferredVideoSrc.value.split(".").pop();
     if (setIntervalId.value !== null) {
       clearTimeout(setIntervalId.value);
     }
-    window.navigator.clipboard.writeText("copy").then(() => {
-      defaultInstance
-        .get("", {
-          responseType: "blob",
-        })
-        .then((result) => {
-          console.log(result);
-        });
+    window.navigator.clipboard.writeText(inferredVideoSrc.value).then(() => {
       // 복사가 완료되면 호출된다.
-      const blob = new Blob([""], { type: `video/${getExtension}` });
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "test";
+      link.href = inferredVideoSrc.value;
+      link.download = inferredVideoSrc.value;
       link.click();
-      URL.revokeObjectURL(link.href);
       isCopy.value = true;
       setIntervalId.value = setTimeout(() => {
         isCopy.value = false;
