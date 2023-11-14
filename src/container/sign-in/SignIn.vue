@@ -80,6 +80,7 @@
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const userId = ref("");
   const userPw = ref("");
+  const referrer = route.query.referrer as string | undefined;
   const validCheck = reactive({
     id: false,
     pw: false,
@@ -127,12 +128,16 @@
           },
         })
         .then((result) => {
-          console.log(result.headers.authorization);
           cookies.set("token", result.headers.authorization);
           userStore.putUserInfo({
             token: result.headers.authorization,
           });
-          router.push("/main");
+          console.log(`output->referrer`, referrer);
+          if (referrer == undefined) {
+            router.push("/main");
+          } else {
+            router.push(`/${referrer}`);
+          }
         })
         .catch((err: Error) => {
           emitter.emit("update:alert", {

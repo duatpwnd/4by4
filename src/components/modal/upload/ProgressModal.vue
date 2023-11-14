@@ -35,6 +35,7 @@
     background-color: rgba(0, 0, 0, 0.5);
   }
   .progress-modal {
+    min-width: 650px;
     position: fixed;
     top: 50%;
     left: 50%;

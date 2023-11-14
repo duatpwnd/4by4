@@ -188,7 +188,6 @@
   import { AxiosInstance } from "axios";
   import { ref, inject, onMounted, onBeforeUnmount } from "vue";
   import serviceAPI from "@api/services";
-  import { useRoute } from "vue-router";
   interface StreamType {
     data: {
       progress: number;
@@ -223,7 +222,7 @@
       }
     >
   >;
-  const updateKey = ref(0);
+  const updateKey = ref(0); // 업로드 중 취소할때 갱신을 위한 키값
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
   const selectedVideoFile = ref<VideoListType | null>(null); // 선택된 비디오 파일
@@ -258,6 +257,7 @@
     aiModelOptions.value = list.inferenceModelList;
     videoFiles.value = list.videoList;
   };
+  // 비디오 및 ai model 불러오는 함수
   const getVideoList = () => {
     Promise.all([
       defaultInstance.get(serviceAPI.videoList),
@@ -269,6 +269,7 @@
       );
     });
   };
+  // 베스트 퀄리티 유효성 체크
   const onCheck = (value: string) => {
     const getIndex = quality.value.indexOf(value);
     if (getIndex >= 0) {
@@ -374,25 +375,21 @@
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
-          console.log(data);
           if (data.step == "inference") {
-            isActiveProgressModal.value = true;
-            emitter.emit("update:loading", { isLoading: false });
-            progressValue.value = data.progress;
+            isActiveProgressModal.value = true; // 프로그레스 돌리기
+            emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
+            progressValue.value = data.progress; // 프로그레스 값 할당
             if (data.progress == 100) {
-              sseEvents.close();
-              isInferred.value = true;
-              localStorage.removeItem("inference");
-              isActiveProgressModal.value = false;
+              sseEvents.close(); // sse 연결 끊기
+              isInferred.value = true; // 녹색으로 테두리 변경 신호
+              localStorage.removeItem("inference"); // 로컬 삭제
+              isActiveProgressModal.value = false; // 프로그레스 모달 닫기
+              emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
               defaultInstance
-                .get(
-                  serviceAPI.videoDownload +
-                    `?video_id=${
-                      selectedVideoFile.value && selectedVideoFile.value.videoId
-                    }`
-                )
+                .get(serviceAPI.videoDownload + `?video_id=${uuid}`)
                 .then((result) => {
                   console.log("video download", result);
+                  emitter.emit("update:loading", { isLoading: false });
                 });
             }
           }
@@ -404,11 +401,13 @@
       console.log(err);
     };
   };
+  // 새로고침 물어보기
   const reloadEvent = (event: Event) => {
     event.preventDefault();
     event.stopImmediatePropagation();
     return "";
   };
+  // 추론 중지
   const pauseInference = (obj: { uuid: string; containerId: string }) => {
     emitter.emit("update:alert", {
       isActive: true,
@@ -436,7 +435,7 @@
   });
   onMounted(() => {
     window.addEventListener("beforeunload", reloadEvent);
-    getVideoList();
+    getVideoList(); // 비디오, ai model 불러오기
     if (localStorage.getItem("inference") != null) {
       pauseInference(JSON.parse(localStorage.getItem("inference") as string));
     }

@@ -33,7 +33,7 @@ export default {
     const signOut = () => {
       cookies.remove("token");
       userStore.putUserInfo(null);
-      router.push("/sign-in");
+      router.push(`/sign-in?referrer=${location.pathname.split("/").pop()}`);
       emitter.emit("update:alert", {
         isActive: true,
         message: "Logout has been processed.",
