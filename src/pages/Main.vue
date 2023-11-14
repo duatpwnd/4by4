@@ -326,7 +326,13 @@
         })
         .then((result) => {
           console.log(result);
-          localStorage.setItem("uuid", result.data.data);
+          localStorage.setItem(
+            "inference",
+            JSON.stringify({
+              uuid: result.data.data,
+              containerId: selectedAiModel.value!.containerId,
+            })
+          );
           uuid.value = result.data.data;
           connectSSE(result.data.data);
         });
@@ -341,7 +347,10 @@
         isActiveProgressModal.value = false;
         isInferred.value = false;
         emitter.emit("update:loading", { isLoading: true });
-        pauseInference(selectedAiModel.value!.containerId);
+        pauseInference({
+          containerId: selectedAiModel.value!.containerId,
+          uuid: uuid.value,
+        });
         // defaultInstance
         //   .delete(
         //     serviceAPI.videoInference +
@@ -373,7 +382,7 @@
             if (data.progress == 100) {
               sseEvents.close();
               isInferred.value = true;
-              localStorage.removeItem("uuid");
+              localStorage.removeItem("inference");
               isActiveProgressModal.value = false;
               defaultInstance
                 .get(
@@ -396,28 +405,29 @@
     };
   };
   const reloadEvent = (event: Event) => {
-    if (isActiveProgressModal.value) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return "";
-    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return "";
   };
-  const pauseInference = (id: string) => {
+  const pauseInference = (obj: { uuid: string; containerId: string }) => {
     emitter.emit("update:alert", {
       isActive: true,
       message: "추론 정지중입니다. 잠시만 기다려주세요.",
     });
     defaultInstance
       .delete(
-        serviceAPI.videoInference + `?containerId=${id}&uuid=${uuid.value}`
+        serviceAPI.videoInference +
+          `?containerId=${obj.containerId}&uuid=${obj.uuid}`
       )
       .then((result) => {
         console.log("삭제", result);
+        getVideoList();
+        emitter.emit("update:loading", { isLoading: false });
         emitter.emit("update:alert", {
-          isActive: false,
-          message: "추론 정지중입니다. 잠시만 기다려주세요.",
+          isActive: true,
+          message: "추론 정지가 완료되었습니다.",
         });
-        localStorage.removeItem("uuid");
+        localStorage.removeItem("inference");
       });
   };
   // 새로고침 감지 :: S
@@ -427,8 +437,8 @@
   onMounted(() => {
     window.addEventListener("beforeunload", reloadEvent);
     getVideoList();
-    if (localStorage.getItem("uuid") != null) {
-      pauseInference(localStorage.getItem("uuid") as string);
+    if (localStorage.getItem("inference") != null) {
+      pauseInference(JSON.parse(localStorage.getItem("inference") as string));
     }
   });
   // 새로고침 감지 :: E
