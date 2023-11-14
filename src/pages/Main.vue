@@ -175,8 +175,8 @@
     <Video
       :isUploaded="isUploaded"
       :isInferred="isInferred"
-      :originalVideoSrc="''"
-      :inferredVideoSrc="''"
+      :originalVideoSrc="originalVideoSrc"
+      :inferredVideoSrc="inferredVideoSrc"
     />
   </main>
 </template>
@@ -244,6 +244,8 @@
   const progressValue = ref(0);
   const isUploaded = ref(false); // 업로드 여부
   const isInferred = ref(false); // 추론 여부
+  const originalVideoSrc = ref(""); // 원본 영상
+  const inferredVideoSrc = ref(""); // 추론 영상
   const uuid = ref("");
   let sseEvents: EventSource;
   // upload 처리 함수
@@ -339,29 +341,23 @@
         });
     }
   };
+  const reset = () => {
+    sseEvents.close();
+    isActiveProgressModal.value = false;
+    isInferred.value = false;
+    pauseInference({
+      containerId: selectedAiModel.value!.containerId,
+      uuid: uuid.value,
+    });
+  };
+
   const close = () => {
     emitter.emit("update:alert", {
       isActive: true,
       message: "취소하시겠습니까?",
       fn: () => {
-        sseEvents.close();
-        isActiveProgressModal.value = false;
-        isInferred.value = false;
         emitter.emit("update:loading", { isLoading: true });
-        pauseInference({
-          containerId: selectedAiModel.value!.containerId,
-          uuid: uuid.value,
-        });
-        // defaultInstance
-        //   .delete(
-        //     serviceAPI.videoInference +
-        //       `?containerId=${
-
-        //       }&uuid=${uuid.value}`
-        //   )
-        //   .then((result) => {
-        //     emitter.emit("update:loading", { isLoading: false });
-        //   });
+        reset();
       },
     });
   };
@@ -380,15 +376,17 @@
             emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
             progressValue.value = data.progress; // 프로그레스 값 할당
             if (data.progress == 100) {
-              sseEvents.close(); // sse 연결 끊기
-              isInferred.value = true; // 녹색으로 테두리 변경 신호
-              localStorage.removeItem("inference"); // 로컬 삭제
               isActiveProgressModal.value = false; // 프로그레스 모달 닫기
               emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
               defaultInstance
                 .get(serviceAPI.videoDownload + `?video_id=${uuid}`)
                 .then((result) => {
                   console.log("video download", result);
+                  originalVideoSrc.value = "";
+                  inferredVideoSrc.value = "";
+                  sseEvents.close(); // sse 연결 끊기
+                  isInferred.value = true; // 녹색으로 테두리 변경 신호
+                  localStorage.removeItem("inference"); // 로컬 삭제
                   emitter.emit("update:loading", { isLoading: false });
                 });
             }
@@ -397,8 +395,9 @@
       } catch (error) {}
     };
     sseEvents.onerror = (err) => {
-      emitter.emit("update:loading", { isLoading: false });
       console.log(err);
+      reset();
+      emitter.emit("update:loading", { isLoading: false });
     };
   };
   // 새로고침 물어보기
