@@ -22,7 +22,7 @@
       <!-- 헤더 :: E -->
       <div class="video-area" ref="videoAreaRef">
         <button
-          v-if="isInferred"
+          v-show="isInferred"
           ref="draggableButton"
           class="drag-btn"
         ></button>
@@ -99,6 +99,7 @@
     if (setIntervalId.value !== null) {
       clearTimeout(setIntervalId.value);
     }
+    console.log(inferredVideoSrc.value);
     window.navigator.clipboard.writeText(inferredVideoSrc.value).then(() => {
       // 복사가 완료되면 호출된다.
       const link = document.createElement("a");
@@ -113,6 +114,7 @@
   };
   const draggable = ($target: HTMLButtonElement) => {
     const videoContainer = videoContainerRef.value;
+    console.log(videoContainer);
     let isPress = false;
     document.onmouseup = () => {
       isPress = false;

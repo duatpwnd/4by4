@@ -298,6 +298,9 @@
         message: "Please select ai model.",
       });
     } else {
+      isInferred.value = false;
+      originalVideoSrc.value = "";
+      inferredVideoSrc.value = "";
       emitter.emit("update:loading", { isLoading: true });
       defaultInstance
         .post(serviceAPI.videoInference, {
@@ -435,9 +438,11 @@
   };
   // 새로고침 물어보기
   const reloadEvent = (event: Event) => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    return "";
+    if (isActiveProgressModal.value) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return "";
+    }
   };
   // 추론 중지
   const pauseInference = (obj: { uuid: string; containerId: string }) => {
