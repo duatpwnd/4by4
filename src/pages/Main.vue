@@ -378,6 +378,9 @@
             emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
             progressValue.value = data.progress; // 프로그레스 값 할당
           }
+          if (data.status == "error") {
+            reset();
+          }
           // 완료
           if (
             data.step == "all" &&
@@ -388,21 +391,29 @@
             isActiveProgressModal.value = false; // 프로그레스 모달 닫기
             localStorage.removeItem("inference"); // 로컬 삭제
             emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
-            Promise.all([
-              defaultInstance.get(
-                serviceAPI.videoDownload +
-                  `?videoId=${
-                    selectedVideoFile.value && selectedVideoFile.value.videoId
-                  }`
-              ),
-              defaultInstance.get(serviceAPI.videoDownload + `?uuid=${uuid}`),
-            ]).then((result) => {
-              console.log("video download", result);
-              originalVideoSrc.value = "";
-              inferredVideoSrc.value = "";
-              isInferred.value = true; // 녹색으로 테두리 변경 신호
-              emitter.emit("update:loading", { isLoading: false });
-            });
+            originalVideoSrc.value =
+              "http://172.168.10.91:49090" +
+              serviceAPI.videoDownload +
+              `?videoId=${
+                selectedVideoFile.value && selectedVideoFile.value.videoId
+              }`;
+            inferredVideoSrc.value =
+              "http://172.168.10.91:49090" +
+              serviceAPI.videoDownload +
+              `?uuid=${uuid}`;
+            isInferred.value = true; // 녹색으로 테두리 변경 신호
+            emitter.emit("update:loading", { isLoading: false });
+            // Promise.all([
+            //   defaultInstance.get(
+            //     serviceAPI.videoDownload +
+            //       `?videoId=${
+            //         selectedVideoFile.value && selectedVideoFile.value.videoId
+            //       }`
+            //   ),
+            //   defaultInstance.get(serviceAPI.videoDownload + `?uuid=${uuid}`),
+            // ]).then((result) => {
+            //   console.log("video download", result);
+            // });
 
             // defaultInstance
             //   .get(serviceAPI.videoDownload + `?uuid=${uuid}`)

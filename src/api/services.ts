@@ -11,7 +11,7 @@ const services = {
   gpuList: "/api/gpu/list", // 배포등록가능한 gpu 리스트
   upload: "/api/file/upload", // 모델 업로드
   videoInference: "/api/video/inference", // 비디오 추론
-  videoDownload: "/api/video/download", // 비디오 다운로드
+  videoDownload: "/video/download", // 비디오 다운로드
   videoFileUpload: "/api/video/file/upload", // 비디오 업로드
   inferenceModelList: "/api/model/inference/list", // 추론 모델리스트
   videoList: "/api/video/list", // 비디오 리스트

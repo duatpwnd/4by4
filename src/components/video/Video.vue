@@ -27,15 +27,11 @@
           class="drag-btn"
         ></button>
         <!-- 원본 비디오 :: S -->
-        <video ref="originalVideo">
-          <source :src="originalVideoSrc" />
-        </video>
+        <video ref="originalVideo" :src="originalVideoSrc"></video>
         <!-- 원본 비디오 :: E -->
         <div id="video-clipper" ref="videoClipperRef">
           <!-- 추론된 비디오 :: S -->
-          <video ref="inferenceVideo">
-            <source :src="inferredVideoSrc" />
-          </video>
+          <video ref="inferenceVideo" :src="inferredVideoSrc"></video>
           <!-- 추론된 비디오 :: E -->
         </div>
         <!-- v-if='isInferred' -->
