@@ -395,13 +395,13 @@
             localStorage.removeItem("inference"); // 로컬 삭제
             emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
             originalVideoSrc.value =
-              "http://172.168.10.91:49090" +
+              import.meta.env.VITE_BASE_URL +
               serviceAPI.videoDownload +
               `?videoId=${
                 selectedVideoFile.value && selectedVideoFile.value.videoId
               }`;
             inferredVideoSrc.value =
-              "http://172.168.10.91:49090" +
+              import.meta.env.VITE_BASE_URL +
               serviceAPI.videoDownload +
               `?uuid=${uuid}`;
             isInferred.value = true; // 녹색으로 테두리 변경 신호

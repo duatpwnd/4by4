@@ -83,7 +83,7 @@
   const isMouseDownBtn = ref(false);
   const signOut = inject("signOut");
   const isCopy = ref(false);
-  const setIntervalId = ref<NodeJS.Timeout | null>(null);
+  const setIntervalId = ref<ReturnType<typeof setTimeout> | null>(null);
   interface Props {
     isUploaded: boolean;
     isInferred: boolean;
