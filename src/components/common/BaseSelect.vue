@@ -9,10 +9,12 @@
         :key="index"
         @click="select(option)"
       >
-        <span v-if="name.split(',').length == 2">
-          {{ option[name.split(",")[0]] }}/{{ option[name.split(",")[1]] }}
-        </span>
-        <span v-else> {{ option[name] }} </span>
+        <slot name="list">
+          <span v-if="name.split(',').length == 2">
+            {{ option[name.split(",")[0]] }}/{{ option[name.split(",")[1]] }}
+          </span>
+          <span v-else> {{ option[name] }} </span>
+        </slot>
       </li>
     </ul>
   </div>

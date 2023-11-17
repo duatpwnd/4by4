@@ -2,23 +2,17 @@ import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath, URL } from "url";
-import mkcert from "vite-plugin-mkcert";
-console.log(loadEnv);
-// https://vitejs.dev/config/
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
   return defineConfig({
     plugins: [vue(), tsconfigPaths()], // https설정시에 넣기 mkcert()
-    // base: "http://222.107.124.161:64000", // public
-    base: process.env.VITE_BASE_URL, // private
+    base: process.env.VITE_BASE_URL,
     assetsInclude: ["**/*.mov"],
     server: {
       port: 5173,
       proxy: {
         "/api": {
-          // target: "http://183.111.175.101:49090",
-          // target: "http://222.107.124.161:64000", // public
-          target: process.env.VITE_BASE_URL, // private
+          target: process.env.VITE_BASE_URL,
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api/, ``),

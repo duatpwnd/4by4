@@ -1,7 +1,7 @@
 <template>
   <ProgressModal
     v-if="isActiveProgressModal"
-    text="Inference is in progress..."
+    :text="step + ' in_progress...'"
     :progressValue="progressValue"
     @update:close-progress-modal="close"
   />
@@ -20,12 +20,9 @@
         <div class="row">
           <BaseButton @click="isActiveUploadModal = true" text="Upload Video" />
         </div>
-        <div class="row">
+        <div class="row video-file-select-area">
           <label class="label">video File</label>
           <BaseSelect
-            @update:select-box="(video:VideoListType)=>{
-              isUploaded = true;
-              selectedVideoFile = video}"
             name="fileName"
             :options="videoFiles"
             :text="
@@ -33,7 +30,22 @@
                 ? '<span class=not-selected>Please Upload Video Files</span>'
                 : selectedVideoFile.fileName
             "
-          />
+          >
+            <template #list v-for="files in videoFiles">
+              <span class="date">{{ files.date }}</span>
+              <div v-for="video in files.video" class="file-name-area">
+                <span
+                  class="file-name"
+                  @click="
+                    isUploaded = true;
+                    selectedVideoFile = video;
+                  "
+                  >{{ video.fileName }}</span
+                >
+                <FontAwesomeIcon icon="xmark" class="delete-button" />
+              </div>
+            </template>
+          </BaseSelect>
         </div>
       </section>
       <section class="setting-area">
@@ -82,7 +94,7 @@
             />
             <label for="BestQuality">Best Quality</label>
           </div>
-          <div>
+          <!-- <div>
             <span
               class="check-box"
               :class="
@@ -102,7 +114,7 @@
               "
               >2-Pass Encoding</label
             >
-          </div>
+          </div> -->
         </div>
         <div class="row check-area">
           <div>
@@ -147,7 +159,7 @@
           </div>
         </div>
         <div class="row">
-          <label class="bitrate">AVg.Bitrate : </label>
+          <label class="bitrate">Bitrate : </label>
           <BaseInput
             @update:modelValue="(newValue:string) => (bitrate = newValue)"
             placeholder=""
@@ -199,6 +211,10 @@
     };
   }
   interface VideoListType {
+    date: string;
+    video: { videoId: string; fileName: string }[];
+  }
+  interface SelectedVideo {
     videoId: string;
     fileName: string;
   }
@@ -225,7 +241,7 @@
   const updateKey = ref(0); // 업로드 중 취소할때 갱신을 위한 키값
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
-  const selectedVideoFile = ref<VideoListType | null>(null); // 선택된 비디오 파일
+  const selectedVideoFile = ref<SelectedVideo | null>(null); // 선택된 비디오 파일
   const aiModelOptions = ref<SelectedAiType[]>([]); // aiModel 리스트
   const selectedAiModel = ref<SelectedAiType | null>(null); // 선택된 aiModel
   const formatOptions = [{ name: "mp4" }, { name: "mov" }, { name: "mkv" }]; // format 리스트
@@ -247,6 +263,7 @@
   const originalVideoSrc = ref(""); // 원본 영상
   const inferredVideoSrc = ref(""); // 추론 영상
   const uuid = ref("");
+  const step = ref(""); // 추론 진행상태
   let sseEvents: EventSource;
   // upload 처리 함수
   const upload = (list: {
@@ -332,7 +349,7 @@
         })
         .then((result) => {
           console.log(result);
-          localStorage.setItem(
+          sessionStorage.setItem(
             "inference",
             JSON.stringify({
               uuid: result.data.data,
@@ -368,19 +385,16 @@
   const connectSSE = (uuid: string) => {
     sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
     sseEvents.onopen = () => {
+      emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
       console.log(serviceAPI.connectSSE + `?uuid=${uuid}` + "----connect");
     };
     sseEvents.onmessage = (stream: any) => {
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
-          console.log(data);
-          // 진행
-          if (data.step == "inference") {
-            isActiveProgressModal.value = true; // 프로그레스 돌리기
-            emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
-            progressValue.value = data.progress; // 프로그레스 값 할당
-          }
+          step.value = data.step;
+          progressValue.value = data.progress; // 프로그레스 값 할당
+          isActiveProgressModal.value = true; // 프로그레스 돌리기
           if (data.status == "error") {
             reset();
           }
@@ -392,7 +406,7 @@
           ) {
             sseEvents.close(); // sse 연결 끊기
             isActiveProgressModal.value = false; // 프로그레스 모달 닫기
-            localStorage.removeItem("inference"); // 로컬 삭제
+            sessionStorage.removeItem("inference"); // 로컬 삭제
             emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
             originalVideoSrc.value =
               import.meta.env.VITE_BASE_URL +
@@ -438,11 +452,9 @@
   };
   // 새로고침 물어보기
   const reloadEvent = (event: Event) => {
-    if (isActiveProgressModal.value) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return "";
-    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return "";
   };
   // 추론 중지
   const pauseInference = (obj: { uuid: string; containerId: string }) => {
@@ -463,7 +475,7 @@
           isActive: true,
           message: "추론 정지가 완료되었습니다.",
         });
-        localStorage.removeItem("inference");
+        sessionStorage.removeItem("inference");
       });
   };
   // 새로고침 감지 :: S
@@ -473,8 +485,8 @@
   onMounted(() => {
     window.addEventListener("beforeunload", reloadEvent);
     getVideoList(); // 비디오, ai model 불러오기
-    if (localStorage.getItem("inference") != null) {
-      pauseInference(JSON.parse(localStorage.getItem("inference") as string));
+    if (sessionStorage.getItem("inference") != null) {
+      pauseInference(JSON.parse(sessionStorage.getItem("inference") as string));
     }
   });
   // 새로고침 감지 :: E
@@ -490,6 +502,49 @@
         center right 20px
       );
     }
+    .video-file-select-area {
+      :deep(.select-box) {
+        .optionList {
+          .optionItem {
+            padding: 0;
+            &:hover {
+              background-color: transparent;
+            }
+            .date {
+              padding: 14px 10px;
+              display: block;
+              background-color: #686de0;
+              color: white;
+              margin-bottom: 0;
+            }
+            .file-name-area {
+              display: flex;
+              justify-content: space-between;
+              &:hover {
+                background-color: #ccc;
+              }
+
+              &:not(:first-of-type) {
+                margin-top: 10px;
+              }
+              .file-name {
+                width: calc(100% - 15px);
+                align-self: center;
+                padding: 14px 10px;
+                @include ellipsis(1);
+              }
+              .delete-button {
+                color: red;
+                align-self: center;
+                cursor: pointer;
+                font-size: 20px;
+                padding-right: 10px;
+              }
+            }
+          }
+        }
+      }
+    }
     :deep(.select-box) {
       @include background("arrow_bottom_ico.svg", 10px, 5px, center right 20px);
       .not-selected {
@@ -497,6 +552,9 @@
       }
       .label {
         width: calc(100% - 10px);
+      }
+      .date {
+        margin-bottom: 6px;
       }
     }
     aside {
@@ -560,8 +618,7 @@
           text-align: center;
           background-color: white;
           width: 100px;
-          margin-left: 7px;
-          margin-right: 2px;
+          margin: 0 6px;
           &.inActive {
             color: #ccc;
           }

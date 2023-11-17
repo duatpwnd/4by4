@@ -30,6 +30,34 @@ export default {
         app.component(el.__name, el);
       }
     });
+    const dateFormat = (date: Date) => {
+      let month: string | number = date.getMonth() + 1;
+      let day: string | number = date.getDate();
+      let hour: string | number = date.getHours();
+      let minute: string | number = date.getMinutes();
+      let second: string | number = date.getSeconds();
+
+      month = month >= 10 ? month : "0" + month;
+      day = day >= 10 ? day : "0" + day;
+      hour = hour >= 10 ? hour : "0" + hour;
+      minute = minute >= 10 ? minute : "0" + minute;
+      second = second >= 10 ? second : "0" + second;
+
+      return (
+        date.getFullYear() +
+        "-" +
+        month +
+        "-" +
+        day +
+        "_" +
+        hour +
+        ":" +
+        minute +
+        ":" +
+        second
+      );
+    };
+
     const signOut = () => {
       cookies.remove("token");
       userStore.putUserInfo(null);
@@ -40,6 +68,7 @@ export default {
       });
     };
     app.provide("emitter", emitter);
+    app.provide("dateFormat", dateFormat);
     app.provide("authInstance", authInstance);
     app.provide("defaultInstance", defaultInstance);
     app.provide("signOut", signOut);

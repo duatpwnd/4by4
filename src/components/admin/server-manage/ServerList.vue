@@ -40,13 +40,6 @@
           </div>
         </td>
         <td class="control">
-          <BaseSwitcherButton
-            :fieldId="'kafkaButton' + index"
-            :isChecked="item.status == 'running'"
-            @update:modelValue="(param:boolean)=>{
-              changeKafkaStatus(item.serverId, param);
-            }"
-          />
           <FontAwesomeIcon
             icon="gear"
             class="setting-button"
@@ -87,7 +80,6 @@
   } from "vue";
   import { EventType, Emitter } from "mitt";
   import { useRoute, useRouter } from "vue-router";
-  import BaseSwitcherButton from "@components/common/BaseSwitcherButton.vue";
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { APIResponse } from "@axios/types";
@@ -115,6 +107,7 @@
     data: boolean;
     resultMsg: string;
   }
+  let sseEvents: EventSource;
   const ths = <const>["#", "Name", "IP", "Resources", "Utilization", "Control"];
   const tab = <const>["CONNECTED", "TERMINATED", "ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
@@ -166,6 +159,20 @@
           },
         });
       });
+  };
+  const connectSSE = (uuid: string) => {
+    sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
+    sseEvents.onopen = () => {};
+    sseEvents.onmessage = (stream: any) => {
+      try {
+        if (typeof JSON.parse(stream.data) == "object") {
+          const data = JSON.parse(stream.data);
+        }
+      } catch (error) {}
+    };
+    sseEvents.onerror = (err) => {
+      console.log(err);
+    };
   };
   onActivated(() => {
     // 이전에 active된 탭을 활성화
@@ -259,8 +266,6 @@
         .setting-button {
           vertical-align: middle;
           color: #818080;
-          margin-left: 10px;
-          margin-right: 10px;
         }
       }
     }

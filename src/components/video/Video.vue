@@ -37,7 +37,9 @@
         <!-- v-if='isInferred' -->
         <button class="share-btn" @click="copy" v-if="isInferred">
           <transition name="fade" mode="out-in">
-            <span class="copy-text" v-if="isCopy" @click.stop="">copied.</span>
+            <span class="copy-text" v-if="isCopy" @click.stop=""
+              >download and copy</span
+            >
           </transition>
         </button>
       </div>
@@ -307,8 +309,9 @@
           .copy-text {
             background: white;
             position: absolute;
+            white-space: nowrap;
             top: -50px;
-            left: -14px;
+            right: 0;
             padding: 10px;
             border-radius: 6px;
           }
@@ -334,14 +337,16 @@
       }
       .timeline-area {
         position: absolute;
-        bottom: 0;
+        bottom: 0px;
         text-align: center;
         width: 100%;
         height: 128px;
 
         .swiper-container {
-          margin-bottom: 10px;
-          height: calc(100% - 58px);
+          border: 1px solid white;
+          box-sizing: border-box;
+          margin-bottom: 20px;
+          height: calc(100% - 20px);
         }
         .video-menu-area {
           svg {

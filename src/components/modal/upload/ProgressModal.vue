@@ -2,7 +2,9 @@
   <div class="mask"></div>
   <div class="progress-modal">
     <p>
-      {{ text }}<strong class="progress-value">{{ progressValue }}%</strong>
+      {{ text }}<br /><strong class="progress-value"
+        >{{ progressValue }}%</strong
+      >
     </p>
     <div class="progress-bar-area">
       <span
@@ -47,14 +49,15 @@
     box-sizing: border-box;
     p {
       text-align: center;
+      line-height: 60px;
+      white-space: nowrap;
       font: {
         size: 38px;
         weight: 700;
       }
       .progress-value {
         color: #686de0;
-        width: 100px;
-        display: inline-block;
+        display: block;
       }
     }
     .progress-bar-area {
