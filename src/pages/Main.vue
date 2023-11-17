@@ -31,19 +31,29 @@
                 : selectedVideoFile.fileName
             "
           >
-            <template #list v-for="files in videoFiles">
-              <span class="date">{{ files.date }}</span>
-              <div v-for="video in files.video" class="file-name-area">
-                <span
-                  class="file-name"
-                  @click="
-                    isUploaded = true;
-                    selectedVideoFile = video;
-                  "
-                  >{{ video.fileName }}</span
-                >
-                <FontAwesomeIcon icon="xmark" class="delete-button" />
-              </div>
+            <template #list>
+              <li
+                class="optionItem"
+                v-for="(files, index) in videoFiles"
+                :key="index"
+              >
+                <span class="date">{{ files.date }}</span>
+                <div v-for="video in files.video" class="file-name-area">
+                  <span
+                    class="file-name"
+                    @click="
+                      isUploaded = true;
+                      selectedVideoFile = video;
+                    "
+                    >{{ video.fileName }}</span
+                  >
+                  <FontAwesomeIcon
+                    icon="xmark"
+                    class="delete-button"
+                    @click="deleteVideo(video.videoId)"
+                  />
+                </div>
+              </li>
             </template>
           </BaseSelect>
         </div>
@@ -275,6 +285,23 @@
     videoFiles.value = [];
     aiModelOptions.value = list.inferenceModelList;
     videoFiles.value = list.videoList;
+  };
+  const deleteVideo = (videoId: string) => {
+    emitter.emit("update:alert", {
+      isActive: true,
+      message: "삭제하시겠습니까?",
+      fn: () => {
+        console.log("삭제api");
+        emitter.emit("update:loading", { isLoading: true });
+        defaultInstance
+          .delete(serviceAPI.video + `?videoId=${videoId}`)
+          .then((result) => {
+            console.log(result);
+            emitter.emit("update:loading", { isLoading: false });
+            getVideoList();
+          });
+      },
+    });
   };
   // 비디오 및 ai model 불러오는 함수
   const getVideoList = () => {
@@ -511,7 +538,8 @@
               background-color: transparent;
             }
             .date {
-              padding: 14px 10px;
+              line-height: 23px;
+              padding: 0px 10px;
               display: block;
               background-color: #686de0;
               color: white;

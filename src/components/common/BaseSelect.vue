@@ -2,20 +2,20 @@
   <div class="select-box">
     <button class="label" v-html="text" ref="selectedText"></button>
     <ul class="optionList" v-show="isActive">
-      <li
-        class="optionItem"
-        v-for="(option, index) in options"
-        v-if="options.length > 0"
-        :key="index"
-        @click="select(option)"
-      >
-        <slot name="list">
+      <slot name="list">
+        <li
+          class="optionItem"
+          v-for="(option, index) in options"
+          v-if="options.length > 0"
+          :key="index"
+          @click="select(option)"
+        >
           <span v-if="name.split(',').length == 2">
             {{ option[name.split(",")[0]] }}/{{ option[name.split(",")[1]] }}
           </span>
           <span v-else> {{ option[name] }} </span>
-        </slot>
-      </li>
+        </li>
+      </slot>
     </ul>
   </div>
 </template>
