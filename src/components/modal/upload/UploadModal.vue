@@ -177,6 +177,14 @@
           title: files![i].name,
           file: files![i],
         });
+        const removeDuplicates = thumb.value.filter(
+          (arr, index, callback) =>
+            index ===
+            callback.findIndex((t) => {
+              return t.title === arr.title;
+            })
+        );
+        thumb.value = removeDuplicates;
 
         // video.addEventListener("loadeddata", () => {
         //   const canvas = document.createElement("canvas");
