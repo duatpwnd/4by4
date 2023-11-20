@@ -68,7 +68,11 @@
     if (!validCheck.email) {
       emitter.emit("update:loading", { isLoading: true });
       defaultInstance
-        .get(serviceAPI.sendEmailPassword + `?email=${email.value}`)
+        .get(serviceAPI.sendEmailPassword + `?email=${email.value}`, {
+          transformRequest: (data, headers) => {
+            delete headers["Authorization"];
+          },
+        })
         .then((result) => {
           console.log(result);
           emitter.emit("update:alert", {

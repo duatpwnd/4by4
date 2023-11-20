@@ -126,6 +126,9 @@
             userId: userId.value,
             password: userPw.value,
           },
+          transformRequest: (data, headers) => {
+            delete headers["Authorization"];
+          },
         })
         .then((result) => {
           cookies.set("token", result.headers.authorization);

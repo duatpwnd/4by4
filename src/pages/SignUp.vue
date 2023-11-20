@@ -20,7 +20,7 @@
         />
       </div>
       <div class="row">
-        <span class="or">OR Create Acount via Email</span>
+        <span class="or">OR Create Account via Email</span>
       </div>
       <div class="row name-area">
         <div class="first-name-area">
@@ -186,13 +186,21 @@
     if (Object.values(validCheck).indexOf(true) == -1) {
       emitter.emit("update:loading", { isLoading: true });
       defaultInstance
-        .post(authAPI.join, {
-          firstName: userFirstName.value,
-          lastName: userLastName.value,
-          password: userPassword.value,
-          email: userEmail.value,
-          role: "user",
-        })
+        .post(
+          authAPI.join,
+          {
+            firstName: userFirstName.value,
+            lastName: userLastName.value,
+            password: userPassword.value,
+            email: userEmail.value,
+            role: "user",
+          },
+          {
+            transformRequest: (data, headers) => {
+              delete headers["Authorization"];
+            },
+          }
+        )
         .then((result) => {
           if ("data" in result.data) {
             emit("update:route", "SignIn");

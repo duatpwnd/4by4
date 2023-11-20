@@ -447,27 +447,6 @@
               `?uuid=${uuid}`;
             isInferred.value = true; // 녹색으로 테두리 변경 신호
             emitter.emit("update:loading", { isLoading: false });
-            // Promise.all([
-            //   defaultInstance.get(
-            //     serviceAPI.videoDownload +
-            //       `?videoId=${
-            //         selectedVideoFile.value && selectedVideoFile.value.videoId
-            //       }`
-            //   ),
-            //   defaultInstance.get(serviceAPI.videoDownload + `?uuid=${uuid}`),
-            // ]).then((result) => {
-            //   console.log("video download", result);
-            // });
-
-            // defaultInstance
-            //   .get(serviceAPI.videoDownload + `?uuid=${uuid}`)
-            //   .then((result) => {
-            //     console.log("video download", result);
-            //     originalVideoSrc.value = "";
-            //     inferredVideoSrc.value = "";
-            //     isInferred.value = true; // 녹색으로 테두리 변경 신호
-            //     emitter.emit("update:loading", { isLoading: false });
-            //   });
           }
         }
       } catch (error) {}
