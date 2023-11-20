@@ -175,7 +175,7 @@
             placeholder=""
             type="text"
             :onlyText="true"
-            :modelValue="quality.indexOf('best quality') >= 0 ? 0 : bitrate"
+            :modelValue="quality.indexOf('best quality') >= 0 ? 1000 : bitrate"
             :class="quality.indexOf('best quality') < 0 ? 'active' : 'inActive'"
             :isDisabled="quality.indexOf('best quality') < 0 ? false : true"
           />
@@ -266,7 +266,7 @@
   const vbrOrCbr = ref("VBR");
   const isActiveUploadModal = ref(false);
   const isActiveProgressModal = ref(false);
-  const bitrate = ref("128");
+  const bitrate = ref("1000");
   const progressValue = ref(0);
   const isUploaded = ref(false); // 업로드 여부
   const isInferred = ref(false); // 추론 여부
@@ -360,7 +360,7 @@
               ? 1
               : 0,
           avgBitrate:
-            quality.value.indexOf("best quality") >= 0 ? 0 : bitrate.value,
+            quality.value.indexOf("best quality") >= 0 ? "1000" : bitrate.value,
           vbr:
             quality.value.indexOf("best quality") >= 0
               ? false

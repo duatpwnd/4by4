@@ -90,23 +90,30 @@
   >;
 
   const googleSignIn = () => {
-    googleTokenLogin().then((response) => {
-      console.log(response);
-      defaultInstance
-        .get(authAPI.googleLogin, {
-          headers: {
-            token: response.token_type + " " + response.access_token,
-          },
-        })
-        .then((result) => {
-          console.log(result);
-          cookies.set("token", result.data.data);
-          userStore.putUserInfo({
-            token: result.data.data,
+    googleTokenLogin()
+      .then((response) => {
+        console.log(response);
+        defaultInstance
+          .get(authAPI.googleLogin, {
+            headers: {
+              token: response.token_type + " " + response.access_token,
+            },
+            transformRequest: (data, headers) => {
+              delete headers["Authorization"];
+            },
+          })
+          .then((result) => {
+            console.log(result);
+            cookies.set("token", result.data.data);
+            userStore.putUserInfo({
+              token: result.data.data,
+            });
+            router.push("/main");
           });
-          router.push("/main");
-        });
-    });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   const signIn = () => {
     if (userId.value.trim().length == 0) {
