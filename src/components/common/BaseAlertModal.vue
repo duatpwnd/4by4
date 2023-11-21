@@ -5,7 +5,7 @@
     @click="emitter.emit('update:alert', { isActive: false })"
   ></div>
   <div class="alert-modal-container" v-if="isActiveAlert">
-    <strong class="msg">{{ text }}</strong>
+    <strong class="msg" v-html="text"></strong>
     <div class="close-area">
       <BaseButton
         v-if="fn !== undefined"
@@ -64,6 +64,7 @@
       text-align: center;
       width: 100%;
       display: block;
+      line-height: 24px;
     }
   }
   .close-area {

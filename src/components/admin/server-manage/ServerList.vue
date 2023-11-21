@@ -1,9 +1,4 @@
 <template>
-  <!-- <FontAwesomeIcon
-    icon="plus"
-    class="add-button"
-    @click="router.push(route.fullPath + '&type=register')"
-  /> -->
   <div class="filter-area">
     <button
       v-for="(item, index) in tab"

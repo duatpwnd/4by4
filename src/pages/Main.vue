@@ -23,6 +23,7 @@
         <div class="row video-file-select-area">
           <label class="label">video File</label>
           <BaseSelect
+            @click="isExistVideo"
             name="fileName"
             :options="videoFiles"
             :text="
@@ -275,6 +276,16 @@
   const uuid = ref("");
   const step = ref(""); // 추론 진행상태
   let sseEvents: EventSource;
+  // 비디오 존재 여부에 따른 안내 문구
+  const isExistVideo = (event: Event) => {
+    if (videoFiles.value.length == 0) {
+      emitter.emit("update:alert", {
+        isActive: true,
+        message: "Please upload your video files.",
+      });
+      event.stopPropagation();
+    }
+  };
   // upload 처리 함수
   const upload = (list: {
     videoList: VideoListType[];
