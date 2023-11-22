@@ -74,12 +74,12 @@
         </p>
       </div>
       <div class="row">
-        <label>Password Confirm</label>
+        <label>Confirm Password</label>
         <BaseInput
           type="password"
           @update:modelValue="passwordConfirmValidCheck"
           :modelValue="userPasswordConfirm"
-          placeholder="password confirm"
+          placeholder="Confirm Password"
         />
         <p class="guide-message" v-if="validCheck.pwConfirm">
           Passwords do not match.
@@ -277,7 +277,7 @@
           &:after,
           &:before {
             content: "";
-            width: calc(50% - 112px);
+            width: calc(50% - 116px);
             display: inline-block;
             background: #ababab;
             height: 1px;

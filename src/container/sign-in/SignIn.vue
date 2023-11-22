@@ -45,11 +45,11 @@
           class="find-password-link"
           @click="emit('update:route', 'ChangePassword')"
         >
-          Forget password?
+          Forgot password?
         </button>
       </div>
       <div class="row">
-        <span class="question-txt">Don’t Have a Account?</span>
+        <span class="question-txt">Don’t have an account?</span>
         <button
           type="button"
           class="sign-up-link"

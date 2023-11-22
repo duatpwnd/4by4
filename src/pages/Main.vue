@@ -21,7 +21,7 @@
           <BaseButton @click="isActiveUploadModal = true" text="Upload Video" />
         </div>
         <div class="row video-file-select-area">
-          <label class="label">video File</label>
+          <label class="label">Video File</label>
           <BaseSelect
             @click="isExistVideo"
             name="fileName"
@@ -60,7 +60,7 @@
         </div>
       </section>
       <section class="setting-area">
-        <h2 class="h2-title">Output Setting</h2>
+        <h2 class="h2-title">Output Settings</h2>
         <div class="row">
           <label class="label">AI Model</label>
           <BaseSelect
