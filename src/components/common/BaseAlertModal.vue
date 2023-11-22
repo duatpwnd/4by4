@@ -22,7 +22,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, toRefs, inject } from "vue";
+  import { toRefs, inject } from "vue";
   import { EventType, Emitter } from "mitt";
   interface Props {
     text: string;

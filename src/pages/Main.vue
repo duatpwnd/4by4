@@ -90,7 +90,7 @@
         <div class="row">
           <label class="label">Encoder</label>
           <BaseSelect
-            @update:select-box="(obj:SelectedType) => (selectedEncoder = obj)"
+            @update:select-box="(obj:SelectedEncoderType) => (selectedEncoder = obj)"
             :options="encoderOptions"
             name="name"
             :text="selectedEncoder.name"
@@ -209,7 +209,7 @@
   import UploadModal from "@components/modal/upload/UploadModal.vue";
   import { EventType, Emitter } from "mitt";
   import { AxiosInstance } from "axios";
-  import { ref, inject, onMounted, onBeforeUnmount } from "vue";
+  import { ref, inject, onMounted, onBeforeUnmount, computed } from "vue";
   import serviceAPI from "@api/services";
   interface StreamType {
     data: {
@@ -237,6 +237,11 @@
   interface SelectedType {
     name: string;
   }
+  interface SelectedEncoderType {
+    name: string;
+    value: string;
+    disabled?: boolean;
+  }
 
   const emitter = inject("emitter") as Emitter<
     Record<
@@ -257,12 +262,15 @@
   const selectedAiModel = ref<SelectedAiType | null>(null); // 선택된 aiModel
   const formatOptions = [{ name: "mp4" }, { name: "mov" }, { name: "mkv" }]; // format 리스트
   const selectedFormat = ref<SelectedType>({ name: "mp4" }); // 선택된 format
-  const encoderOptions = [
-    { name: "H.264" },
-    { name: "H.265" },
-    { name: "ProRes" },
-  ]; // encoder 리스트
-  const selectedEncoder = ref<SelectedType>({ name: "H.264" }); // 선택된 encoder
+  // const encoderOptions = [
+  //   { name: "H.264", value: "H.264" },
+  //   { name: "H.265", value: "H.265" },
+  //   { name: "ProRes(Unable to play video)", value: "ProRes" },
+  // ]; // encoder 리스트
+  const selectedEncoder = ref<SelectedEncoderType>({
+    name: "H.264",
+    value: "H.264",
+  }); // 선택된 encoder
   const quality = ref<string[]>([]);
   const vbrOrCbr = ref("VBR");
   const isActiveUploadModal = ref(false);
@@ -273,8 +281,22 @@
   const isInferred = ref(false); // 추론 여부
   const originalVideoSrc = ref(""); // 원본 영상
   const inferredVideoSrc = ref(""); // 추론 영상
-  const uuid = ref("");
+  const uuid = ref(""); // sse uuid
   const step = ref(""); // 추론 진행상태
+  const encoderOptions = computed(() => {
+    const arr: SelectedEncoderType[] = [
+      { name: "H.264", value: "H.264" },
+      { name: "H.265", value: "H.265" },
+      { name: "ProRes(Unable to play video)", value: "ProRes" },
+    ];
+    if (
+      selectedFormat.value.name == "mp4" ||
+      selectedFormat.value.name == "mov"
+    ) {
+      arr[2].disabled = true;
+    }
+    return arr;
+  });
   let sseEvents: EventSource;
   // 비디오 존재 여부에 따른 안내 문구
   const isExistVideo = (event: Event) => {
@@ -362,7 +384,7 @@
           videoId: selectedVideoFile.value && selectedVideoFile.value.videoId,
           containerId: selectedAiModel.value.containerId,
           format: selectedFormat.value.name,
-          encoder: selectedEncoder.value.name,
+          encoder: selectedEncoder.value.value,
           bestQuality: quality.value.indexOf("best quality") >= 0 ? 1 : 0,
           twoPassEncoding:
             quality.value.indexOf("best quality") >= 0
@@ -446,16 +468,8 @@
             isActiveProgressModal.value = false; // 프로그레스 모달 닫기
             sessionStorage.removeItem("inference"); // 로컬 삭제
             emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
-            originalVideoSrc.value =
-              import.meta.env.VITE_BASE_URL +
-              serviceAPI.videoDownload +
-              `?videoId=${
-                selectedVideoFile.value && selectedVideoFile.value.videoId
-              }`;
-            inferredVideoSrc.value =
-              import.meta.env.VITE_BASE_URL +
-              serviceAPI.videoDownload +
-              `?uuid=${uuid}`;
+            originalVideoSrc.value = data.originalVideo;
+            inferredVideoSrc.value = data.inferenceVideo;
             isInferred.value = true; // 녹색으로 테두리 변경 신호
             emitter.emit("update:loading", { isLoading: false });
           }
@@ -469,9 +483,11 @@
   };
   // 새로고침 물어보기
   const reloadEvent = (event: Event) => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    return "";
+    if (isActiveProgressModal.value) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return "";
+    }
   };
   // 추론 중지
   const pauseInference = (obj: { uuid: string; containerId: string }) => {

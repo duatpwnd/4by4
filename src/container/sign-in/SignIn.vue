@@ -68,7 +68,7 @@
   import serviceAPI from "@api/services";
   import authAPI from "@api/auth";
   import { useUserStore } from "@/store/user";
-  import { googleTokenLogin } from "vue3-google-login";
+  import { googleTokenLogin, googleOneTap } from "vue3-google-login";
   import { useCookies } from "vue3-cookies";
   import { EventType, Emitter } from "mitt";
   const emit = defineEmits(["update:route"]);

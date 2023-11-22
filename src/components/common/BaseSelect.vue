@@ -8,7 +8,14 @@
           v-for="(option, index) in options"
           v-if="options.length > 0"
           :key="index"
-          @click="select(option)"
+          @click="
+            (event) => {
+              option.disabled == true
+                ? event.stopPropagation()
+                : select(option);
+            }
+          "
+          :class="option.disabled == true ? 'disabled' : ''"
         >
           <span v-if="name.split(',').length == 2">
             {{ option[name.split(",")[0]] }}/{{ option[name.split(",")[1]] }}
@@ -89,6 +96,9 @@
         padding: 20px;
         &:hover {
           background-color: #ccc;
+        }
+        &.disabled {
+          background-color: rgb(255 139 139 / 50%);
         }
       }
     }
