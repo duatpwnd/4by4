@@ -262,11 +262,6 @@
   const selectedAiModel = ref<SelectedAiType | null>(null); // 선택된 aiModel
   const formatOptions = [{ name: "mp4" }, { name: "mov" }, { name: "mkv" }]; // format 리스트
   const selectedFormat = ref<SelectedType>({ name: "mp4" }); // 선택된 format
-  // const encoderOptions = [
-  //   { name: "H.264", value: "H.264" },
-  //   { name: "H.265", value: "H.265" },
-  //   { name: "ProRes(Unable to play video)", value: "ProRes" },
-  // ]; // encoder 리스트
   const selectedEncoder = ref<SelectedEncoderType>({
     name: "H.264",
     value: "H.264",

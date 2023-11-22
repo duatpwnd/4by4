@@ -8,13 +8,7 @@
           v-for="(option, index) in options"
           v-if="options.length > 0"
           :key="index"
-          @click="
-            (event) => {
-              option.disabled == true
-                ? event.stopPropagation()
-                : select(option);
-            }
-          "
+          @click="select(option)"
           :class="option.disabled == true ? 'disabled' : ''"
         >
           <span v-if="name.split(',').length == 2">
