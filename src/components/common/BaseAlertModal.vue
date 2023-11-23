@@ -16,7 +16,7 @@
       <BaseButton
         text="Close"
         class="close-button"
-        @click="emitter.emit('update:alert', { isActive: false })"
+        @click.stop="emitter.emit('update:alert', { isActive: false })"
       />
     </div>
   </div>

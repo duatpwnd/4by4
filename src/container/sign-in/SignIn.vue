@@ -92,7 +92,6 @@
   const googleSignIn = () => {
     googleTokenLogin()
       .then((response) => {
-        console.log(response);
         defaultInstance
           .get(authAPI.googleLogin, {
             headers: {
@@ -103,7 +102,6 @@
             },
           })
           .then((result) => {
-            console.log(result);
             cookies.set("token", result.data.data);
             userStore.putUserInfo({
               token: result.data.data,
@@ -142,7 +140,6 @@
           userStore.putUserInfo({
             token: result.headers.authorization,
           });
-          console.log(`output->referrer`, referrer);
           if (referrer == undefined) {
             router.push("/main");
           } else {
@@ -162,7 +159,6 @@
     defaultInstance
       .patch(serviceAPI.userJoin + `?mailConfirmCode=${code}`)
       .then((result) => {
-        console.log(result);
         emitter.emit("update:alert", {
           isActive: true,
           message: "Sign up is complete.",

@@ -39,20 +39,43 @@
                 :key="index"
               >
                 <span class="date">{{ files.date }}</span>
-                <div v-for="video in files.video" class="file-name-area">
+                <div
+                  v-for="(video, index) in files.video"
+                  class="file-name-area"
+                  @click="
+                    isUploaded = true;
+                    selectedVideoFile = video;
+                  "
+                  @mouseenter="
+                    () => {
+                      if (
+                        fileName &&
+                        fileName[index].offsetWidth <
+                          fileName[index].scrollWidth
+                      ) {
+                        isOverflowText = index;
+                      }
+                    }
+                  "
+                >
                   <span
                     class="file-name"
-                    @click="
-                      isUploaded = true;
-                      selectedVideoFile = video;
-                    "
+                    ref="fileName"
+                    v-tooltip="{
+                      content: isOverflowText == index ? video.fileName : '',
+                      placement: 'bottom',
+                      delay: 0,
+                    }"
                     >{{ video.fileName }}</span
                   >
-                  <FontAwesomeIcon
-                    icon="xmark"
-                    class="delete-button"
-                    @click="deleteVideo(video.videoId)"
-                  />
+                  <span>
+                    <span class="file-size">{{ video.fileSize }}</span>
+                    <FontAwesomeIcon
+                      icon="xmark"
+                      class="delete-button"
+                      @click.stop="deleteVideo(video.videoId)"
+                    />
+                  </span>
                 </div>
               </li>
             </template>
@@ -223,11 +246,12 @@
   }
   interface VideoListType {
     date: string;
-    video: { videoId: string; fileName: string }[];
+    video: { videoId: string; fileName: string; fileSize: string }[];
   }
   interface SelectedVideo {
     videoId: string;
     fileName: string;
+    fileSize: string;
   }
   interface SelectedAiType {
     projectName: string;
@@ -237,8 +261,7 @@
   interface SelectedType {
     name: string;
   }
-  interface SelectedEncoderType {
-    name: string;
+  interface SelectedEncoderType extends SelectedType {
     value: string;
     disabled?: boolean;
   }
@@ -278,7 +301,7 @@
   const inferredVideoSrc = ref(""); // 추론 영상
   const uuid = ref(""); // sse uuid
   const step = ref(""); // 추론 진행상태
-  const encoderOptions = computed(() => {
+  const encoderOptions = computed<SelectedEncoderType[]>(() => {
     const arr: SelectedEncoderType[] = [
       { name: "H.264", value: "H.264" },
       { name: "H.265", value: "H.265" },
@@ -292,6 +315,8 @@
     }
     return arr;
   });
+  const isOverflowText = ref(-1);
+  const fileName = ref<HTMLSpanElement[] | null>(null);
   let sseEvents: EventSource;
   // 비디오 존재 여부에 따른 안내 문구
   const isExistVideo = (event: Event) => {
@@ -319,12 +344,10 @@
       isActive: true,
       message: "삭제하시겠습니까?",
       fn: () => {
-        console.log("삭제api");
         emitter.emit("update:loading", { isLoading: true });
         defaultInstance
           .delete(serviceAPI.video + `?videoId=${videoId}`)
           .then((result) => {
-            console.log(result);
             emitter.emit("update:loading", { isLoading: false });
             getVideoList();
           });
@@ -403,7 +426,6 @@
               : false,
         })
         .then((result) => {
-          console.log(result);
           sessionStorage.setItem(
             "inference",
             JSON.stringify({
@@ -441,7 +463,6 @@
     sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
     sseEvents.onopen = () => {
       emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
-      console.log(serviceAPI.connectSSE + `?uuid=${uuid}` + "----connect");
     };
     sseEvents.onmessage = (stream: any) => {
       try {
@@ -496,7 +517,6 @@
           `?containerId=${obj.containerId}&uuid=${obj.uuid}`
       )
       .then((result) => {
-        console.log("삭제", result);
         getVideoList();
         emitter.emit("update:loading", { isLoading: false });
         emitter.emit("update:alert", {
@@ -547,27 +567,29 @@
               margin-bottom: 0;
             }
             .file-name-area {
+              padding: 14px 10px;
               display: flex;
               justify-content: space-between;
               &:hover {
                 background-color: #ccc;
               }
 
-              &:not(:first-of-type) {
-                margin-top: 10px;
-              }
               .file-name {
-                width: calc(100% - 15px);
+                width: calc(100% - 80px);
                 align-self: center;
-                padding: 14px 10px;
+                line-height: 23px;
                 @include ellipsis(1);
               }
+              .file-size {
+                height: 12px;
+                margin-right: 6px;
+                vertical-align: middle;
+              }
               .delete-button {
+                vertical-align: middle;
                 color: red;
-                align-self: center;
                 cursor: pointer;
                 font-size: 20px;
-                padding-right: 10px;
               }
             }
           }
@@ -578,9 +600,6 @@
       @include background("arrow_bottom_ico.svg", 10px, 5px, center right 20px);
       .not-selected {
         color: #b3b3b3;
-      }
-      .label {
-        width: calc(100% - 10px);
       }
       .date {
         margin-bottom: 6px;

@@ -12,7 +12,6 @@ const services = {
   upload: "/api/file/upload", // 모델 업로드
   video: "/api/video",
   videoInference: "/api/video/inference", // 비디오 추론
-  videoDownload: "/video/download", // 비디오 다운로드
   videoFileUpload: "/api/video/file/upload", // 비디오 업로드
   inferenceModelList: "/api/model/inference/list", // 추론 모델리스트
   videoList: "/api/video/list", // 비디오 리스트

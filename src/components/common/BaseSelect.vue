@@ -62,7 +62,7 @@
       text-align: left;
       padding: 20px;
       align-items: center;
-      width: inherit;
+      width: calc(100% - 12px);
       height: inherit;
       border: 0 none;
       outline: 0 none;
