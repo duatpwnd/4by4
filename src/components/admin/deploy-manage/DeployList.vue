@@ -38,6 +38,9 @@
         >
           {{ item.gpu }}
         </td>
+        <td>
+          {{ item.npu }}
+        </td>
         <td>{{ item.image }}</td>
         <td
           class="container-id"
@@ -85,14 +88,7 @@
   />
 </template>
 <script setup lang="ts">
-  import {
-    inject,
-    ref,
-    onMounted,
-    computed,
-    onActivated,
-    onDeactivated,
-  } from "vue";
+  import { inject, ref, computed, onActivated, onDeactivated } from "vue";
   import { useRoute, useRouter } from "vue-router";
   import { EventType, Emitter } from "mitt";
   import serviceAPI from "@api/services";
@@ -112,7 +108,15 @@
       }
     >
   >;
-  const ths = <const>["#", "Host", "GPU", "Image", "ContainerID", "Control"];
+  const ths = <const>[
+    "#",
+    "Host",
+    "Device",
+    "NPU",
+    "Image",
+    "ContainerID",
+    "Control",
+  ];
   const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const routeCurrentPage = computed<number>(() => {

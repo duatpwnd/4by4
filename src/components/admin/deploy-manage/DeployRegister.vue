@@ -1,5 +1,11 @@
 <template>
-  <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+  <FontAwesomeIcon
+    icon="xmark"
+    class="close-button"
+    @click="
+      router.push('/admin?mainCategory=deployManage&subCategory=deployStatus')
+    "
+  />
   <div class="register-container">
     <div class="select-box-area">
       <div>
@@ -18,7 +24,7 @@
         </p>
       </div>
       <div>
-        <label class="title">GPU</label>
+        <label class="title">Device</label>
         <div class="gpu-area">
           <BaseSelectCheckBox
             @update:select-box="
@@ -28,11 +34,11 @@
             "
             :options="gpuList"
             name="gpuName"
-            :text="selectedGpu.length == 0 ? 'Select GPU ID' : selectedGpu"
+            :text="selectedGpu.length == 0 ? 'Select Device' : selectedGpu"
           />
         </div>
         <p class="notice-message" v-if="validationCheck.selectedGpu">
-          Please select the GPU ID.
+          Please select the Device.
         </p>
 
         <!-- <BaseSelect

@@ -5,7 +5,13 @@
     :progressValue="progressValue"
     @update:close-progress-modal="close"
   />
-  <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+  <FontAwesomeIcon
+    icon="xmark"
+    class="close-button"
+    @click="
+      router.push('/admin?mainCategory=modelManage&subCategory=modelStatus')
+    "
+  />
   <div class="register-container">
     <div class="file-upload-wrapper">
       <div

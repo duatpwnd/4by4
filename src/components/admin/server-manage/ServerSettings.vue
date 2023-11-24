@@ -1,6 +1,12 @@
 <template>
   <div class="settings-container" v-if="'hostName' in serverInfo">
-    <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+    <FontAwesomeIcon
+      icon="xmark"
+      class="close-button"
+      @click="
+        router.push('/admin?mainCategory=serverManage&subCategory=serverStatus')
+      "
+    />
     <div>
       <dl class="host-info">
         <div>
@@ -24,7 +30,7 @@
           <strong>{{ Number(serverInfo.memory).toFixed(0) }}GB</strong>
         </div>
         <div class="row">
-          <strong class="title">GPU : </strong>
+          <strong class="title">Device : </strong>
           <div class="gpu-wrapper">
             <div
               class="gpu-area"
@@ -59,6 +65,7 @@
       gpuName: string;
       gpuMemory: string;
     }[];
+    npu: any[];
   }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>

@@ -1,6 +1,12 @@
 <template>
   <div class="model-settings-container">
-    <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+    <FontAwesomeIcon
+      icon="xmark"
+      class="close-button"
+      @click="
+        router.push('/admin?mainCategory=modelManage&subCategory=modelStatus')
+      "
+    />
     <dl v-if="'imageName' in modelInfo">
       <div>
         <dt>Model Name</dt>

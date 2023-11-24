@@ -26,12 +26,12 @@
         <td>{{ item.publicIp }}</td>
         <td class="resources">
           <div v-for="(list, index) in item.gpuList" :key="index">
-            {{ list.gpuName }}
+            {{ list.deviceName }}
           </div>
         </td>
         <td class="utilization">
           <div v-for="(list, index) in item.gpuList" :key="index">
-            <BaseProgress :value="Number(list.gpuUsageRate).toFixed(2)" />
+            <BaseProgress :value="Number(list.usage).toFixed(2)" />
           </div>
         </td>
         <td class="control">
@@ -84,8 +84,8 @@
     publicIp: string;
     serverId: number;
     gpuList: {
-      gpuName: string;
-      gpuUsageRate: number;
+      deviceName: string;
+      usage: number;
     }[];
     cpuCoreCnt: number;
     cpuUsage: number;

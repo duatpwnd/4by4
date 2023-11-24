@@ -7,6 +7,7 @@ interface DeployListType {
   host: string;
   image: string;
   gpu: string;
+  npu: string;
   containerId: string;
   status: string;
 }

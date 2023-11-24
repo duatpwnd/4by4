@@ -1,6 +1,12 @@
 <template>
   <div class="deploy-settings-container">
-    <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+    <FontAwesomeIcon
+      icon="xmark"
+      class="close-button"
+      @click="
+        router.push('/admin?mainCategory=deployManage&subCategory=deployStatus')
+      "
+    />
     <div class="dl-wrapper">
       <dl v-if="'host' in containerInfo">
         <div>
@@ -8,7 +14,7 @@
           <dd>{{ containerInfo.host }}:{{ containerInfo.port }}</dd>
         </div>
         <div>
-          <dt>GPU</dt>
+          <dt>Device</dt>
           <dd
             v-tooltip="{
               content: containerInfo.gpu ?? 'null',
@@ -48,6 +54,10 @@
         <div>
           <dt>Model Image</dt>
           <dd>{{ containerInfo.imageName }}</dd>
+        </div>
+        <div>
+          <dt>NPU</dt>
+          <dd>{{ containerInfo.npu ?? "null" }}</dd>
         </div>
       </dl>
     </div>
@@ -164,7 +174,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { onMounted, ref, inject, reactive } from "vue";
+  import { onMounted, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";
   import { useRoute, useRouter } from "vue-router";
   import BaseButton from "@components/common/BaseButton.vue";
@@ -179,6 +189,7 @@
     containerId: string;
     status: string;
     deployStatus: string;
+    npu: string;
   }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isLoading: boolean }>
