@@ -1,9 +1,4 @@
 <template>
-  <FontAwesomeIcon
-    icon="right-from-bracket"
-    class="sign-out-button"
-    @click="signOut"
-  />
   <div class="video-container" ref="videoContainerRef">
     <div id="teleport-upload-modal" class="contents">
       <!-- 헤더 :: S -->
@@ -88,7 +83,6 @@
   const draggableButton = ref<HTMLButtonElement | null>(null);
   const isVideoPlay = ref(false);
   const isMouseDownBtn = ref(false);
-  const signOut = inject("signOut");
   const isCopy = ref(false);
   const isDownload = ref(false);
   const setIntervalId = ref<ReturnType<typeof setTimeout> | null>(null);
@@ -249,15 +243,6 @@
   });
 </script>
 <style scoped lang="scss">
-  .sign-out-button {
-    position: fixed;
-    top: 22px;
-    right: 22px;
-    color: #ff4343;
-    z-index: 1;
-    height: 50px;
-    cursor: pointer;
-  }
   .video-container {
     display: inline-block;
     width: calc(100% - 320px);

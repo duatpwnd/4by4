@@ -17,6 +17,12 @@
     <aside>
       <section class="upload-area">
         <h2 class="h2-title">PIXELL AI</h2>
+        <FontAwesomeIcon
+          icon="right-from-bracket"
+          class="sign-out-button"
+          @click="signOut"
+        />
+
         <div class="row">
           <BaseButton @click="isActiveUploadModal = true" text="Upload Video" />
         </div>
@@ -287,6 +293,7 @@
       }
     >
   >;
+  const signOut = inject("signOut");
   const userStore = useUserStore();
   const updateKey = ref(0); // 업로드 중 취소할때 갱신을 위한 키값
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
@@ -635,6 +642,17 @@
       width: 320px;
       height: 100%;
       overflow: auto;
+      .h2-title {
+        display: inline-block;
+      }
+      .sign-out-button {
+        color: #ff4343;
+        z-index: 1;
+        height: 24px;
+        cursor: pointer;
+        float: right;
+      }
+
       .row {
         margin-top: 20px;
         &.check-area {
