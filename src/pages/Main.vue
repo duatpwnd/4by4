@@ -234,6 +234,8 @@
   import { AxiosInstance } from "axios";
   import { ref, inject, onMounted, onBeforeUnmount, computed } from "vue";
   import serviceAPI from "@api/services";
+  import { useUserStore } from "@/store/user";
+  import { EventSourcePolyfill } from "event-source-polyfill";
   interface StreamType {
     data: {
       progress: number;
@@ -277,6 +279,7 @@
       }
     >
   >;
+  const userStore = useUserStore();
   const updateKey = ref(0); // 업로드 중 취소할때 갱신을 위한 키값
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const videoFiles = ref<VideoListType[]>([]); // 비디오 파일 리스트
@@ -460,7 +463,14 @@
   };
   // sse 연결
   const connectSSE = (uuid: string) => {
-    sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
+    const sseEvents = new EventSourcePolyfill(
+      import.meta.env.VITE_BASE_URL + serviceAPI.connectSSE + `?uuid=${uuid}`,
+      {
+        headers: {
+          Authorization: userStore.user!.token,
+        },
+      }
+    );
     sseEvents.onopen = () => {
       emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
     };
@@ -484,17 +494,13 @@
             isActiveProgressModal.value = false; // 프로그레스 모달 닫기
             sessionStorage.removeItem("inference"); // 로컬 삭제
             emitter.emit("update:loading", { isLoading: true }); // 비디오 다운로드 하기전까지 로딩바 돌리기
-            originalVideoSrc.value = data.originalVideo;
-            inferredVideoSrc.value = data.inferenceVideo;
+            originalVideoSrc.value = data.originalVideo; // 원본 src
+            inferredVideoSrc.value = data.inferenceVideo; // 추론 src
             isInferred.value = true; // 녹색으로 테두리 변경 신호
             emitter.emit("update:loading", { isLoading: false });
           }
         }
       } catch (error) {}
-    };
-    sseEvents.onerror = (err) => {
-      console.log(err);
-      reset();
     };
   };
   // 새로고침 물어보기

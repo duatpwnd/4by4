@@ -8,17 +8,17 @@ export default ({ mode }) => {
     plugins: [vue(), tsconfigPaths()], // https설정시에 넣기 mkcert()
     base: process.env.VITE_BASE_URL,
     assetsInclude: ["**/*.mov"],
-    server: {
-      port: 5173,
-      proxy: {
-        "/api": {
-          target: process.env.VITE_BASE_URL,
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, ``),
-        },
-      },
-    },
+    // server: {
+    //   port: 5173,
+    //   proxy: {
+    //     "/api": {
+    //       target: process.env.VITE_BASE_URL,
+    //       changeOrigin: true,
+    //       secure: false,
+    //       rewrite: (path) => path.replace(/^\/api/, ``),
+    //     },
+    //   },
+    // },
     css: {
       preprocessorOptions: {
         scss: {

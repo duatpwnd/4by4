@@ -9,3 +9,4 @@ declare module "swiper/modules";
 declare module "@uppy/*";
 declare module "vue-follow-tooltip";
 declare module "vue-uuid";
+declare module "event-source-polyfill";

@@ -6,7 +6,7 @@ import router from "@/router/index";
 const emitter = mitt();
 const { cookies } = useCookies();
 export const defaultInstance: AxiosInstance = axios.create({
-  // baseURL: import.meta.env.VITE_BASE_URL,
+  baseURL: import.meta.env.VITE_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Authorization: cookies.get("token"),

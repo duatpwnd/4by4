@@ -3,7 +3,7 @@ import { useCookies } from "vue3-cookies";
 const { cookies } = useCookies();
 import { inject } from "vue";
 import { EventType, Emitter } from "mitt";
-
+import { useUserStore } from "@/store/user";
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
@@ -64,6 +64,11 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else if (token) {
+    const userStore = useUserStore();
+    userStore.putUserInfo({
+      token: token,
+    });
+
     if (to.path === "/") {
       return next({ path: "/" });
     } else {

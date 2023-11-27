@@ -26,7 +26,7 @@
         <td>{{ item.publicIp }}</td>
         <td class="resources">
           <div v-for="(list, index) in item.gpuList" :key="index">
-            {{ list.deviceName }}
+            {{ list.deviceName }}({{ list.type }})
           </div>
         </td>
         <td class="utilization">
@@ -78,6 +78,8 @@
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { APIResponse } from "@axios/types";
+  import { EventSourcePolyfill } from "event-source-polyfill";
+  import { useUserStore } from "@/store/user";
   interface ServerListType {
     status: string;
     hostName: string;
@@ -86,6 +88,8 @@
     gpuList: {
       deviceName: string;
       usage: number;
+      id: string;
+      type: string;
     }[];
     cpuCoreCnt: number;
     cpuUsage: number;
@@ -105,6 +109,7 @@
   let sseEvents: EventSource;
   const ths = <const>["#", "Name", "IP", "Resources", "Utilization", "Control"];
   const tab = <const>["CONNECTED", "TERMINATED", "ALL"];
+  const userStore = useUserStore();
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const router = useRouter();
   const route = useRoute();
@@ -155,13 +160,27 @@
         });
       });
   };
-  const connectSSE = (uuid: string) => {
-    sseEvents = new EventSource(serviceAPI.connectSSE + `?uuid=${uuid}`);
-    sseEvents.onopen = () => {};
+  const connectSSE = () => {
+    sseEvents = new EventSourcePolyfill(
+      import.meta.env.VITE_BASE_URL + serviceAPI.connectServerSSE,
+      {
+        headers: {
+          Authorization: userStore.user!.token,
+        },
+      }
+    );
+    sseEvents.onopen = () => {
+      console.log("connect server sse");
+    };
     sseEvents.onmessage = (stream: any) => {
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
+          const findIndex = serverList.value.findIndex((el) => {
+            return data.serverId == el.serverId;
+          });
+          console.log(data.resource);
+          serverList.value[findIndex].gpuList = data.resource;
         }
       } catch (error) {}
     };
@@ -189,6 +208,7 @@
   onMounted(() => {
     // 최초 한번 실행
     getServerList(currentPage, currentStatus.value);
+    connectSSE();
   });
 </script>
 <style scoped lang="scss">

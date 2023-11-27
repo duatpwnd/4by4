@@ -42,6 +42,19 @@
             </div>
           </div>
         </div>
+        <div class="row">
+          <strong class="title">NPU : </strong>
+          <div class="gpu-wrapper">
+            <div
+              class="gpu-area"
+              v-for="(list, index) in serverInfo.npu"
+              :key="index"
+            >
+              <strong>{{ list.npuName }}</strong>
+              <strong class="gpu-memory">{{ list.npuUsage }}GB</strong>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- <div class="server-change">
         <BaseButton text="설정 변경" @click="change" />
@@ -65,7 +78,7 @@
       gpuName: string;
       gpuMemory: string;
     }[];
-    npu: any[];
+    npu: { npuName: string; npuUsage: string }[];
   }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>

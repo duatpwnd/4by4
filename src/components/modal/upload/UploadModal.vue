@@ -23,7 +23,7 @@
             :key="updateKey"
             type="file"
             id="file-upload"
-            accept=".mp4, .mov, .mkv"
+            accept=".mp4"
             @change="fileUpload"
             @click="updateKey += 1"
             multiple
@@ -136,20 +136,21 @@
       });
     } else {
       event.preventDefault();
-      const allowedExtensions = /(\.mov|\.mp4|\.mkv)$/i;
+      const allowedExtensions = /\.mp4$/i;
       isDragged.value = false;
       const target = event.dataTransfer;
       if (target && target.files) {
         for (const file of target.files) {
-          if (!allowedExtensions.exec(file.name)) {
+          if (!allowedExtensions.test(file.name)) {
             emitter.emit("update:alert", {
               isActive: true,
-              message: "mp4,mov,mkv 확장자만 지원합니다.",
+              message: "mp4 확장자만 지원합니다.",
             });
             break;
+          } else {
+            createThumbNail(target.files, "drop");
           }
         }
-        createThumbNail(target.files, "drop");
       }
     }
   };
@@ -173,10 +174,13 @@
         // source.src = createBlobURL;
         // video.append(source);
         // document.body.append(video);
-        thumb.value.push({
-          title: files![i].name,
-          file: files![i],
-        });
+        const allowedExtensions = /\.mp4$/i;
+        if (allowedExtensions.test(files[i].name)) {
+          thumb.value.push({
+            title: files![i].name,
+            file: files![i],
+          });
+        }
         const removeDuplicates = thumb.value.filter(
           (arr, index, callback) =>
             index ===
