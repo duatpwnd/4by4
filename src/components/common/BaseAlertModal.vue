@@ -35,8 +35,8 @@
   const props = defineProps<Props>();
   const { text, isActiveAlert, fn } = toRefs(props);
   const ok = () => {
-    fn && fn.value && fn.value();
     emitter.emit("update:alert", { isActive: false });
+    fn && fn.value && fn.value();
   };
 </script>
 <style scoped lang="scss">
@@ -65,6 +65,7 @@
       width: 100%;
       display: block;
       line-height: 24px;
+      position: relative;
     }
   }
   .close-area {

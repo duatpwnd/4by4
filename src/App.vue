@@ -24,6 +24,7 @@
     console.log(curr, prev);
   });
   emitter.on("update:alert", (obj) => {
+    console.log(obj);
     isActiveAlert.value = obj.isActive;
     fn.value = obj.fn;
     if (obj.message !== undefined) {
@@ -47,6 +48,38 @@
 </template>
 
 <style>
+  .loader {
+    display: inline-block;
+    box-sizing: border-box;
+    vertical-align: middle;
+    border: 2px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 2px solid #686de0;
+    width: 19px;
+    height: 19px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+  }
+
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% {
+      -webkit-transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
   .v-spinner {
     background-color: rgba(0, 0, 0, 0.3);
     position: fixed;

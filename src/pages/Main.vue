@@ -371,7 +371,6 @@
       defaultInstance.get(serviceAPI.videoList),
       defaultInstance.get(serviceAPI.inferenceModelList),
     ]).then((result) => {
-      console.log(result);
       videoFiles.value = result[0].data;
       aiModelOptions.value = result[1].data.data.filter(
         (el: string | null) => el !== null
@@ -466,7 +465,6 @@
       isActive: true,
       message: "취소하시겠습니까?",
       fn: () => {
-        emitter.emit("update:loading", { isLoading: true });
         reset();
       },
     });
@@ -481,7 +479,6 @@
         },
       }
     );
-    console.log(sseEvents);
     sseEvents.onopen = () => {
       emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
     };
@@ -526,7 +523,8 @@
   const pauseInference = (obj: { uuid: string; containerId: string }) => {
     emitter.emit("update:alert", {
       isActive: true,
-      message: "추론 정지중입니다. 잠시만 기다려주세요.",
+      message:
+        "추론 정지중입니다. 잠시만 기다려주세요.&nbsp;&nbsp;<div class='loader'></div>",
     });
     defaultInstance
       .delete(
