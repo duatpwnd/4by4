@@ -32,13 +32,13 @@
       <div class="row">
         <span class="or">OR</span>
       </div>
-      <div class="row">
+      <!-- <div class="row">
         <div class="google-sign-in-area">
           <button type="button" class="google-sign-in" @click="googleSignIn">
             Continue with Google
           </button>
         </div>
-      </div>
+      </div> -->
       <div class="row">
         <button
           type="button"

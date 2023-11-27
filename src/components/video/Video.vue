@@ -37,8 +37,13 @@
         <!-- v-if='isInferred' -->
         <button class="share-btn" @click="copy" v-if="isInferred">
           <transition name="fade" mode="out-in">
-            <span class="copy-text" v-if="isCopy" @click.stop=""
-              >download and copy</span
+            <span class="copy-text" v-if="isCopy" @click.stop="">copy</span>
+          </transition>
+        </button>
+        <button class="download-btn" @click="download" v-if="isInferred">
+          <transition name="fade" mode="out-in">
+            <span class="download-text" v-if="isDownload" @click.stop=""
+              >download</span
             >
           </transition>
         </button>
@@ -85,7 +90,9 @@
   const isMouseDownBtn = ref(false);
   const signOut = inject("signOut");
   const isCopy = ref(false);
+  const isDownload = ref(false);
   const setIntervalId = ref<ReturnType<typeof setTimeout> | null>(null);
+  const downloadSetIntervalId = ref<ReturnType<typeof setTimeout> | null>(null);
   interface Props {
     isUploaded: boolean;
     isInferred: boolean;
@@ -97,22 +104,29 @@
     toRefs(props);
   // 다운로드 및 공유
   const copy = () => {
-    const getExtension = inferredVideoSrc.value.split(".").pop();
     if (setIntervalId.value !== null) {
       clearTimeout(setIntervalId.value);
     }
-    console.log(inferredVideoSrc.value);
     window.navigator.clipboard.writeText(inferredVideoSrc.value).then(() => {
       // 복사가 완료되면 호출된다.
-      const link = document.createElement("a");
-      link.href = inferredVideoSrc.value;
-      link.download = inferredVideoSrc.value;
-      link.click();
       isCopy.value = true;
       setIntervalId.value = setTimeout(() => {
         isCopy.value = false;
       }, 2000);
     });
+  };
+  const download = () => {
+    if (downloadSetIntervalId.value !== null) {
+      clearTimeout(downloadSetIntervalId.value);
+    }
+    const link = document.createElement("a");
+    link.href = inferredVideoSrc.value;
+    link.download = inferredVideoSrc.value;
+    link.click();
+    isDownload.value = true;
+    downloadSetIntervalId.value = setTimeout(() => {
+      isDownload.value = false;
+    }, 2000);
   };
   const draggable = ($target: HTMLButtonElement) => {
     const videoContainer = videoContainerRef.value;
@@ -298,7 +312,8 @@
           cursor: grab;
         }
 
-        .share-btn {
+        .share-btn,
+        .download-btn {
           @include background("share_ico.svg", 40px, 45px, center);
           width: 40px;
           height: 45px;
@@ -306,7 +321,8 @@
           bottom: -80px;
           right: 40px;
           z-index: 3;
-          .copy-text {
+          .copy-text,
+          .download-text {
             background: white;
             position: absolute;
             white-space: nowrap;
@@ -316,7 +332,10 @@
             border-radius: 6px;
           }
         }
-
+        .download-btn {
+          @include background("download_ico.png", 40px, 45px, center);
+          right: 100px;
+        }
         > video {
           width: 100%;
           position: absolute;

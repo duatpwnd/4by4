@@ -11,14 +11,14 @@
   >
     <fieldset>
       <legend class="legend">Create an Account</legend>
-      <div class="row">
+      <!-- <div class="row">
         <button class="google-sign-up"></button>
         <FontAwesomeIcon
           icon="xmark"
           class="close-button"
           @click="emit('update:route', 'SignIn')"
         />
-      </div>
+      </div> -->
       <div class="row">
         <span class="or">OR Create Account via Email</span>
       </div>

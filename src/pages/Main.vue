@@ -113,7 +113,15 @@
         <div class="row">
           <label class="label">Encoder</label>
           <BaseSelect
-            @update:select-box="(obj:SelectedEncoderType) => (selectedEncoder = obj)"
+            @update:select-box="(obj:SelectedEncoderType) => {
+              if(obj.disabled){
+                emitter.emit('update:alert', {
+                  isActive: true,
+                  message: 'Unable to play video',
+                });          
+              }
+              (selectedEncoder = obj)
+            }"
             :options="encoderOptions"
             name="name"
             :text="selectedEncoder.name"
@@ -363,6 +371,7 @@
       defaultInstance.get(serviceAPI.videoList),
       defaultInstance.get(serviceAPI.inferenceModelList),
     ]).then((result) => {
+      console.log(result);
       videoFiles.value = result[0].data;
       aiModelOptions.value = result[1].data.data.filter(
         (el: string | null) => el !== null
@@ -464,7 +473,7 @@
   };
   // sse 연결
   const connectSSE = (uuid: string) => {
-    const sseEvents = new EventSourcePolyfill(
+    sseEvents = new EventSourcePolyfill(
       import.meta.env.VITE_BASE_URL + serviceAPI.connectSSE + `?uuid=${uuid}`,
       {
         headers: {
@@ -472,6 +481,7 @@
         },
       }
     );
+    console.log(sseEvents);
     sseEvents.onopen = () => {
       emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
     };
@@ -530,6 +540,11 @@
           isActive: true,
           message: "추론 정지가 완료되었습니다.",
         });
+        setTimeout(() => {
+          emitter.emit("update:alert", {
+            isActive: false,
+          });
+        }, 2000);
         sessionStorage.removeItem("inference");
       });
   };
