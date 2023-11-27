@@ -12,7 +12,8 @@
         <label class="title">Host</label>
         <BaseSelect
           @update:select-box="(obj:HostListType) => {
-            hostChange(obj)}"
+            updatedKey += 1;
+            hostChange(obj);}"
           :options="hostList"
           name="serverName"
           :text="
@@ -32,8 +33,9 @@
                 gpuChange(obj);
               }
             "
+            :key="updatedKey"
             :options="gpuList"
-            name="gpuName"
+            name="type,deviceId,deviceName"
             :text="selectedGpu.length == 0 ? 'Select Device' : selectedGpu"
           />
         </div>
@@ -116,8 +118,10 @@
   }
   interface GpuListType {
     id: number;
-    gpuName: string;
+    deviceId: string;
+    deviceName: string;
     size: number;
+    type: string;
   }
   interface ModelListType {
     modelId: string;
@@ -143,6 +147,7 @@
   const modelList = ref<ModelListType[]>([]); // model 리스트
   const tagList = ref<TagListType[]>([]); // tag 리스트
   const gpuList = ref<GpuListType[]>([]); // gpu 리스트
+  const updatedKey = ref(0);
   const validationCheck = reactive({
     selectedHost: false,
     selectedGpu: false,
@@ -159,10 +164,13 @@
     }
   };
   const gpuChange = (gpu: string) => {
+    console.log(gpu);
     selectedGpu.value = JSON.parse(gpu);
     validationCheck.selectedGpu = false;
   };
   const hostChange = (host: HostListType) => {
+    selectedGpu.value = [];
+    gpuList.value = [];
     selectedHost.value = host;
     validationCheck.selectedHost = false;
     defaultInstance
@@ -213,9 +221,16 @@
       defaultInstance
         .post(serviceAPI.container, {
           serverId: selectedHost.value && selectedHost.value.serverId,
+          npuIdList:
+            selectedGpu.value &&
+            selectedGpu.value
+              .filter((el: GpuListType) => el.type == "npu")
+              .map((el) => el.id),
           gpuIdList:
             selectedGpu.value &&
-            selectedGpu.value.map((el: GpuListType) => el.id),
+            selectedGpu.value
+              .filter((el: GpuListType) => el.type == "gpu")
+              .map((el) => el.id),
           modelId: selectedModel.value && selectedModel.value.modelId,
           tag: selectedTags.value && selectedTags.value.tag,
           containerName: containerName.value,

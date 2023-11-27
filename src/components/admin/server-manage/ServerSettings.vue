@@ -30,7 +30,7 @@
           <strong>{{ Number(serverInfo.memory).toFixed(0) }}GB</strong>
         </div>
         <div class="row">
-          <strong class="title">Device : </strong>
+          <strong class="title">GPU : </strong>
           <div class="gpu-wrapper">
             <div
               class="gpu-area"

@@ -9,16 +9,31 @@
       <input
         v-else
         type="text"
-        :value="text.map((el) => el[name]).toString()"
+        :value="
+          text.map((el1) => {
+            return name
+              .split(',')
+              .map((el2) => {
+                return el1[el2];
+              })
+              .join('/');
+          })
+        "
         readonly
       />
     </div>
     <ul class="optionList" v-show="isActive">
       <li class="optionItem" v-for="(option, index) in options" :key="index">
-        <label :for="option[name] + index">{{ option[name] }}</label>
+        <label :for="name.split(',').join('/') + index">
+          <template v-for="(el, index1) in name.split(',')">{{
+            index1 != name.split(",").length - 1
+              ? option[el].concat("/")
+              : option[el]
+          }}</template>
+        </label>
         <BaseCheckBox
           @update:checkModelValue="select(option)"
-          :id="option[name] + index"
+          :id="name.split(',').join('/') + index"
           :value="option"
         />
       </li>
@@ -37,7 +52,7 @@
   const selectedText = ref<HTMLButtonElement | null>(null);
   const { options, text, name } = toRefs(props);
   const isActive = ref(false);
-  const selectedArr: any[] = [];
+  let selectedArr: any[] = [];
   const select = (option: string | { [key: string]: any }) => {
     const findIndex = selectedArr.findIndex((el) => {
       return el == option;
@@ -74,6 +89,7 @@
       box-sizing: border-box;
       input {
         width: 90%;
+        @include ellipsis(1);
       }
       .label {
         background: transparent;
@@ -104,6 +120,7 @@
           width: calc(100% - 40px);
           padding: 20px;
           box-sizing: border-box;
+          @include ellipsis(1);
         }
         :deep(input[type="checkbox"]) {
           & + label {
