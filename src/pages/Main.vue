@@ -396,6 +396,7 @@
         message: "Please select ai model.",
       });
     } else {
+      isActiveUploadModal.value = false;
       isInferred.value = false;
       originalVideoSrc.value = "";
       inferredVideoSrc.value = "";

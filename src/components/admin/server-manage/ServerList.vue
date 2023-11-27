@@ -26,7 +26,7 @@
         <td>{{ item.publicIp }}</td>
         <td class="resources">
           <div v-for="(list, index) in item.gpuList" :key="index">
-            {{ list.deviceName }}({{ list.type }})
+            {{ list.type }}/{{ list.deviceName }}
           </div>
         </td>
         <td class="utilization">
