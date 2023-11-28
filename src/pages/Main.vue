@@ -52,28 +52,10 @@
                     isUploaded = true;
                     selectedVideoFile = video;
                   "
-                  @mouseenter="
-                    () => {
-                      if (
-                        fileName &&
-                        fileName[index].offsetWidth <
-                          fileName[index].scrollWidth
-                      ) {
-                        isOverflowText = index;
-                      }
-                    }
-                  "
                 >
-                  <span
-                    class="file-name"
-                    ref="fileName"
-                    v-tooltip="{
-                      content: isOverflowText == index ? video.fileName : '',
-                      placement: 'bottom',
-                      delay: 0,
-                    }"
-                    >{{ video.fileName }}</span
-                  >
+                  <span class="file-name" ref="fileName">{{
+                    video.fileName
+                  }}</span>
                   <span>
                     <span class="file-size">{{ video.fileSize }}</span>
                     <FontAwesomeIcon
@@ -333,7 +315,6 @@
     }
     return arr;
   });
-  const isOverflowText = ref(-1);
   const fileName = ref<HTMLSpanElement[] | null>(null);
   let sseEvents: EventSource;
   // 비디오 존재 여부에 따른 안내 문구

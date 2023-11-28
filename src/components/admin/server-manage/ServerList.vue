@@ -173,6 +173,7 @@
       console.log("connect server sse");
     };
     sseEvents.onmessage = (stream: any) => {
+      console.log(stream);
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);

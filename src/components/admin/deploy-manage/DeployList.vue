@@ -38,7 +38,14 @@
         >
           {{ item.gpu }}
         </td>
-        <td>
+        <td
+          class="npu"
+          v-tooltip="{
+            content: item.npu,
+            placement: 'bottom',
+            delay: 0,
+          }"
+        >
           {{ item.npu }}
         </td>
         <td>{{ item.image }}</td>
@@ -241,6 +248,7 @@
             width: 4%;
           }
           &.container-id,
+          &.npu,
           &.gpu {
             @include ellipsis(1);
           }
