@@ -24,7 +24,7 @@
         />
 
         <div class="row">
-          <BaseButton @click="isActiveUploadModal = true" text="Upload Video" />
+          <BaseButton @click="handleUploadVideo" text="Upload Video" />
         </div>
         <div class="row video-file-select-area">
           <label class="label">Video File</label>
@@ -48,15 +48,15 @@
                 <div
                   v-for="(video, index) in files.video"
                   class="file-name-area"
-                  @click="
-                    isUploaded = true;
-                    selectedVideoFile = video;
-                  "
+                  @click="clickVideo(video)"
                 >
                   <span class="file-name" ref="fileName">{{
                     video.fileName
                   }}</span>
                   <span>
+                    <span class="file-status" v-if="video.isInference"
+                      >완료</span
+                    >
                     <span class="file-size">{{ video.fileSize }}</span>
                     <FontAwesomeIcon
                       icon="xmark"
@@ -242,15 +242,17 @@
       step: string;
     };
   }
-  interface VideoListType {
-    date: string;
-    video: { videoId: string; fileName: string; fileSize: string }[];
-  }
   interface SelectedVideo {
     videoId: string;
     fileName: string;
     fileSize: string;
+    isInference: boolean;
   }
+  interface VideoListType {
+    date: string;
+    video: SelectedVideo[];
+  }
+
   interface SelectedAiType {
     projectName: string;
     modelName: string;
@@ -301,6 +303,35 @@
   const inferredVideoSrc = ref(""); // 추론 영상
   const uuid = ref(""); // sse uuid
   const step = ref(""); // 추론 진행상태
+  const handleUploadVideo = () => {
+    isActiveUploadModal.value = true;
+    selectedVideoFile.value = null;
+    isInferred.value = false;
+    isUploaded.value = false;
+    originalVideoSrc.value = "";
+    inferredVideoSrc.value = "";
+  };
+  const clickVideo = (video: SelectedVideo) => {
+    console.log(video);
+    isUploaded.value = true;
+    selectedVideoFile.value = video;
+    isActiveUploadModal.value = false;
+    upload;
+    if (video.isInference) {
+      defaultInstance
+        .get(serviceAPI.videoAlready + `?videoId=${video.videoId}`)
+        .then((result) => {
+          console.log(result);
+          isInferred.value = true;
+          originalVideoSrc.value = result.data.data.originalVideo;
+          inferredVideoSrc.value = result.data.data.inferenceVideo;
+        });
+    } else {
+      isInferred.value = false;
+      originalVideoSrc.value = "";
+      inferredVideoSrc.value = "";
+    }
+  };
   const encoderOptions = computed<SelectedEncoderType[]>(() => {
     const arr: SelectedEncoderType[] = [
       { name: "H.264", value: "H.264" },
@@ -337,6 +368,13 @@
     videoFiles.value = [];
     aiModelOptions.value = list.inferenceModelList;
     videoFiles.value = list.videoList;
+    // const find = videoFiles.value[videoFiles.value.length - 1].video.findIndex(
+    //   (el1) => {
+    //     return el1.isInference == false
+    //   }
+    // );
+    // console.log(find);
+    // selectedVideoFile.value = videoFiles.value[find];
   };
   const deleteVideo = (videoId: string) => {
     emitter.emit("update:alert", {
@@ -347,6 +385,10 @@
         defaultInstance
           .delete(serviceAPI.video + `?videoId=${videoId}`)
           .then((result) => {
+            originalVideoSrc.value = "";
+            inferredVideoSrc.value = "";
+            isUploaded.value = false;
+            isInferred.value = false;
             emitter.emit("update:loading", { isLoading: false });
             getVideoList();
           });
@@ -493,6 +535,7 @@
             originalVideoSrc.value = data.originalVideo; // 원본 src
             inferredVideoSrc.value = data.inferenceVideo; // 추론 src
             isInferred.value = true; // 녹색으로 테두리 변경 신호
+            getVideoList();
             emitter.emit("update:loading", { isLoading: false });
           }
         }
@@ -583,21 +626,24 @@
               }
 
               .file-name {
-                width: calc(100% - 80px);
-                align-self: center;
-                line-height: 23px;
+                width: calc(100% - 100px);
                 @include ellipsis(1);
+                align-self: center;
               }
               .file-size {
-                height: 12px;
+                width: 45px;
+                margin-right: 6px;
+                vertical-align: middle;
+              }
+              .file-status {
                 margin-right: 6px;
                 vertical-align: middle;
               }
               .delete-button {
-                vertical-align: middle;
                 color: red;
                 cursor: pointer;
                 font-size: 20px;
+                vertical-align: -4px;
               }
             }
           }

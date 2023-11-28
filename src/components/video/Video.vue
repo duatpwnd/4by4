@@ -29,7 +29,6 @@
           <video ref="inferenceVideo" :src="inferredVideoSrc"></video>
           <!-- 추론된 비디오 :: E -->
         </div>
-        <!-- v-if='isInferred' -->
         <button class="share-btn" @click="copy" v-if="isInferred">
           <transition name="fade" mode="out-in">
             <span class="copy-text" v-if="isCopy" @click.stop="">copy</span>

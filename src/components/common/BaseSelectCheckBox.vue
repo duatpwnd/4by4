@@ -112,6 +112,8 @@
       min-height: 56px;
       background-color: #dfdfdf;
       max-height: 280px;
+      overflow-y: auto;
+
       .optionItem {
         display: flex;
         justify-content: space-between;

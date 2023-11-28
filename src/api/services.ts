@@ -20,5 +20,6 @@ const services = {
   connectSSE: "/sse/connect", // sse 연결
   connectServerSSE: "/sse/server", // server sse 연동
   userJoin: "/user/join", // 회원가입후 이메일 인증
+  videoAlready: "/video/already",
 };
 export default services;

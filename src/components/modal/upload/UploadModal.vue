@@ -294,8 +294,6 @@
 </script>
 <style scoped lang="scss">
   .upload-modal-container {
-    border: 1px solid black;
-    border-radius: 10px;
     position: absolute;
     top: 0;
     left: 0;
