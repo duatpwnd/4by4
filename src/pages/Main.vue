@@ -82,11 +82,13 @@
                 }
             "
             :options="aiModelOptions"
-            name="projectName,modelName"
+            name="projectName,containerName"
             :text="
               selectedAiModel == null
                 ? '<span class=not-selected>Select AI Model</span>'
-                : selectedAiModel.projectName + '/' + selectedAiModel.modelName
+                : selectedAiModel.projectName +
+                  '/' +
+                  selectedAiModel.containerName
             "
           />
         </div>
@@ -258,6 +260,7 @@
   interface SelectedAiType {
     projectName: string;
     modelName: string;
+    containerName: string;
     containerId: string;
   }
   interface SelectedType {

@@ -9,15 +9,15 @@
           v-if="options.length > 0"
           :key="index"
           @click="select(option, index)"
-          :class="[
-            option.disabled == true ? 'disabled' : '',
-            index == currentIndex ? 'active' : '',
-          ]"
+          :class="[option.disabled == true ? 'disabled' : '']"
         >
-          <span v-if="name.split(',').length == 2">
-            {{ option[name.split(",")[0]] }}/{{ option[name.split(",")[1]] }}
-          </span>
-          <span v-else> {{ option[name] }} </span>
+          <template v-for="(el, index1) in name.split(',')">
+            {{
+              index1 != name.split(",").length - 1
+                ? option[el].concat("/")
+                : option[el]
+            }}
+          </template>
         </li>
       </slot>
     </ul>
@@ -93,6 +93,7 @@
       overflow-y: auto;
       .optionItem {
         padding: 20px;
+        @include ellipsis(1);
         &:hover {
           background-color: #ccc;
         }
