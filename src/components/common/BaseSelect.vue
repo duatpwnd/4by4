@@ -8,8 +8,11 @@
           v-for="(option, index) in options"
           v-if="options.length > 0"
           :key="index"
-          @click="select(option)"
-          :class="option.disabled == true ? 'disabled' : ''"
+          @click="select(option, index)"
+          :class="[
+            option.disabled == true ? 'disabled' : '',
+            index == currentIndex ? 'active' : '',
+          ]"
         >
           <span v-if="name.split(',').length == 2">
             {{ option[name.split(",")[0]] }}/{{ option[name.split(",")[1]] }}
@@ -28,11 +31,13 @@
     text: string;
   }
   const props = defineProps<Props>();
+  const currentIndex = ref(-1);
   const emit = defineEmits(["update:select-box"]);
   const selectedText = ref<HTMLButtonElement | null>(null);
   const { options, text, name } = toRefs(props);
   const isActive = ref(false);
-  const select = (option: File) => {
+  const select = (option: File, index: number) => {
+    currentIndex.value = index;
     emit("update:select-box", option);
     isActive.value = false;
   };
@@ -91,6 +96,10 @@
         &:hover {
           background-color: #ccc;
         }
+        &.active {
+          background-color: #b3b6f6;
+        }
+
         &.disabled {
           background-color: rgb(255 139 139 / 50%);
         }

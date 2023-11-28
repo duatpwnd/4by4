@@ -48,7 +48,8 @@
                 <div
                   v-for="(video, index) in files.video"
                   class="file-name-area"
-                  @click="clickVideo(video)"
+                  :class="index == currentVideoIndex ? 'active' : ''"
+                  @click="clickVideo(video, index)"
                 >
                   <span class="file-name" ref="fileName">{{
                     video.fileName
@@ -278,6 +279,7 @@
       }
     >
   >;
+  const currentVideoIndex = ref(-1);
   const signOut = inject("signOut");
   const userStore = useUserStore();
   const updateKey = ref(0); // 업로드 중 취소할때 갱신을 위한 키값
@@ -313,7 +315,8 @@
     originalVideoSrc.value = "";
     inferredVideoSrc.value = "";
   };
-  const clickVideo = (video: SelectedVideo) => {
+  const clickVideo = (video: SelectedVideo, index: number) => {
+    currentVideoIndex.value = index;
     updateVideoKey.value += 1;
     isUploaded.value = true;
     selectedVideoFile.value = video;
@@ -370,6 +373,7 @@
     videoFiles.value = [];
     aiModelOptions.value = list.inferenceModelList;
     videoFiles.value = list.videoList;
+    // upload 후 제일 마지막 파일 선택
     const findLastIndex = list.videoList[
       list.videoList.length - 1
     ].video.findLastIndex((el) => {
@@ -392,6 +396,8 @@
             inferredVideoSrc.value = "";
             isUploaded.value = false;
             isInferred.value = false;
+            selectedVideoFile.value = null; // 선택 파일 초기화
+            currentVideoIndex.value = -1; // active 된 비디오 초기화
             emitter.emit("update:loading", { isLoading: false });
             getVideoList();
           });
@@ -624,6 +630,9 @@
               padding: 14px 10px;
               display: flex;
               justify-content: space-between;
+              &.active {
+                background-color: #b3b6f6;
+              }
               &:hover {
                 background-color: #ccc;
               }
