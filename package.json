@@ -38,6 +38,7 @@
     "vite-plugin-mkcert": "^1.16.0",
     "vite-tsconfig-paths": "^4.2.0",
     "vue": "^3.3.4",
+    "vue-clipboard3": "^2.0.0",
     "vue-google-oauth2": "^1.5.10",
     "vue-router": "^4.2.4",
     "vue3-cookies": "^1.0.6",

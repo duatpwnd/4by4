@@ -57,7 +57,14 @@
             @click="moveVideo('backward')"
           />
           <FontAwesomeIcon
+            v-if="!isVideoPlay"
             icon="circle-play"
+            class="fa-3x play-button"
+            @click="play"
+          />
+          <FontAwesomeIcon
+            v-else
+            icon="circle-pause"
             class="fa-3x play-button"
             @click="play"
           />
@@ -75,6 +82,13 @@
 <script setup lang="ts">
   import { onMounted, ref, toRefs, inject } from "vue";
   import TimeLine from "@components/video/TimeLine.vue";
+  import useClipboard from "vue-clipboard3";
+  interface Props {
+    isUploaded: boolean;
+    isInferred: boolean;
+    originalVideoSrc: string;
+    inferredVideoSrc: string;
+  }
   const videoContainerRef = ref<HTMLDivElement | null>(null);
   const videoAreaRef = ref<HTMLDivElement | null>(null);
   const videoClipperRef = ref<HTMLDivElement | null>(null);
@@ -87,12 +101,7 @@
   const isDownload = ref(false);
   const setIntervalId = ref<ReturnType<typeof setTimeout> | null>(null);
   const downloadSetIntervalId = ref<ReturnType<typeof setTimeout> | null>(null);
-  interface Props {
-    isUploaded: boolean;
-    isInferred: boolean;
-    originalVideoSrc: string;
-    inferredVideoSrc: string;
-  }
+  const { toClipboard } = useClipboard();
   const props = defineProps<Props>();
   const { isUploaded, isInferred, originalVideoSrc, inferredVideoSrc } =
     toRefs(props);
@@ -101,13 +110,11 @@
     if (setIntervalId.value !== null) {
       clearTimeout(setIntervalId.value);
     }
-    window.navigator.clipboard.writeText(inferredVideoSrc.value).then(() => {
-      // 복사가 완료되면 호출된다.
-      isCopy.value = true;
-      setIntervalId.value = setTimeout(() => {
-        isCopy.value = false;
-      }, 2000);
-    });
+    toClipboard(inferredVideoSrc.value);
+    isCopy.value = true;
+    setIntervalId.value = setTimeout(() => {
+      isCopy.value = false;
+    }, 2000);
   };
   const download = () => {
     if (downloadSetIntervalId.value !== null) {
