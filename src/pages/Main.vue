@@ -219,6 +219,7 @@
       :isInferred="isInferred"
       :originalVideoSrc="originalVideoSrc"
       :inferredVideoSrc="inferredVideoSrc"
+      :key="updateVideoKey"
     />
   </main>
 </template>
@@ -303,6 +304,7 @@
   const inferredVideoSrc = ref(""); // 추론 영상
   const uuid = ref(""); // sse uuid
   const step = ref(""); // 추론 진행상태
+  const updateVideoKey = ref(0);
   const handleUploadVideo = () => {
     isActiveUploadModal.value = true;
     selectedVideoFile.value = null;
@@ -312,7 +314,7 @@
     inferredVideoSrc.value = "";
   };
   const clickVideo = (video: SelectedVideo) => {
-    console.log(video);
+    updateVideoKey.value += 1;
     isUploaded.value = true;
     selectedVideoFile.value = video;
     isActiveUploadModal.value = false;
@@ -368,13 +370,14 @@
     videoFiles.value = [];
     aiModelOptions.value = list.inferenceModelList;
     videoFiles.value = list.videoList;
-    // const find = videoFiles.value[videoFiles.value.length - 1].video.findIndex(
-    //   (el1) => {
-    //     return el1.isInference == false
-    //   }
-    // );
-    // console.log(find);
-    // selectedVideoFile.value = videoFiles.value[find];
+    const findLastIndex = list.videoList[
+      list.videoList.length - 1
+    ].video.findLastIndex((el) => {
+      return el.isInference == false;
+    });
+    isUploaded.value = true;
+    selectedVideoFile.value =
+      list.videoList[list.videoList.length - 1].video[findLastIndex];
   };
   const deleteVideo = (videoId: string) => {
     emitter.emit("update:alert", {

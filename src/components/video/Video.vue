@@ -61,6 +61,7 @@
             class="fa-3x play-button"
             @click="play"
           />
+          <!-- 일시정지 -->
           <FontAwesomeIcon
             v-else
             icon="circle-pause"
