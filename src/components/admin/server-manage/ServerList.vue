@@ -25,7 +25,11 @@
         <td>{{ item.hostName }}</td>
         <td>{{ item.publicIp }}</td>
         <td class="resources">
-          <div v-for="(list, index) in item.gpuList" :key="index">
+          <div
+            class="resources-items"
+            v-for="(list, index) in item.gpuList"
+            :key="index"
+          >
             {{ list.type }}/{{ list.deviceName }}
           </div>
         </td>
@@ -272,6 +276,10 @@
           }
           &.utilization,
           &.resources {
+            .resources-items {
+              height: 20px;
+              line-height: 21px;
+            }
             :not(:first-of-type) {
               padding-top: 10px;
             }

@@ -49,6 +49,7 @@
         display: table;
         table-layout: fixed;
         width: 100%;
+        border-bottom: 1px solid rgba(145, 158, 171, 0.24);
         &:hover {
           background-color: #e9f4ff;
         }

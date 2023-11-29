@@ -104,7 +104,7 @@
           <label class="label">Encoder</label>
           <BaseSelect
             @update:select-box="(obj:SelectedEncoderType) => {
-              if(obj.disabled){
+              if(obj.message){
                 emitter.emit('update:alert', {
                   isActive: true,
                   message: obj.message,
@@ -346,7 +346,12 @@
   const encoderOptions = computed<SelectedEncoderType[]>(() => {
     const arr: SelectedEncoderType[] = [
       { name: "H.264", value: "H.264" },
-      { name: "H.265", value: "H.265" },
+      {
+        name: "H.265",
+        value: "H.265",
+        message:
+          "Unsupport H265 codec in Web browser, Please download H265 video",
+      },
       { name: "ProRes(Unable to play video)", value: "ProRes", disabled: true },
     ];
     if (
