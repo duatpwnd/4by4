@@ -185,6 +185,13 @@
     }
     if (Object.values(validCheck).indexOf(true) == -1) {
       emitter.emit("update:loading", { isLoading: true });
+      console.log("회원가입 obj:", {
+        firstName: userFirstName.value,
+        lastName: userLastName.value,
+        password: userPassword.value,
+        email: userEmail.value,
+        role: "user",
+      });
       defaultInstance
         .post(
           authAPI.join,
