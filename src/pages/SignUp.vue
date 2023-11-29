@@ -194,12 +194,13 @@
             password: userPassword.value,
             email: userEmail.value,
             role: "user",
-          },
-          {
-            transformRequest: (data, headers) => {
-              delete headers["Authorization"];
-            },
           }
+          // {
+          //   transformRequest: (data, headers) => {
+          //     delete headers["Authorization"];
+          //     return data;
+          //   },
+          // }
         )
         .then((result) => {
           if ("data" in result.data) {
@@ -215,7 +216,7 @@
           emitter.emit("update:loading", { isLoading: false });
           emitter.emit("update:alert", {
             isActive: true,
-            message: "이미 존재하는 아이디입니다.",
+            message: "이미 존재하는 이메일입니다.",
           });
         });
     }
