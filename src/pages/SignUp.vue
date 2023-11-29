@@ -202,6 +202,7 @@
             password: userPassword.value,
             email: userEmail.value,
             role: "user",
+            host: location.host,
           }
           // {
           //   transformRequest: (data, headers) => {
