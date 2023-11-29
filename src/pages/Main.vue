@@ -355,7 +355,8 @@
     ) {
       arr[2].message = "Unable to play video, download only ALERT";
     } else {
-      arr[2].message = "Unable to play video";
+      arr[2].message =
+        "Unable to encode prores in mp4, please select other encoder";
     }
     return arr;
   });
