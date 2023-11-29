@@ -107,7 +107,7 @@
               if(obj.disabled){
                 emitter.emit('update:alert', {
                   isActive: true,
-                  message: 'Unable to play video',
+                  message: obj.message,
                 });          
               }
               (selectedEncoder = obj)
@@ -207,7 +207,10 @@
           <BaseButton
             text="Preview"
             :class="
-              selectedVideoFile == null || selectedAiModel == null
+              selectedVideoFile == null ||
+              selectedAiModel == null ||
+              (selectedFormat.name == 'mp4' &&
+                selectedEncoder.value == 'ProRes')
                 ? 'inActive'
                 : 'active'
             "
@@ -268,6 +271,7 @@
   interface SelectedEncoderType extends SelectedType {
     value: string;
     disabled?: boolean;
+    message?: string;
   }
 
   const emitter = inject("emitter") as Emitter<
@@ -343,13 +347,15 @@
     const arr: SelectedEncoderType[] = [
       { name: "H.264", value: "H.264" },
       { name: "H.265", value: "H.265" },
-      { name: "ProRes(Unable to play video)", value: "ProRes" },
+      { name: "ProRes(Unable to play video)", value: "ProRes", disabled: true },
     ];
     if (
-      selectedFormat.value.name == "mp4" ||
+      selectedFormat.value.name == "mkv" ||
       selectedFormat.value.name == "mov"
     ) {
-      arr[2].disabled = true;
+      arr[2].message = "Unable to play video, download only ALERT";
+    } else {
+      arr[2].message = "Unable to play video";
     }
     return arr;
   });
@@ -434,7 +440,12 @@
   };
   // 추론함수
   const preview = () => {
-    if (selectedVideoFile.value == null) {
+    if (
+      selectedFormat.value.name == "mp4" &&
+      selectedEncoder.value.value == "ProRes"
+    ) {
+      return false;
+    } else if (selectedVideoFile.value == null) {
       emitter.emit("update:alert", {
         isActive: true,
         message: "Please select a video file.",
@@ -486,6 +497,7 @@
               containerId: selectedAiModel.value!.containerId,
             })
           );
+          updateVideoKey.value += 1;
           uuid.value = result.data.data;
           connectSSE(result.data.data);
         });
