@@ -48,7 +48,6 @@
                 <div
                   v-for="(video, index) in files.video"
                   class="file-name-area"
-                  :class="index == currentVideoIndex ? 'active' : ''"
                   @click="clickVideo(video, index)"
                 >
                   <span class="file-name" ref="fileName">{{
@@ -528,6 +527,7 @@
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
+          console.log(data);
           step.value = data.step;
           progressValue.value = data.progress; // 프로그레스 값 할당
           isActiveProgressModal.value = true; // 프로그레스 돌리기
