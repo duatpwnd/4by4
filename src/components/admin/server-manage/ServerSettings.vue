@@ -44,7 +44,7 @@
         </div>
         <div class="row">
           <strong class="title">NPU : </strong>
-          <div class="gpu-wrapper">
+          <div class="npu-wrapper">
             <div
               class="gpu-area"
               v-for="(list, index) in serverInfo.npu"
@@ -142,11 +142,13 @@
           color: blue;
           width: 80px;
           display: inline-block;
+          vertical-align: top;
         }
         .cores {
           margin-left: 16px;
         }
-        .gpu-wrapper {
+        .gpu-wrapper,
+        .npu-wrapper {
           display: inline-flex;
           width: calc(100% - 80px);
           flex-direction: column;
@@ -156,6 +158,10 @@
               margin-left: 16px;
             }
           }
+        }
+        .npu-wrapper {
+          height: 144px;
+          overflow-y: auto;
         }
       }
     }
