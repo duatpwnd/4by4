@@ -34,7 +34,15 @@
 
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
+    Record<
+      EventType,
+      {
+        isActive: boolean;
+        message?: string;
+        fn?: () => void;
+        closeFn?: () => void;
+      }
+    >
   >;
   const emit = defineEmits(["update:route"]);
 
@@ -81,10 +89,12 @@
         )
         .then((result) => {
           console.log(result);
-          router.push("/sign-in");
           emitter.emit("update:alert", {
             isActive: true,
             message: "비밀번호 변경이 완료되었습니다.",
+            closeFn: () => {
+              router.push("/sign-in");
+            },
           });
         });
     }
