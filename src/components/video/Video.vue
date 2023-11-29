@@ -361,7 +361,7 @@
         }
         .video-menu-area {
           svg {
-            cursor: pointer;
+            cursor: grab;
           }
           .play-button {
             margin: 0 20px;
