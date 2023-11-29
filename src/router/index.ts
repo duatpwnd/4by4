@@ -83,10 +83,10 @@ router.beforeEach((to, from, next) => {
           { isLoading?: boolean; isActive?: boolean; message?: string }
         >
       >;
-      emitter.emit("update:alert", {
-        isActive: true,
-        message: "Please log in.",
-      });
+      // emitter.emit("update:alert", {
+      //   isActive: true,
+      //   message: "Please log in.",
+      // });
 
       return next({ path: "/sign-in" });
     } else {

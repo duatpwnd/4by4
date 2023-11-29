@@ -23,7 +23,7 @@
             :key="updateKey"
             type="file"
             id="file-upload"
-            accept=".mp4"
+            accept=".mp4,.mov,.mkv"
             @change="fileUpload"
             @click="updateKey += 1"
             multiple
@@ -136,7 +136,7 @@
       });
     } else {
       event.preventDefault();
-      const allowedExtensions = /\.mp4$/i;
+      const allowedExtensions = /(\.mov|\.mp4|\.mkv)$/i;
       isDragged.value = false;
       const target = event.dataTransfer;
       if (target && target.files) {
@@ -174,7 +174,7 @@
         // source.src = createBlobURL;
         // video.append(source);
         // document.body.append(video);
-        const allowedExtensions = /\.mp4$/i;
+        const allowedExtensions = /(\.mov|\.mp4|\.mkv)$/i;
         if (allowedExtensions.test(files[i].name)) {
           thumb.value.push({
             title: files![i].name,

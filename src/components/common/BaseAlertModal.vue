@@ -16,7 +16,10 @@
       <BaseButton
         text="Close"
         class="close-button"
-        @click.stop="emitter.emit('update:alert', { isActive: false })"
+        @click.stop="
+          emitter.emit('update:alert', { isActive: false });
+          closeFn && closeFn();
+        "
       />
     </div>
   </div>
@@ -28,12 +31,13 @@
     text: string;
     isActiveAlert: boolean;
     fn?: () => void;
+    closeFn?: () => void;
   }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;
   const props = defineProps<Props>();
-  const { text, isActiveAlert, fn } = toRefs(props);
+  const { text, isActiveAlert, fn, closeFn } = toRefs(props);
   const ok = () => {
     emitter.emit("update:alert", { isActive: false });
     fn && fn.value && fn.value();

@@ -4,14 +4,14 @@
       <!-- 헤더 :: S -->
       <div class="title-area">
         <div class="original">
-          <strong :class="isUploaded ? 'uploaded' : 'not-uploaded'"
-            >Original
-          </strong>
-        </div>
-        <div class="pixell-ai">
           <strong :class="isInferred ? 'uploaded' : 'not-uploaded'"
             >PIXELL AI</strong
           >
+        </div>
+        <div class="pixell-ai">
+          <strong :class="isUploaded ? 'uploaded' : 'not-uploaded'"
+            >Original
+          </strong>
         </div>
       </div>
       <!-- 헤더 :: E -->

@@ -8,6 +8,7 @@
   const isActiveAlert = ref(false);
   const isLoading = ref(false);
   const fn = ref();
+  const closeFn = ref();
   const emitter = inject("emitter") as Emitter<
     Record<
       EventType,
@@ -15,6 +16,7 @@
         isActive: boolean;
         message?: string;
         fn?: () => void;
+        closeFn?: () => void;
         isLoading?: boolean;
       }
     >
@@ -24,6 +26,7 @@
   emitter.on("update:alert", (obj) => {
     isActiveAlert.value = obj.isActive;
     fn.value = obj.fn;
+    closeFn.value = obj.closeFn;
     if (obj.message !== undefined) {
       noticeMessage.value = obj.message;
     }
@@ -39,6 +42,7 @@
     v-if="isActiveAlert"
     :isActiveAlert="isActiveAlert"
     :fn="fn"
+    :closeFn="closeFn"
     :text="noticeMessage"
   />
   <router-view></router-view>

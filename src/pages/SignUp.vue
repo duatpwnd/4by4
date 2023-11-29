@@ -113,6 +113,7 @@
         isLoading?: boolean;
         message?: string;
         fn?: () => void;
+        closeFn?: () => void;
       }
     >
   >;
@@ -211,11 +212,13 @@
         )
         .then((result) => {
           if ("data" in result.data) {
-            emit("update:route", "SignIn");
             emitter.emit("update:loading", { isLoading: false });
             emitter.emit("update:alert", {
               isActive: true,
               message: "회원가입이 완료되었으며, 인증 메일이 발송되었습니다.",
+              closeFn: () => {
+                emit("update:route", "SignIn");
+              },
             });
           }
         })
