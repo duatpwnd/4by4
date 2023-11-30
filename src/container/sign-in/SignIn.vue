@@ -29,9 +29,9 @@
       <div class="row">
         <BaseButton text="Log In" @click="signIn" />
       </div>
-      <div class="row">
+      <!-- <div class="row">
         <span class="or">OR</span>
-      </div>
+      </div> -->
       <!-- <div class="row">
         <div class="google-sign-in-area">
           <button type="button" class="google-sign-in" @click="googleSignIn">

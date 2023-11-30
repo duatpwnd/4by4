@@ -19,15 +19,16 @@
           @click="emit('update:route', 'SignIn')"
         />
       </div> -->
-      <div class="row">
+      <!-- <div class="row">
         <span class="or">OR Create Account via Email</span>
-      </div>
+      </div> -->
       <div class="row name-area">
         <div class="first-name-area">
           <label>First Name</label>
           <BaseInput
             type="text"
             @update:modelValue="firstNameCheck"
+            @update:enterEvent="signUp"
             :modelValue="userFirstName"
             placeholder="first name"
           />
@@ -40,6 +41,7 @@
           <BaseInput
             type="text"
             @update:modelValue="lastNameCheck"
+            @update:enterEvent="signUp"
             :modelValue="userLastName"
             placeholder="last name"
           />
@@ -53,6 +55,7 @@
         <BaseInput
           type="text"
           @update:modelValue="emailValidCheck"
+          @update:enterEvent="signUp"
           :modelValue="userEmail"
           placeholder="email"
         />
@@ -65,6 +68,7 @@
         <BaseInput
           type="password"
           @update:modelValue="passwordValidCheck"
+          @update:enterEvent="signUp"
           :modelValue="userPassword"
           placeholder="password"
         />
@@ -78,6 +82,7 @@
         <BaseInput
           type="password"
           @update:modelValue="passwordConfirmValidCheck"
+          @update:enterEvent="signUp"
           :modelValue="userPasswordConfirm"
           placeholder="Confirm Password"
         />
