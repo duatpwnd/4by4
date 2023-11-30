@@ -663,23 +663,22 @@
                 @include ellipsis(1);
                 align-self: center;
               }
-              .file-size {
-                width: 45px;
-                margin-right: 6px;
-                vertical-align: middle;
-              }
               .file-status-area {
-                text-align: right;
+                display: flex;
                 width: 50%;
+                justify-content: right;
+                column-gap: 4px;
                 .file-status {
-                  margin-right: 6px;
-                  vertical-align: middle;
+                  align-self: center;
+                }
+                .file-size {
+                  align-self: center;
                 }
                 .delete-button {
                   color: red;
                   cursor: pointer;
                   font-size: 20px;
-                  vertical-align: -4px;
+                  align-self: center;
                 }
               }
             }
