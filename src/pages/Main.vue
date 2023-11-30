@@ -667,7 +667,7 @@
                 display: flex;
                 width: 50%;
                 justify-content: right;
-                column-gap: 4px;
+                column-gap: 2px;
                 .file-status {
                   align-self: center;
                 }
