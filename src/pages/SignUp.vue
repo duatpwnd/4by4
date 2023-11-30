@@ -93,7 +93,7 @@
 </template>
 <script setup lang="ts">
   import { ref, inject, reactive } from "vue";
-  import { AxiosInstance } from "axios";
+  import { AxiosHeaders, AxiosInstance } from "axios";
   import { EventType, Emitter } from "mitt";
   import authAPI from "@api/auth";
   const userFirstName = ref("");
@@ -186,31 +186,20 @@
     }
     if (Object.values(validCheck).indexOf(true) == -1) {
       emitter.emit("update:loading", { isLoading: true });
-      console.log("회원가입 obj:", {
-        firstName: userFirstName.value,
-        lastName: userLastName.value,
-        password: userPassword.value,
-        email: userEmail.value,
-        role: "user",
-      });
       defaultInstance
-        .post(
-          authAPI.join,
-          {
-            firstName: userFirstName.value,
-            lastName: userLastName.value,
-            password: userPassword.value,
-            email: userEmail.value,
-            role: "user",
-            host: location.host,
-          }
-          // {
-          //   transformRequest: (data, headers) => {
-          //     delete headers["Authorization"];
-          //     return data;
-          //   },
-          // }
-        )
+        .post(authAPI.join, {
+          transformRequest: (data: any, headers: AxiosHeaders) => {
+            delete headers["Authorization"];
+            return {
+              firstName: userFirstName.value,
+              lastName: userLastName.value,
+              password: userPassword.value,
+              email: userEmail.value,
+              role: "user",
+              host: location.host,
+            };
+          },
+        })
         .then((result) => {
           if ("data" in result.data) {
             emitter.emit("update:loading", { isLoading: false });

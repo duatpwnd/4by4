@@ -44,7 +44,7 @@
       //overflow-x: hidden;
       display: block;
       height: calc(100% - 56px);
-      overflow-y: auto;
+      overflow-y: scroll;
       tr {
         display: table;
         table-layout: fixed;
