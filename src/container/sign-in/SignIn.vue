@@ -58,6 +58,10 @@
           Sign Up
         </button>
       </div>
+      <div class="logo-area">
+        <img src="@images/logo.png" class="logo" />
+        <img src="@images/4by4_logo.png" class="fourbyfour-logo" />
+      </div>
     </fieldset>
   </form>
 </template>
@@ -176,6 +180,7 @@
 <style scoped lang="scss">
   .sign-in-form {
     width: 50%;
+    position: relative;
     overflow-y: auto;
     fieldset {
       height: 100%;
@@ -189,6 +194,21 @@
         }
         text-align: center;
       }
+      .logo-area {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        text-align: center;
+        width: 100%;
+        .logo {
+          width: 110px;
+          margin-right: 25px;
+        }
+        .fourbyfour-logo {
+          height: 51px;
+        }
+      }
+
       .row {
         &:not(:first-of-type) {
           margin-top: 22px;

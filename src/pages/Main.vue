@@ -53,7 +53,7 @@
                   <span class="file-name" ref="fileName">{{
                     video.fileName
                   }}</span>
-                  <span>
+                  <span class="file-status-area">
                     <span class="file-status" v-if="video.isInference"
                       >완료</span
                     >
@@ -659,7 +659,7 @@
               }
 
               .file-name {
-                width: calc(100% - 100px);
+                width: 50%;
                 @include ellipsis(1);
                 align-self: center;
               }
@@ -668,15 +668,19 @@
                 margin-right: 6px;
                 vertical-align: middle;
               }
-              .file-status {
-                margin-right: 6px;
-                vertical-align: middle;
-              }
-              .delete-button {
-                color: red;
-                cursor: pointer;
-                font-size: 20px;
-                vertical-align: -4px;
+              .file-status-area {
+                text-align: right;
+                width: 50%;
+                .file-status {
+                  margin-right: 6px;
+                  vertical-align: middle;
+                }
+                .delete-button {
+                  color: red;
+                  cursor: pointer;
+                  font-size: 20px;
+                  vertical-align: -4px;
+                }
               }
             }
           }
