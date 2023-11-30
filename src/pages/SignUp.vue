@@ -193,17 +193,12 @@
       emitter.emit("update:loading", { isLoading: true });
       defaultInstance
         .post(authAPI.join, {
-          transformRequest: (data: any, headers: AxiosHeaders) => {
-            delete headers["Authorization"];
-            return {
-              firstName: userFirstName.value,
-              lastName: userLastName.value,
-              password: userPassword.value,
-              email: userEmail.value,
-              role: "user",
-              host: location.host,
-            };
-          },
+          firstName: userFirstName.value,
+          lastName: userLastName.value,
+          password: userPassword.value,
+          email: userEmail.value,
+          role: "user",
+          host: location.host,
         })
         .then((result) => {
           if ("data" in result.data) {
