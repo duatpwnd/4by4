@@ -59,8 +59,8 @@
         </button>
       </div>
       <div class="logo-area">
-        <img src="@images/logo.png" class="logo" />
         <img src="@images/4by4_logo.png" class="fourbyfour-logo" />
+        <img src="@images/logo.png" class="logo" />
       </div>
     </fieldset>
   </form>
@@ -200,9 +200,10 @@
         right: 0;
         text-align: center;
         width: 100%;
+        display: flex;
+        justify-content: space-around;
         .logo {
           width: 110px;
-          margin-right: 25px;
         }
         .fourbyfour-logo {
           height: 51px;
