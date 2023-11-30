@@ -271,24 +271,20 @@
             size: 15px;
             weight: 700;
           }
+          white-space: nowrap;
+          display: flex;
           color: #ababab;
           width: 100%;
           text-align: center;
-          display: block;
+          justify-content: space-between;
+          column-gap: 20px;
           &:after,
           &:before {
             content: "";
-            width: calc(50% - 116px);
-            display: inline-block;
+            width: 100%;
             background: #ababab;
             height: 1px;
-            vertical-align: middle;
-          }
-          &:before {
-            margin-right: 20px;
-          }
-          &:after {
-            margin-left: 20px;
+            align-self: center;
           }
         }
       }

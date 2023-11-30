@@ -712,7 +712,9 @@
         cursor: pointer;
         float: right;
       }
-
+      .setting-area {
+        margin-top: 30px;
+      }
       .row {
         margin-top: 20px;
         &.check-area {
