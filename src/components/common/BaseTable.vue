@@ -26,6 +26,7 @@
         }
         th,
         td {
+          box-sizing: border-box;
           white-space: nowrap;
           padding: 20px;
           text-align: left;
@@ -56,7 +57,7 @@
       }
     }
     thead {
-      width: 100%;
+      width: calc(100% - 16px);
       position: relative;
       display: table;
       table-layout: fixed;

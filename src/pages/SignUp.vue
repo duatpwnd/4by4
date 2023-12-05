@@ -192,15 +192,25 @@
     if (Object.values(validCheck).indexOf(true) == -1) {
       emitter.emit("update:loading", { isLoading: true });
       defaultInstance
-        .post(authAPI.join, {
-          firstName: userFirstName.value,
-          lastName: userLastName.value,
-          password: userPassword.value,
-          email: userEmail.value,
-          role: "user",
-          host: location.host,
-        })
+        .post(
+          authAPI.join,
+          {
+            firstName: userFirstName.value,
+            lastName: userLastName.value,
+            password: userPassword.value,
+            email: userEmail.value,
+            role: "user",
+            host: location.host,
+          },
+          {
+            transformRequest: (data, header) => {
+              delete header["Authorization"];
+              return JSON.stringify(data);
+            },
+          }
+        )
         .then((result) => {
+          console.log(result);
           if ("data" in result.data) {
             emitter.emit("update:loading", { isLoading: false });
             emitter.emit("update:alert", {
@@ -216,7 +226,7 @@
           emitter.emit("update:loading", { isLoading: false });
           emitter.emit("update:alert", {
             isActive: true,
-            message: "이미 존재하는 이메일입니다.",
+            message: err.response.data.message,
           });
         });
     }

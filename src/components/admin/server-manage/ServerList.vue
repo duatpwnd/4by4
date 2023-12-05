@@ -254,10 +254,10 @@
       tr {
         th {
           &:first-child {
-            width: 2%;
+            width: 4%;
           }
           &:last-child {
-            width: 10%;
+            width: 7%;
           }
         }
       }
@@ -269,11 +269,12 @@
           padding: 8px 20px;
           font-size: 14px;
           &:first-child {
-            width: 2%;
+            width: 4%;
           }
           &:last-child {
-            width: 10%;
+            width: 7%;
           }
+
           &.utilization,
           &.resources {
             .resources-items {

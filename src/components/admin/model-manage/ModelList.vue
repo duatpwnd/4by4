@@ -206,10 +206,10 @@
       tr {
         th {
           &:first-child {
-            width: 2%;
+            width: 4%;
           }
           &:last-child {
-            width: 4%;
+            width: 7%;
           }
         }
       }
@@ -218,10 +218,10 @@
       tr {
         td {
           &:first-child {
-            width: 2%;
+            width: 4%;
           }
           &:last-child {
-            width: 4%;
+            width: 7%;
           }
         }
       }
