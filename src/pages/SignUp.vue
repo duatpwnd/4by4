@@ -10,6 +10,10 @@
     "
   >
     <fieldset>
+      <button
+        class="close-btn"
+        @click="emit('update:route', 'SignIn')"
+      ></button>
       <legend class="legend">Create an Account</legend>
       <!-- <div class="row">
         <button class="google-sign-up"></button>
@@ -237,6 +241,16 @@
     width: 50%;
     overflow-y: auto;
     fieldset {
+      position: relative;
+      .close-btn {
+        @include background("close_ico.svg", 25px, 25px, center);
+        width: 25px;
+        height: 25px;
+        position: absolute;
+        top: -25px;
+        right: 0px;
+      }
+
       .legend {
         font: {
           size: 25px;
