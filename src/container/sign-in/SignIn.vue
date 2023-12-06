@@ -82,6 +82,7 @@
   const code = route.params.code;
   const userStore = useUserStore();
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const authInstance = inject("authInstance") as AxiosInstance;
   const userId = ref("");
   const userPw = ref("");
   const referrer = route.query.referrer as string | undefined;
@@ -100,9 +101,6 @@
           .get(authAPI.googleLogin, {
             headers: {
               token: response.token_type + " " + response.access_token,
-            },
-            transformRequest: (data, headers) => {
-              delete headers["Authorization"];
             },
           })
           .then((result) => {
@@ -129,14 +127,11 @@
       validCheck.pw = false;
     }
     if (!validCheck.id && !validCheck.pw) {
-      defaultInstance
+      authInstance
         .get(authAPI.login, {
           headers: {
             userId: userId.value,
             password: userPw.value,
-          },
-          transformRequest: (data, headers) => {
-            delete headers["Authorization"];
           },
         })
         .then((result) => {
@@ -160,7 +155,7 @@
   };
   // 회원가입을 위한 로직
   const successSignUp = () => {
-    defaultInstance
+    authInstance
       .patch(serviceAPI.userJoin + `?mailConfirmCode=${code}`)
       .then((result) => {
         emitter.emit("update:alert", {

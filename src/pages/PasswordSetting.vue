@@ -32,7 +32,7 @@
   import { useRoute, useRouter } from "vue-router";
   import serviceAPI from "@api/services";
 
-  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const authInstance = inject("authInstance") as AxiosInstance;
   const emitter = inject("emitter") as Emitter<
     Record<
       EventType,
@@ -82,7 +82,7 @@
       validCheck.passwordConfirm = true;
     }
     if (!validCheck.password && !validCheck.passwordConfirm) {
-      defaultInstance
+      authInstance
         .patch(
           serviceAPI.requestPasswordChange +
             `?code=${code}&password=${password.value}`

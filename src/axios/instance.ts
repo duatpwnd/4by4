@@ -14,10 +14,8 @@ export const defaultInstance: AxiosInstance = axios.create({
 });
 export const authInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
-
   headers: {
     "Content-Type": "application/json",
-    Authorization: "Bearer " + cookies.get("token"),
   },
 });
 defaultInstance.interceptors.request.use(

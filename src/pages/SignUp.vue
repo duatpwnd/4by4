@@ -102,7 +102,7 @@
 </template>
 <script setup lang="ts">
   import { ref, inject, reactive } from "vue";
-  import { AxiosHeaders, AxiosInstance } from "axios";
+  import { AxiosInstance } from "axios";
   import { EventType, Emitter } from "mitt";
   import authAPI from "@api/auth";
   const userFirstName = ref("");
@@ -113,7 +113,7 @@
   const pwReg = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,16}$/;
   const emailReg =
     /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
-  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const authInstance = inject("authInstance") as AxiosInstance;
   const emitter = inject("emitter") as Emitter<
     Record<
       EventType,
@@ -195,24 +195,15 @@
     }
     if (Object.values(validCheck).indexOf(true) == -1) {
       emitter.emit("update:loading", { isLoading: true });
-      defaultInstance
-        .post(
-          authAPI.join,
-          {
-            firstName: userFirstName.value,
-            lastName: userLastName.value,
-            password: userPassword.value,
-            email: userEmail.value,
-            role: "user",
-            host: location.host,
-          },
-          {
-            transformRequest: (data, header) => {
-              delete header["Authorization"];
-              return JSON.stringify(data);
-            },
-          }
-        )
+      authInstance
+        .post(authAPI.join, {
+          firstName: userFirstName.value,
+          lastName: userLastName.value,
+          password: userPassword.value,
+          email: userEmail.value,
+          role: "user",
+          host: location.host,
+        })
         .then((result) => {
           console.log(result);
           if ("data" in result.data) {

@@ -36,7 +36,7 @@
   import BaseInput from "@/components/common/BaseInput.vue";
   import BaseButton from "@/components/common/BaseButton.vue";
   const email = ref("");
-  const defaultInstance = inject("defaultInstance") as AxiosInstance;
+  const authInstance = inject("authInstance") as AxiosInstance;
   const emailReg =
     /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
 
@@ -67,15 +67,10 @@
     }
     if (!validCheck.email) {
       emitter.emit("update:loading", { isLoading: true });
-      defaultInstance
+      authInstance
         .get(
           serviceAPI.sendEmailPassword +
-            `?email=${email.value}&host=${location.host}`,
-          {
-            transformRequest: (data, headers) => {
-              delete headers["Authorization"];
-            },
-          }
+            `?email=${email.value}&host=${location.host}`
         )
         .then((result) => {
           console.log(result);
