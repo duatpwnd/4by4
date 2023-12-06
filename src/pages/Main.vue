@@ -571,6 +571,9 @@
         }
       } catch (error) {}
     };
+    sseEvents.onerror = (err) => {
+      sseEvents.close();
+    };
   };
   // 새로고침 물어보기
   const reloadEvent = (event: Event) => {

@@ -176,7 +176,7 @@
     sseEvents.onopen = () => {
       console.log("connect server sse");
     };
-    sseEvents.onmessage = (stream: any) => {
+    sseEvents.onmessage = (stream) => {
       console.log(stream);
       try {
         if (typeof JSON.parse(stream.data) == "object") {
@@ -190,7 +190,7 @@
       } catch (error) {}
     };
     sseEvents.onerror = (err) => {
-      console.log(err);
+      sseEvents.close();
     };
   };
   onActivated(() => {

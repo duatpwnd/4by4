@@ -112,7 +112,6 @@
   onMounted(() => {
     // 새로고침시 서브메뉴 세팅
     decideLnbNav(route.query.mainCategory as string);
-    console.log(route.query.mainCategory);
     if (route.query.mainCategory == undefined) {
       decideLnbNav("serverManage");
       router.push(
