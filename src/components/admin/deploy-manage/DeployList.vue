@@ -28,6 +28,7 @@
           {{ index + 1 + 10 * (currentPage - 1) }}
         </td>
         <td>{{ item.host }}</td>
+        <td>{{ item.status }}</td>
         <td
           class="gpu"
           v-tooltip="{
@@ -118,6 +119,7 @@
   const ths = <const>[
     "#",
     "Host",
+    "Status",
     "Device",
     "NPU",
     "Image",
@@ -229,10 +231,12 @@
     thead {
       tr {
         th {
-          &:first-child {
+          &:nth-child(1) {
             width: 4%;
           }
-          &:last-child {
+          &:last-child,
+          &:nth-child(2),
+          &:nth-child(3) {
             width: 7%;
           }
         }
@@ -241,10 +245,12 @@
     tbody {
       tr {
         td {
-          &:first-child {
+          &:nth-child(1) {
             width: 4%;
           }
-          &:last-child {
+          &:last-child,
+          &:nth-child(2),
+          &:nth-child(3) {
             width: 7%;
           }
 
