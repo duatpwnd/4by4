@@ -71,7 +71,7 @@
         <!-- <td>
         {{ index + 1 + 10 * (currentPage - 1) }}
       </td> -->
-        <td>{{ item.hostName }}ter</td>
+        <td>{{ item.hostName }}</td>
         <td>{{ item.publicIp }}</td>
         <td class="resources">
           <div
@@ -264,6 +264,7 @@
     // }
   });
   onDeactivated(() => {
+    console.log("onDeactivated");
     sseEvents.close();
     // 컴포넌트 이동시에 이전탭을 기억하기 위해서
     // activeTab.value = tabStatus.value;
