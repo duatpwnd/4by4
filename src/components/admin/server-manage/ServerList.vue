@@ -40,8 +40,8 @@
         </td>
         <td class="control">
           <FontAwesomeIcon
-            icon="gear"
-            class="setting-button"
+            icon="circle-info"
+            class="info-button"
             @click="
               router.push(
                 route.fullPath + `&type=settings&serverId=${item.serverId}`
@@ -111,7 +111,7 @@
     resultMsg: string;
   }
   let sseEvents: EventSource;
-  const ths = <const>["#", "Name", "IP", "Resources", "Utilization", "Control"];
+  const ths = <const>["#", "Name", "IP", "Devices", "Memory Usage", ""];
   const tab = <const>["CONNECTED", "TERMINATED", "ALL"];
   const userStore = useUserStore();
   const activeTab = ref<(typeof tab)[number] | null>(null);
@@ -169,7 +169,7 @@
       import.meta.env.VITE_BASE_URL + serviceAPI.connectServerSSE,
       {
         headers: {
-          Authorization: null,
+          Authorization: userStore.user!.token,
         },
       }
     );
@@ -184,16 +184,18 @@
           const findIndex = serverList.value.findIndex((el) => {
             return data.serverId == el.serverId;
           });
-          console.log(data.resource);
           serverList.value[findIndex].gpuList = data.resource;
         }
       } catch (error) {}
     };
     sseEvents.onerror = (err) => {
+      console.log("sse 연결이 끊겼습니다.");
       sseEvents.close();
     };
   };
   onActivated(() => {
+    console.log("활성화");
+    connectSSE();
     // 이전에 active된 탭을 활성화
     if (activeTab.value !== null) {
       router.push({
@@ -207,13 +209,14 @@
     }
   });
   onDeactivated(() => {
+    console.log("비활성화");
+    sseEvents.close();
     // 컴포넌트 이동시에 이전탭을 기억하기 위해서
     activeTab.value = currentStatus.value;
   });
   onMounted(() => {
     // 최초 한번 실행
     getServerList(currentPage, currentStatus.value);
-    connectSSE();
   });
 </script>
 <style scoped lang="scss">
@@ -288,9 +291,9 @@
         }
       }
       .control {
-        .setting-button {
-          vertical-align: middle;
-          color: #818080;
+        .info-button {
+          font-size: 20px;
+          cursor: pointer;
         }
       }
     }

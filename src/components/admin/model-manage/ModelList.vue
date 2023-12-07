@@ -35,7 +35,7 @@
         </td>
         <td class="control">
           <FontAwesomeIcon
-            icon="gear"
+            icon="circle-info"
             class="setting-button"
             @click="
               router.push(
@@ -80,7 +80,7 @@
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
   >;
-  const ths = <const>["#", "Name", "Project", "Image", "Tag", "Control"];
+  const ths = <const>["#", "Name", "Project", "Image", "Tag", ""];
   const router = useRouter();
   const route = useRoute();
   const routeCurrentPage = computed<number>(() => {

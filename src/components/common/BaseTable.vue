@@ -57,7 +57,7 @@
       }
     }
     thead {
-      width: calc(100% - 16px);
+      width: 100%;
       position: relative;
       display: table;
       table-layout: fixed;

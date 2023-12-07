@@ -237,8 +237,10 @@
   const fileUpload = (event: Event) => {
     const target = event.target as HTMLInputElement;
     if (target && target.files) {
-      files.value = target.files[0];
-      validCheck.files = false;
+      if (target.files[0] !== undefined) {
+        files.value = target.files[0];
+        validCheck.files = false;
+      }
     }
   };
   const close = () => {
@@ -332,7 +334,7 @@
               isActiveProgressModal.value = false;
               emitter.emit("update:alert", {
                 isActive: true,
-                message: "잠시만 기다려 주세요!",
+                message: "모델 등록중 입니다.",
               });
             }
           },
