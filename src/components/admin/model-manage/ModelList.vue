@@ -36,7 +36,7 @@
         <td class="control">
           <FontAwesomeIcon
             icon="circle-info"
-            class="setting-button"
+            class="info-button"
             @click="
               router.push(
                 route.fullPath + `&type=settings&modelId=${item.modelId}`
@@ -75,7 +75,7 @@
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
   import { getModelList } from "./model";
-  const tab = <const>["REGISTERED", "UNREGISTERED", "ALL"];
+  const tab = <const>["ALL", "REGISTERED", "UNREGISTERED"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
@@ -139,20 +139,21 @@
   //       });
   //     });
   // };
+
   onActivated(() => {
-    if (activeTab.value !== null) {
-      router.push({
-        query: {
-          mainCategory: "modelManage",
-          subCategory: "modelStatus",
-          currentPage: currentPage.value,
-          currentStatus: activeTab.value,
-        },
-      });
-    }
+    // if (activeTab.value !== null) {
+    //   router.push({
+    //     query: {
+    //       mainCategory: "modelManage",
+    //       subCategory: "modelStatus",
+    //       currentPage: currentPage.value,
+    //       currentStatus: activeTab.value,
+    //     },
+    //   });
+    // }
   });
   onDeactivated(() => {
-    activeTab.value = currentStatus.value;
+    // activeTab.value = currentStatus.value;
   });
 </script>
 <style scoped lang="scss">
@@ -229,8 +230,7 @@
         .remove-button {
           color: #ff4343;
         }
-        .setting-button {
-          color: #818080;
+        .info-button {
           margin-right: 10px;
         }
       }

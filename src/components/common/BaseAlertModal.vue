@@ -6,7 +6,7 @@
   ></div>
   <div class="alert-modal-container" v-if="isActiveAlert">
     <strong class="msg" v-html="text"></strong>
-    <div class="close-area">
+    <div class="close-area" v-if="isActiveCloseButton">
       <BaseButton
         v-if="fn !== undefined"
         text="Ok"
@@ -32,12 +32,16 @@
     isActiveAlert: boolean;
     fn?: () => void;
     closeFn?: () => void;
+    isActiveCloseButton?: boolean;
   }
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;
-  const props = defineProps<Props>();
-  const { text, isActiveAlert, fn, closeFn } = toRefs(props);
+  const props = withDefaults(defineProps<Props>(), {
+    isActiveCloseButton: true,
+  });
+  const { text, isActiveAlert, fn, closeFn, isActiveCloseButton } =
+    toRefs(props);
   const ok = () => {
     emitter.emit("update:alert", { isActive: false });
     fn && fn.value && fn.value();

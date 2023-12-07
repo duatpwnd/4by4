@@ -14,21 +14,6 @@
           <dd>{{ containerInfo.host }}:{{ containerInfo.port }}</dd>
         </div>
         <div>
-          <dt>Device</dt>
-          <dd
-            v-tooltip="{
-              content: containerInfo.gpu ?? 'null',
-              placement: 'bottom',
-              delay: 0,
-              options: {
-                fontSize: 20,
-              },
-            }"
-          >
-            {{ containerInfo.gpu ?? "null" }}
-          </dd>
-        </div>
-        <div>
           <dt>Container ID</dt>
           <dd
             v-tooltip="{
@@ -44,6 +29,15 @@
           </dd>
         </div>
         <div>
+          <dt>Model Image</dt>
+          <dd>{{ containerInfo.imageName }}</dd>
+        </div>
+        <div>
+          <dt>Container Name</dt>
+          <dd>{{ containerInfo.status }}</dd>
+        </div>
+
+        <div>
           <dt>Container Status</dt>
           <dd>{{ containerInfo.status }}</dd>
         </div>
@@ -52,9 +46,21 @@
           <dd>{{ containerInfo.deployStatus }}</dd>
         </div>
         <div>
-          <dt>Model Image</dt>
-          <dd>{{ containerInfo.imageName }}</dd>
+          <dt>GPU</dt>
+          <dd
+            v-tooltip="{
+              content: containerInfo.gpu ?? 'null',
+              placement: 'bottom',
+              delay: 0,
+              options: {
+                fontSize: 20,
+              },
+            }"
+          >
+            {{ containerInfo.gpu ?? "null" }}
+          </dd>
         </div>
+
         <div>
           <dt>NPU</dt>
           <dd>{{ containerInfo.npu ?? "null" }}</dd>
@@ -75,7 +81,7 @@
             ? false
             : true
         "
-        @click="containerUpdate('start')"
+        @click="containerUpdate('start', '시작 하시겠습니까?')"
       />
       <BaseButton
         :class="
@@ -94,7 +100,7 @@
             ? false
             : true
         "
-        @click="containerUpdate('stop')"
+        @click="containerUpdate('stop', '중지 하시겠습니까?')"
       />
       <BaseButton
         :class="
@@ -106,7 +112,7 @@
             : 'inactive'
         "
         type="button"
-        text="Kill"
+        text="Delete"
         :disabled="
           containerInfo.status == 'starting' ||
           containerInfo.status == 'running' ||
@@ -115,7 +121,7 @@
             ? false
             : true
         "
-        @click="containerUpdate('kill')"
+        @click="containerUpdate('remove', '삭제 하시겠습니까?')"
       />
       <BaseButton
         type="button"
@@ -134,9 +140,9 @@
             ? false
             : true
         "
-        @click="containerUpdate('restart')"
+        @click="containerUpdate('restart', '다시 시작 하시겠습니까?')"
       />
-      <BaseButton
+      <!-- <BaseButton
         type="button"
         text="Pause"
         :disabled="
@@ -152,8 +158,8 @@
             ? 'active'
             : 'inactive'
         "
-      />
-      <BaseButton
+      /> -->
+      <!-- <BaseButton
         type="button"
         text="Resume"
         :class="
@@ -169,7 +175,7 @@
             : true
         "
         @click="containerUpdate('resume')"
-      />
+      /> -->
     </div>
   </div>
 </template>
@@ -192,24 +198,38 @@
     npu: string;
   }
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isLoading: boolean }>
+    Record<
+      EventType,
+      {
+        isLoading?: boolean;
+        isActive?: boolean;
+        message?: string;
+        fn?: () => void;
+      }
+    >
   >;
   const router = useRouter();
   const route = useRoute();
   const containerId = route.query.containerId;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const containerInfo = reactive<ContainerInfoType | {}>({});
-  const containerUpdate = (status: string) => {
-    emitter.emit("update:loading", { isLoading: true });
-    defaultInstance
-      .patch(serviceAPI.container, {
-        containerId: containerId,
-        status: status,
-      })
-      .then((result) => {
-        console.log(result);
-        getContainerInfo();
-      });
+  const containerUpdate = (status: string, message: string) => {
+    emitter.emit("update:alert", {
+      isActive: true,
+      message: message,
+      fn: () => {
+        emitter.emit("update:loading", { isLoading: true });
+        defaultInstance
+          .patch(serviceAPI.container, {
+            containerId: containerId,
+            status: status,
+          })
+          .then((result) => {
+            console.log(result);
+            getContainerInfo();
+          });
+      },
+    });
   };
   const getContainerInfo = () => {
     defaultInstance

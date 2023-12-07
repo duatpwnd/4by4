@@ -4,12 +4,21 @@
       v-for="(item, index) in tab"
       :key="index"
       :class="currentStatus == item ? 'active' : ''"
-      @click="currentStatus == item ? '' : getServerList(currentPage, item)"
+      @click="
+        updateKey += 1;
+        tabStatus == item ? '' : (tabStatus = item);
+        router.push({
+          query: {
+            ...route.query,
+            currentStatus: item,
+          },
+        });
+      "
     >
       {{ item }}
     </button>
   </div>
-  <BaseTable :ths="ths" v-if="serverList.length > 0">
+  <BaseTable :ths="ths" v-if="serverList !== null" :key="updateKey">
     <template #thead>
       <tr>
         <th v-for="(th, index) in ths" :key="index">
@@ -18,10 +27,14 @@
       </tr>
     </template>
     <template #tbody>
-      <tr v-for="(item, index) in serverList" :key="index">
-        <td>
+      <tr
+        v-for="(item, index) in serverList.running"
+        :key="index"
+        v-if="currentStatus == 'CONNECTED' || currentStatus == 'ALL'"
+      >
+        <!-- <td>
           {{ index + 1 + 10 * (currentPage - 1) }}
-        </td>
+        </td> -->
         <td>{{ item.hostName }}</td>
         <td>{{ item.publicIp }}</td>
         <td class="resources">
@@ -50,10 +63,46 @@
           />
         </td>
       </tr>
+      <tr
+        v-for="(item, index) in serverList.terminated"
+        :key="index"
+        v-if="currentStatus == 'TERMINATED' || currentStatus == 'ALL'"
+      >
+        <!-- <td>
+        {{ index + 1 + 10 * (currentPage - 1) }}
+      </td> -->
+        <td>{{ item.hostName }}ter</td>
+        <td>{{ item.publicIp }}</td>
+        <td class="resources">
+          <div
+            class="resources-items"
+            v-for="(list, index) in item.gpuList"
+            :key="index"
+          >
+            {{ list.type }}/{{ list.deviceName }}
+          </div>
+        </td>
+        <td class="utilization">
+          <div v-for="(list, index) in item.gpuList" :key="index">
+            <!-- <BaseProgress :value="Number(list.usage).toFixed(2)" /> -->
+          </div>
+        </td>
+        <td class="control">
+          <FontAwesomeIcon
+            icon="circle-info"
+            class="info-button"
+            @click="
+              router.push(
+                route.fullPath + `&type=settings&serverId=${item.serverId}`
+              )
+            "
+          />
+        </td>
+      </tr>
     </template>
   </BaseTable>
   <Pagination
-    v-if="serverList.length > 0"
+    v-if="serverList !== null"
     class="pagination"
     :total-items="totalPages"
     :show-icons="true"
@@ -62,7 +111,7 @@
     v-model="currentPage"
     @update:model-value="
       (currentPage) => {
-        getServerList(currentPage, currentStatus);
+        getServerList(currentPage);
       }
     "
   ></Pagination>
@@ -89,6 +138,12 @@
     hostName: string;
     publicIp: string;
     serverId: number;
+    npuList: {
+      deviceName: string;
+      usage: number;
+      id: string;
+      type: string;
+    }[];
     gpuList: {
       deviceName: string;
       usage: number;
@@ -102,22 +157,21 @@
     toggle: boolean;
   }
   interface ServerListResType extends APIResponse {
-    content: ServerListType[];
+    running: ServerListType[];
+    terminated: ServerListType[];
     totalPages: number;
     totalElements: number;
   }
-  interface KafkaStatusResType {
-    data: boolean;
-    resultMsg: string;
-  }
   let sseEvents: EventSource;
-  const ths = <const>["#", "Name", "IP", "Devices", "Memory Usage", ""];
-  const tab = <const>["CONNECTED", "TERMINATED", "ALL"];
+  const ths = <const>["Name", "IP", "Devices", "Memory Usage", ""];
+  const tab = <const>["ALL", "CONNECTED", "TERMINATED"];
+  const tabStatus = ref<(typeof tab)[number]>("ALL");
   const userStore = useUserStore();
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const router = useRouter();
   const route = useRoute();
   const totalPages = ref(1);
+  const updateKey = ref(0);
   const currentPage =
     route.query.currentPage == undefined ? 1 : Number(route.query.currentPage);
   const currentStatus = computed<(typeof tab)[number]>(() => {
@@ -125,41 +179,40 @@
     const getIndex = tab.indexOf(status);
     return getIndex == -1 ? "ALL" : status;
   });
-  const serverList = ref<ServerListType[]>([]);
+  const serverList = ref<{
+    running: ServerListType[];
+    terminated: ServerListType[];
+  } | null>(null);
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isLoading: boolean }>
   >;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   // 카프가 상태 변경
-  const changeKafkaStatus = (serverId: number, toggle: boolean) => {
-    emitter.emit("update:loading", { isLoading: true });
-    defaultInstance
-      .put<KafkaStatusResType>(
-        serviceAPI.serverToggle + `?serverId=${serverId}&toggle=${toggle}`
-      )
-      .then((result) => {
-        emitter.emit("update:loading", { isLoading: false });
-        getServerList(currentPage, currentStatus.value);
-      });
-  };
+  // const changeKafkaStatus = (serverId: number, toggle: boolean) => {
+  //   emitter.emit("update:loading", { isLoading: true });
+  //   defaultInstance
+  //     .put<KafkaStatusResType>(
+  //       serviceAPI.serverToggle + `?serverId=${serverId}&toggle=${toggle}`
+  //     )
+  //     .then((result) => {
+  //       emitter.emit("update:loading", { isLoading: false });
+  //       getServerList(currentPage, currentStatus.value);
+  //     });
+  // };
   // 서버 리스트 조회
-  const getServerList = (page: number, status: (typeof tab)[number]) => {
+  const getServerList = (page: number) => {
     defaultInstance
       .get<ServerListResType>(
-        serviceAPI.serverList +
-          `?page=${
-            page - 1
-          }&size=10&sort=desc&status=${status.toLocaleLowerCase()}`
+        serviceAPI.serverList + `?page=${page - 1}&size=10&sort=desc&status=all`
       )
       .then((result) => {
-        console.log(result);
-        serverList.value = result.data.content;
+        serverList.value = result.data;
         totalPages.value = result.data.totalElements;
         router.push({
           query: {
             ...route.query,
             currentPage: page,
-            currentStatus: status,
+            currentStatus: currentStatus.value,
           },
         });
       });
@@ -181,42 +234,43 @@
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
-          const findIndex = serverList.value.findIndex((el) => {
-            return data.serverId == el.serverId;
-          });
-          serverList.value[findIndex].gpuList = data.resource;
+          console.log(data);
+          if (serverList.value !== null) {
+            const findIndex = serverList.value.running.findIndex((el) => {
+              return data.serverId == el.serverId;
+            });
+            serverList.value.running[findIndex].gpuList = data.resource;
+          }
         }
       } catch (error) {}
     };
     sseEvents.onerror = (err) => {
-      console.log("sse 연결이 끊겼습니다.");
+      console.log("sse 연결이 끊겼습니다.", err);
       sseEvents.close();
     };
   };
   onActivated(() => {
-    console.log("활성화");
     connectSSE();
     // 이전에 active된 탭을 활성화
-    if (activeTab.value !== null) {
-      router.push({
-        query: {
-          mainCategory: "serverManage",
-          subCategory: "serverStatus",
-          currentPage: currentPage,
-          currentStatus: activeTab.value,
-        },
-      });
-    }
+    // if (activeTab.value !== null) {
+    //   router.push({
+    //     query: {
+    //       mainCategory: "serverManage",
+    //       subCategory: "serverStatus",
+    //       currentPage: currentPage,
+    //       currentStatus: tabStatus.value,
+    //     },
+    //   });
+    // }
   });
   onDeactivated(() => {
-    console.log("비활성화");
     sseEvents.close();
     // 컴포넌트 이동시에 이전탭을 기억하기 위해서
-    activeTab.value = currentStatus.value;
+    // activeTab.value = tabStatus.value;
   });
   onMounted(() => {
     // 최초 한번 실행
-    getServerList(currentPage, currentStatus.value);
+    getServerList(currentPage);
   });
 </script>
 <style scoped lang="scss">
@@ -256,9 +310,6 @@
     thead {
       tr {
         th {
-          &:first-child {
-            width: 4%;
-          }
           &:last-child {
             width: 7%;
           }
@@ -271,9 +322,6 @@
           vertical-align: middle;
           padding: 8px 20px;
           font-size: 14px;
-          &:first-child {
-            width: 4%;
-          }
           &:last-child {
             width: 7%;
           }
@@ -288,12 +336,6 @@
               padding-top: 10px;
             }
           }
-        }
-      }
-      .control {
-        .info-button {
-          font-size: 20px;
-          cursor: pointer;
         }
       }
     }

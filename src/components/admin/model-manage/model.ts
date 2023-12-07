@@ -3,6 +3,8 @@ import { APIResponse } from "@axios/types";
 import serviceAPI from "@api/services";
 import { defaultInstance } from "@axios/instance";
 import router from "@/router/index";
+import { useUserStore } from "@/store/user";
+import { EventSourcePolyfill } from "event-source-polyfill";
 interface ModelListType {
   modelId: string;
   projectName: string;
@@ -23,6 +25,34 @@ const tab = <const>["REGISTERED", "UNREGISTERED", "ALL"];
 const list = ref<ModelListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
+const userStore = useUserStore();
+let sseEvents: EventSource;
+export const connectSSE = () => {
+  sseEvents = new EventSourcePolyfill(
+    import.meta.env.VITE_BASE_URL + serviceAPI.connectServerSSE,
+    {
+      headers: {
+        Authorization: userStore.user!.token,
+      },
+    }
+  );
+  sseEvents.onopen = () => {
+    console.log("connect server sse");
+  };
+  sseEvents.onmessage = (stream) => {
+    console.log(stream);
+    try {
+      if (typeof JSON.parse(stream.data) == "object") {
+        const data = JSON.parse(stream.data);
+        // sseEvents.close();
+      }
+    } catch (error) {}
+  };
+  sseEvents.onerror = (err) => {
+    console.log("sse 연결이 끊겼습니다.");
+    sseEvents.close();
+  };
+};
 export const getModelList = (page: number, status: (typeof tab)[number]) => {
   defaultInstance
     .get<ModelListResType>(

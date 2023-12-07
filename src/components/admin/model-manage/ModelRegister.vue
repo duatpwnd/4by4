@@ -5,13 +5,7 @@
     :progressValue="progressValue"
     @update:close-progress-modal="close"
   />
-  <FontAwesomeIcon
-    icon="xmark"
-    class="close-button"
-    @click="
-      router.push('/admin?mainCategory=modelManage&subCategory=modelStatus')
-    "
-  />
+  <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
   <div class="register-container">
     <div class="file-upload-wrapper">
       <div
@@ -132,7 +126,7 @@
   import * as tus from "tus-js-client";
   import { APIResponse } from "@axios/types";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
-  import { getModelList } from "./model";
+  import { getModelList, connectSSE } from "./model";
   import { AxiosInstance } from "axios";
   import { ref, inject, reactive, nextTick } from "vue";
   import { EventType, Emitter } from "mitt";
@@ -212,7 +206,12 @@
   const emitter = inject("emitter") as Emitter<
     Record<
       EventType,
-      { isLoading?: boolean; isActive?: boolean; message?: string }
+      {
+        isLoading?: boolean;
+        isActive?: boolean;
+        message?: string;
+        isActiveCloseButton?: boolean;
+      }
     >
   >;
   const onDragenter = () => {
@@ -332,10 +331,16 @@
             console.log(percentage);
             if (percentage == 100) {
               isActiveProgressModal.value = false;
-              emitter.emit("update:alert", {
-                isActive: true,
-                message: "모델 등록중 입니다.",
-              });
+              // emitter.emit("update:alert", {
+              //   isActive: true,
+              //   message: "모델 등록중 입니다.",
+              //   isActiveCloseButton: false,
+              // });
+              router.push(
+                "/admin?mainCategory=modelManage&subCategory=modelStatus"
+              );
+              getModelList(1, "ALL");
+              connectSSE();
             }
           },
           headers: {
@@ -345,17 +350,15 @@
         })
         .then((result) => {
           console.log(`output-> result`, result);
-          emitter.emit("update:alert", {
-            isActive: false,
-          });
-          router.push(
-            "/admin?mainCategory=modelManage&subCategory=modelStatus"
-          );
-          getModelList(1, "ALL");
+          // emitter.emit("update:alert", {
+          //   isActive: false,
+          // });
         })
         .catch((err) => {
+          console.log(err.response, err.messag);
           emitter.emit("update:alert", {
-            isActive: false,
+            isActive: true,
+            message: err.message,
           });
         });
     }

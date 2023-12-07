@@ -33,7 +33,8 @@
           color: rgb(33, 43, 54);
           font-weight: bold;
           .remove-button,
-          .setting-button {
+          .setting-button,
+          .info-button {
             font-size: 20px;
             cursor: pointer;
           }

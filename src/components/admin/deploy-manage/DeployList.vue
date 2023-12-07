@@ -120,11 +120,11 @@
     "#",
     "Host",
     "Status",
-    "Device",
+    "GPU",
     "NPU",
     "Image",
     "ContainerID",
-    "Control",
+    "",
   ];
   const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
@@ -268,7 +268,6 @@
         }
         .setting-button {
           vertical-align: middle;
-          color: #818080;
           margin-right: 10px;
         }
       }
