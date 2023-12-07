@@ -541,7 +541,7 @@
     sseEvents.onopen = () => {
       emitter.emit("update:loading", { isLoading: false }); // 로딩 끄기
     };
-    sseEvents.onmessage = (stream: any) => {
+    sseEvents.onmessage = (stream) => {
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
