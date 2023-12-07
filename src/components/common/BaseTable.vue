@@ -42,11 +42,10 @@
       }
     }
     tbody {
-      // overflow-y: scroll;
+      overflow-y: scroll;
       //overflow-x: hidden;
       display: block;
       height: calc(100% - 56px);
-      overflow-y: scroll;
       tr {
         display: table;
         table-layout: fixed;
@@ -58,7 +57,7 @@
       }
     }
     thead {
-      width: 100%;
+      width: calc(100% - 1.3em);
       position: relative;
       display: table;
       table-layout: fixed;

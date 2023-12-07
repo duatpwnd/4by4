@@ -5,7 +5,6 @@
       :key="index"
       :class="currentStatus == item ? 'active' : ''"
       @click="
-        updateKey += 1;
         tabStatus == item ? '' : (tabStatus = item);
         router.push({
           query: {
@@ -18,7 +17,7 @@
       {{ item }}
     </button>
   </div>
-  <BaseTable :ths="ths" v-if="serverList !== null" :key="updateKey">
+  <BaseTable :ths="ths" v-if="serverList !== null">
     <template #thead>
       <tr>
         <th v-for="(th, index) in ths" :key="index">
@@ -171,7 +170,6 @@
   const router = useRouter();
   const route = useRoute();
   const totalPages = ref(1);
-  const updateKey = ref(0);
   const currentPage =
     route.query.currentPage == undefined ? 1 : Number(route.query.currentPage);
   const currentStatus = computed<(typeof tab)[number]>(() => {
