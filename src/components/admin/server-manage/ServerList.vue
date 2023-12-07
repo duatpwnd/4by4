@@ -169,7 +169,7 @@
       import.meta.env.VITE_BASE_URL + serviceAPI.connectServerSSE,
       {
         headers: {
-          Authorization: userStore.user!.token,
+          Authorization: null,
         },
       }
     );

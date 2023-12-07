@@ -572,7 +572,7 @@
       } catch (error) {}
     };
     sseEvents.onerror = (err) => {
-      sseEvents.close();
+      reset();
     };
   };
   // 새로고침 물어보기
