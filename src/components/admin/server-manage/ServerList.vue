@@ -238,6 +238,9 @@
               return data.serverId == el.serverId;
             });
             serverList.value.running[findIndex].gpuList = data.resource;
+            if (data.isChanged) {
+              getServerList(currentPage);
+            }
           }
         }
       } catch (error) {}

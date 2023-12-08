@@ -24,9 +24,9 @@
     </template>
     <template #tbody>
       <tr v-for="(item, index) in list" :key="index">
-        <td>
+        <!-- <td>
           {{ index + 1 + 10 * (currentPage - 1) }}
-        </td>
+        </td> -->
         <td>{{ item.modelName }}</td>
         <td>{{ item.projectName }}</td>
         <td>{{ item.imageName }}</td>
@@ -74,13 +74,13 @@
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
-  import { getModelList } from "./model";
+  import { getModelList, connectSSE, sseEvents } from "./model";
   const tab = <const>["ALL", "REGISTERED", "UNREGISTERED"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
   >;
-  const ths = <const>["#", "Name", "Project", "Image", "Tag", ""];
+  const ths = <const>["Name", "Project", "Image", "Tag", ""];
   const router = useRouter();
   const route = useRoute();
   const routeCurrentPage = computed<number>(() => {
@@ -141,6 +141,7 @@
   // };
 
   onActivated(() => {
+    // connectSSE();
     // if (activeTab.value !== null) {
     //   router.push({
     //     query: {
@@ -153,6 +154,9 @@
     // }
   });
   onDeactivated(() => {
+    if (sseEvents.value !== null) {
+      sseEvents.value.close();
+    }
     // activeTab.value = currentStatus.value;
   });
 </script>
@@ -206,9 +210,6 @@
     thead {
       tr {
         th {
-          &:first-child {
-            width: 4%;
-          }
           &:last-child {
             width: 7%;
           }
@@ -218,9 +219,6 @@
     tbody {
       tr {
         td {
-          &:first-child {
-            width: 4%;
-          }
           &:last-child {
             width: 7%;
           }

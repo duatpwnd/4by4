@@ -26,9 +26,9 @@ const list = ref<ModelListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const userStore = useUserStore();
-let sseEvents: EventSource;
+export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
-  sseEvents = new EventSourcePolyfill(
+  sseEvents.value = new EventSourcePolyfill(
     import.meta.env.VITE_BASE_URL + serviceAPI.connectServerSSE,
     {
       headers: {
@@ -36,22 +36,24 @@ export const connectSSE = () => {
       },
     }
   );
-  sseEvents.onopen = () => {
-    console.log("connect server sse");
-  };
-  sseEvents.onmessage = (stream) => {
-    console.log(stream);
-    try {
-      if (typeof JSON.parse(stream.data) == "object") {
-        const data = JSON.parse(stream.data);
-        // sseEvents.close();
-      }
-    } catch (error) {}
-  };
-  sseEvents.onerror = (err) => {
-    console.log("sse 연결이 끊겼습니다.");
-    sseEvents.close();
-  };
+  if (sseEvents.value !== null) {
+    sseEvents.value.onopen = () => {
+      console.log("connect server sse");
+    };
+    sseEvents.value.onmessage = (stream) => {
+      console.log(stream);
+      try {
+        if (typeof JSON.parse(stream.data) == "object") {
+          const data = JSON.parse(stream.data);
+          // sseEvents.close();
+        }
+      } catch (error) {}
+    };
+    sseEvents.value.onerror = (err) => {
+      console.log("sse 연결이 끊겼습니다.");
+      sseEvents.value!.close();
+    };
+  }
 };
 export const getModelList = (page: number, status: (typeof tab)[number]) => {
   defaultInstance

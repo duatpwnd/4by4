@@ -57,25 +57,10 @@
       }
     }
     thead {
-      width: calc(100% - 1.3em);
+      width: 100%;
       position: relative;
       display: table;
       table-layout: fixed;
-      tr {
-        th {
-          &:last-child {
-            &::after {
-              content: " ";
-              position: absolute;
-              background-color: rgb(244, 246, 248);
-              width: 1.3em;
-              height: 56px;
-              right: -1.3em;
-              top: 0;
-            }
-          }
-        }
-      }
     }
   }
 </style>

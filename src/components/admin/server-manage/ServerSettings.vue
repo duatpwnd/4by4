@@ -1,6 +1,14 @@
 <template>
   <div class="settings-container" v-if="'hostName' in serverInfo">
-    <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+    <FontAwesomeIcon
+      icon="xmark"
+      class="close-button"
+      @click="
+        router.push(
+          `/admin?mainCategory=serverManage&subCategory=serverStatus&currentStatus=${route.query.currentStatus}`
+        )
+      "
+    />
     <div>
       <dl class="host-info">
         <div>

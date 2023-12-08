@@ -5,7 +5,15 @@
     :progressValue="progressValue"
     @update:close-progress-modal="close"
   />
-  <FontAwesomeIcon icon="xmark" class="close-button" @click="router.go(-1)" />
+  <FontAwesomeIcon
+    icon="xmark"
+    class="close-button"
+    @click="
+      router.push(
+        `/admin?mainCategory=modelManage&subCategory=modelStatus&currentStatus=${route.query.currentStatus}`
+      )
+    "
+  />
   <div class="register-container">
     <div class="file-upload-wrapper">
       <div
@@ -126,11 +134,11 @@
   import * as tus from "tus-js-client";
   import { APIResponse } from "@axios/types";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
-  import { getModelList, connectSSE } from "./model";
+  import { getModelList } from "./model";
   import { AxiosInstance } from "axios";
-  import { ref, inject, reactive, nextTick } from "vue";
+  import { ref, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";
-  import { useRouter } from "vue-router";
+  import { useRouter, useRoute } from "vue-router";
   import BaseInput from "@/components/common/BaseInput.vue";
   import serviceAPI from "@api/services";
   interface ProjectListType {
@@ -150,6 +158,7 @@
   }
 
   const router = useRouter();
+  const route = useRoute();
   const regType = /^[A-Za-z0-9]+[A-Za-z0-9_-]*$/;
   const tagRegType = /^[A-Za-z0-9]+[A-Za-z0-9_.-]*$/;
   const onChange = (newValue: string, key: keyof ModelInfoType) => {
@@ -331,16 +340,20 @@
             console.log(percentage);
             if (percentage == 100) {
               isActiveProgressModal.value = false;
-              // emitter.emit("update:alert", {
-              //   isActive: true,
-              //   message: "모델 등록중 입니다.",
-              //   isActiveCloseButton: false,
-              // });
-              router.push(
-                "/admin?mainCategory=modelManage&subCategory=modelStatus"
-              );
+              emitter.emit("update:alert", {
+                isActive: true,
+                message: "모델 등록중 입니다.",
+                isActiveCloseButton: false,
+              });
               getModelList(1, "ALL");
-              connectSSE();
+              setTimeout(() => {
+                emitter.emit("update:alert", {
+                  isActive: false,
+                });
+                router.push(
+                  "/admin?mainCategory=modelManage&subCategory=modelStatus"
+                );
+              }, 2000);
             }
           },
           headers: {
@@ -350,9 +363,6 @@
         })
         .then((result) => {
           console.log(`output-> result`, result);
-          // emitter.emit("update:alert", {
-          //   isActive: false,
-          // });
         })
         .catch((err) => {
           console.log(err.response, err.messag);
