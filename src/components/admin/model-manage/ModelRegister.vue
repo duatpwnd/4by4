@@ -305,17 +305,15 @@
         .then((result) => {
           console.log("모델 중복 체크", result);
           isActiveProgressModal.value = true;
-          // 업로드 시작
+          // 모델 업로드
           defaultInstance
             .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
               signal: controller.signal,
               onUploadProgress: (progressEvent) => {
-                console.log(progressEvent);
                 const percentage =
                   (progressEvent.loaded * 100) /
                   (progressEvent.total as number);
                 progressValue.value = Number(percentage.toFixed(0));
-                console.log(percentage);
                 if (percentage == 100) {
                   isActiveProgressModal.value = false;
                   emitter.emit("update:alert", {
@@ -331,9 +329,7 @@
               },
             })
             .then((result) => {
-              console.log(`output-> result`, result);
-              // connectSSE();
-              // getModelList(1, "ALL");
+              console.log("모델 등록 결과:", result);
               emitter.emit("update:alert", {
                 isActive: false,
               });
@@ -342,7 +338,7 @@
               );
             })
             .catch((err) => {
-              console.log(err.response, err.message);
+              console.log("모델 등록 에러:", err);
               emitter.emit("update:alert", {
                 isActive: true,
                 message: err.response.data.message,

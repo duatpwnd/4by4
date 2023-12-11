@@ -225,6 +225,7 @@
       validationCheck.containerName = false;
     }
     if (Object.values(validationCheck).indexOf(true) == -1) {
+      // 컨테이너 이름 중복 체크
       defaultInstance
         .get(
           serviceAPI.containerNameCheckDuplication +
@@ -233,6 +234,7 @@
         .then((result) => {
           console.log("컨테이너 이름 중복 체크 :", result);
           emitter.emit("update:loading", { isLoading: true });
+          // 컨테이너 등록
           defaultInstance
             .post(serviceAPI.container, {
               serverId: selectedHost.value && selectedHost.value.serverId,
@@ -251,7 +253,7 @@
               containerName: containerName.value,
             })
             .then((result) => {
-              console.log(result);
+              console.log("컨테이너 등록 결과:", result);
               emitter.emit("update:loading", { isLoading: false });
               router.push(
                 "/admin?mainCategory=deployManage&subCategory=deployStatus"
