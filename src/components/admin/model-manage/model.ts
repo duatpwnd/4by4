@@ -57,6 +57,7 @@ export const connectSSE = () => {
           if (data.type == "error") {
             console.log("모델 에러 감지");
             sseEvents.value!.close();
+            getModelList(1, "ALL");
             emitter.emit("update:alert", {
               isActive: true,
               message: data.message,
