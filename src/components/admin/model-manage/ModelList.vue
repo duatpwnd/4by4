@@ -83,6 +83,7 @@
       EventType,
       {
         isActive: boolean;
+        isActiveCloseButton?: boolean;
         closeText?: string;
         message?: string;
         fn?: () => void;
@@ -107,6 +108,7 @@
     emitter.emit("update:alert", {
       isActive: true,
       message: "삭제하시겠습니까?",
+      isActiveCloseButton: false,
       fn: () => {
         defaultInstance
           .delete(serviceAPI.modelInfo + `?modelId=${modelId}`)
