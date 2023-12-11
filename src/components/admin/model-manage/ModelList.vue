@@ -75,7 +75,7 @@
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
-  import { getModelList, connectSSE, sseEvents } from "./model";
+  import { getModelList, connectSSE } from "./model";
   const tab = <const>["ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const emitter = inject("emitter") as Emitter<
@@ -166,9 +166,9 @@
   });
   onDeactivated(() => {
     console.log("모델리스트 비활성화");
-    if (sseEvents.value !== null) {
-      sseEvents.value.close();
-    }
+    // if (sseEvents.value !== null) {
+    //   sseEvents.value.close();
+    // }
     // activeTab.value = currentStatus.value;
   });
 </script>

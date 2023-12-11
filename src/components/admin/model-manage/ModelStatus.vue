@@ -4,11 +4,12 @@
   </keep-alive>
 </template>
 <script setup lang="ts">
-  import { watchEffect, shallowRef } from "vue";
+  import { watchEffect, shallowRef, onDeactivated } from "vue";
   import ModelRegister from "./ModelRegister.vue";
   import ModelList from "./ModelList.vue";
   import ModelSettings from "./ModelSettings.vue";
   import { useRoute } from "vue-router";
+  import { sseEvents } from "./model";
   const route = useRoute();
   const currComp = shallowRef(ModelList);
   watchEffect(() => {
@@ -22,6 +23,10 @@
         currComp.value = ModelList;
       }
     }
+  });
+  onDeactivated(() => {
+    console.log("이탈", sseEvents.value);
+    sseEvents.value!.close();
   });
 </script>
 <style scoped lang="scss"></style>

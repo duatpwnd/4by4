@@ -131,10 +131,8 @@
   </div>
 </template>
 <script setup lang="ts">
-  import * as tus from "tus-js-client";
   import { APIResponse } from "@axios/types";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
-  import { getModelList, connectSSE } from "./model";
   import { AxiosInstance } from "axios";
   import { ref, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";

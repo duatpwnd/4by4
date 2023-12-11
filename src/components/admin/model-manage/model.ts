@@ -1,10 +1,11 @@
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { APIResponse } from "@axios/types";
 import serviceAPI from "@api/services";
 import { defaultInstance } from "@axios/instance";
 import router from "@/router/index";
 import { useUserStore } from "@/store/user";
 import { EventSourcePolyfill } from "event-source-polyfill";
+import { EventType, Emitter } from "mitt";
 interface ModelListType {
   modelId: string;
   projectName: string;
@@ -27,6 +28,15 @@ const list = ref<ModelListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const userStore = useUserStore();
+const emitter = inject("emitter") as Emitter<
+  Record<
+    EventType,
+    {
+      isActive: boolean;
+      message: string;
+    }
+  >
+>;
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
   sseEvents.value = new EventSourcePolyfill(
@@ -39,16 +49,24 @@ export const connectSSE = () => {
   );
   if (sseEvents.value !== null) {
     sseEvents.value.onopen = () => {
-      console.log("connect server sse");
+      console.log("connect model sse");
     };
     sseEvents.value.onmessage = (stream) => {
+      console.log("model:", stream);
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
           console.log("model:", data);
           if (data.reg) {
-            sseEvents.value!.close();
+            // sseEvents.value!.close();
             getModelList(1, "ALL");
+          }
+          if (data.error) {
+            getModelList(1, "ALL");
+            emitter.emit("update:alert", {
+              isActive: true,
+              message: data.errorMessage,
+            });
           }
         }
       } catch (error) {}

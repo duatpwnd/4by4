@@ -228,10 +228,11 @@
       console.log("connect server sse");
     };
     sseEvents.onmessage = (stream) => {
+      console.log("server:", stream);
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
-          console.log(data);
+          console.log("server:", data);
           if (serverList.value !== null) {
             const findIndex = serverList.value.running.findIndex((el) => {
               return data.serverId == el.serverId;

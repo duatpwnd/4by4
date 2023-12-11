@@ -44,7 +44,7 @@ export const connectSSE = () => {
   );
   if (sseEvents.value !== null) {
     sseEvents.value.onopen = () => {
-      console.log("connect server sse");
+      console.log("connect deploy sse");
     };
     sseEvents.value.onmessage = (stream) => {
       console.log(stream);
