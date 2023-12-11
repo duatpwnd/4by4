@@ -75,7 +75,7 @@
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
-  import { getModelList, connectSSE } from "./model";
+  import { getModelList } from "./model";
   const tab = <const>["ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const emitter = inject("emitter") as Emitter<
@@ -152,7 +152,7 @@
 
   onActivated(() => {
     console.log("모델리스트 활성화");
-    connectSSE();
+    // connectSSE();
     // if (activeTab.value !== null) {
     //   router.push({
     //     query: {

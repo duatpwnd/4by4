@@ -28,17 +28,17 @@ const list = ref<ModelListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const userStore = useUserStore();
-const emitter = inject("emitter") as Emitter<
-  Record<
-    EventType,
-    {
-      isActive: boolean;
-      message: string;
-    }
-  >
->;
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
+  const emitter = inject("emitter") as Emitter<
+    Record<
+      EventType,
+      {
+        isActive: boolean;
+        message: string;
+      }
+    >
+  >;
   sseEvents.value = new EventSourcePolyfill(
     import.meta.env.VITE_BASE_URL + serviceAPI.connectModelSSE,
     {
@@ -59,11 +59,12 @@ export const connectSSE = () => {
           console.log("model:", data);
           if (data.reg) {
             console.log("모델 변경 감지");
-            // sseEvents.value!.close();
+            sseEvents.value!.close();
             getModelList(1, "ALL");
           }
           if (data.type == "error") {
-            getModelList(1, "ALL");
+            console.log("모델 에러 감지");
+            sseEvents.value?.close();
             emitter.emit("update:alert", {
               isActive: true,
               message: data.message,

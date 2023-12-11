@@ -139,6 +139,7 @@
   import { useRouter, useRoute } from "vue-router";
   import BaseInput from "@/components/common/BaseInput.vue";
   import serviceAPI from "@api/services";
+  import { connectSSE } from "./model";
   interface ProjectListType {
     name: string;
     value: string;
@@ -324,6 +325,7 @@
             })
             .then((result) => {
               console.log("모델 등록 결과:", result);
+              connectSSE();
               emitter.emit("update:alert", {
                 isActive: false,
               });

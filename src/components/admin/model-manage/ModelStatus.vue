@@ -26,7 +26,7 @@
   });
   onDeactivated(() => {
     console.log("이탈", sseEvents.value);
-    sseEvents.value!.close();
+    // sseEvents.value!.close();
   });
 </script>
 <style scoped lang="scss"></style>
