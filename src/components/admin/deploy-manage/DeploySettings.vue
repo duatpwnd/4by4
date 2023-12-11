@@ -70,7 +70,7 @@
       </dl>
     </div>
     <div class="button-area" v-if="'status' in containerInfo">
-      <!-- <BaseButton
+      <BaseButton
         type="button"
         text="Start"
         :class="containerInfo.status == 'stop' ? 'active' : 'inactive'"
@@ -119,7 +119,7 @@
             : true
         "
         @click="containerUpdate('restart', '다시 시작 하시겠습니까?')"
-      /> -->
+      />
       <!-- <BaseButton
         type="button"
         text="Pause"
