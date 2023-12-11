@@ -22,6 +22,7 @@ const services = {
   connectServerSSE: "/sse/server", // server sse 연동
   connectContainerSSE: "/sse/container", // container sse 연동
   connectModelSSE: "/sse/model", // container sse 연동
+  containerNameCheckDuplication: "/container/check/duplication", //컨테이너 이름 중복 체크
   userJoin: "/user/join", // 회원가입후 이메일 인증
   videoAlready: "/video/already",
 };

@@ -135,7 +135,10 @@
     tag: string;
   }
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isLoading: boolean }>
+    Record<
+      EventType,
+      { isLoading?: boolean; isActive?: boolean; message?: string }
+    >
   >;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const router = useRouter();
@@ -222,31 +225,46 @@
       validationCheck.containerName = false;
     }
     if (Object.values(validationCheck).indexOf(true) == -1) {
-      emitter.emit("update:loading", { isLoading: true });
       defaultInstance
-        .post(serviceAPI.container, {
-          serverId: selectedHost.value && selectedHost.value.serverId,
-          npuIdList:
-            selectedGpu.value &&
-            selectedGpu.value
-              .filter((el: GpuListType) => el.type == "npu")
-              .map((el) => el.id),
-          gpuIdList:
-            selectedGpu.value &&
-            selectedGpu.value
-              .filter((el: GpuListType) => el.type == "gpu")
-              .map((el) => el.id),
-          modelId: selectedModel.value && selectedModel.value.modelId,
-          tag: selectedTags.value && selectedTags.value.tag,
-          containerName: containerName.value,
-        })
+        .get(
+          serviceAPI.containerNameCheckDuplication +
+            `?container_name=${containerName.value}`
+        )
         .then((result) => {
-          console.log(result);
-          emitter.emit("update:loading", { isLoading: false });
-          router.push(
-            "/admin?mainCategory=deployManage&subCategory=deployStatus"
-          );
-          getContainerList(1, "ALL");
+          console.log("컨테이너 이름 중복 체크 :", result);
+          emitter.emit("update:loading", { isLoading: true });
+          defaultInstance
+            .post(serviceAPI.container, {
+              serverId: selectedHost.value && selectedHost.value.serverId,
+              npuIdList:
+                selectedGpu.value &&
+                selectedGpu.value
+                  .filter((el: GpuListType) => el.type == "npu")
+                  .map((el) => el.id),
+              gpuIdList:
+                selectedGpu.value &&
+                selectedGpu.value
+                  .filter((el: GpuListType) => el.type == "gpu")
+                  .map((el) => el.id),
+              modelId: selectedModel.value && selectedModel.value.modelId,
+              tag: selectedTags.value && selectedTags.value.tag,
+              containerName: containerName.value,
+            })
+            .then((result) => {
+              console.log(result);
+              emitter.emit("update:loading", { isLoading: false });
+              router.push(
+                "/admin?mainCategory=deployManage&subCategory=deployStatus"
+              );
+              getContainerList(1, "ALL");
+            });
+        })
+        .catch((err) => {
+          console.log("컨테이너 이름 벨리데이션 체크 에러:", err);
+          emitter.emit("update:alert", {
+            isActive: true,
+            message: err.response.data.message,
+          });
         });
     }
   };
