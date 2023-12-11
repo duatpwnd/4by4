@@ -294,7 +294,11 @@
       form.append("tag", modelData.tagName);
       // 모델 업로드 중복 체크
       defaultInstance
-        .post(serviceAPI.modelCheckDuplication, form)
+        .post(serviceAPI.modelCheckDuplication, form, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
         .then((result) => {
           console.log("모델 중복 체크", result);
           isActiveProgressModal.value = true;
