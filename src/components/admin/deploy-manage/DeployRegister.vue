@@ -111,7 +111,7 @@
   import BaseSelect from "@/components/common/BaseSelect.vue";
   import BaseSelectCheckBox from "@/components/common/BaseSelectCheckBox.vue";
   import { EventType, Emitter } from "mitt";
-  import { getContainerList } from "./deploy";
+  import { getContainerList, connectSSE, sseEvents } from "./deploy";
   interface HostListType {
     host: string;
     serverId: number;
@@ -235,6 +235,9 @@
           console.log("컨테이너 이름 중복 체크 :", result);
           emitter.emit("update:loading", { isLoading: true });
           // 컨테이너 등록
+          if (sseEvents.value !== null) {
+            sseEvents.value.close();
+          }
           defaultInstance
             .post(serviceAPI.container, {
               serverId: selectedHost.value && selectedHost.value.serverId,
@@ -254,6 +257,7 @@
             })
             .then((result) => {
               console.log("컨테이너 등록 결과:", result);
+              connectSSE();
               emitter.emit("update:loading", { isLoading: false });
               router.push(
                 "/admin?mainCategory=deployManage&subCategory=deployStatus"

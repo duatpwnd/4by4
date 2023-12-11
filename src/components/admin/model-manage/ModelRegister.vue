@@ -139,7 +139,7 @@
   import { useRouter, useRoute } from "vue-router";
   import BaseInput from "@/components/common/BaseInput.vue";
   import serviceAPI from "@api/services";
-  import { connectSSE } from "./model";
+  import { connectSSE, sseEvents } from "./model";
   interface ProjectListType {
     name: string;
     value: string;
@@ -301,6 +301,9 @@
           isActiveProgressModal.value = true;
           form.append("file", file);
           // 모델 업로드
+          if (sseEvents.value !== null) {
+            sseEvents.value.close();
+          }
           defaultInstance
             .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
               signal: controller.signal,

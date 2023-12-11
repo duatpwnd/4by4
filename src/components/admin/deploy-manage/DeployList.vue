@@ -162,7 +162,7 @@
   );
   // 배포 리스트 조회
   onActivated(() => {
-    connectSSE();
+    // connectSSE();
     // if (activeTab.value !== null) {
     //   router.push({
     //     query: {
@@ -176,9 +176,9 @@
   });
   onDeactivated(() => {
     // activeTab.value = currentStatus.value;
-    if (sseEvents.value !== null) {
-      sseEvents.value.close();
-    }
+    // if (sseEvents.value !== null) {
+    //   sseEvents.value.close();
+    // }
   });
 </script>
 <style scoped lang="scss">
