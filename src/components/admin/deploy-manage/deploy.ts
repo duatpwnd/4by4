@@ -35,7 +35,7 @@ export const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
   sseEvents.value = new EventSourcePolyfill(
-    import.meta.env.VITE_BASE_URL + serviceAPI.connectModelSSE,
+    import.meta.env.VITE_BASE_URL + serviceAPI.connectContainerSSE,
     {
       headers: {
         Authorization: userStore.user!.token,

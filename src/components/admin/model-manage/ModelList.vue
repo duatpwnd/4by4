@@ -151,7 +151,7 @@
   // };
 
   onActivated(() => {
-    console.log("배포리스트 활성화");
+    console.log("모델리스트 활성화");
     connectSSE();
     // if (activeTab.value !== null) {
     //   router.push({
@@ -165,7 +165,7 @@
     // }
   });
   onDeactivated(() => {
-    console.log("배포리스트 비활성화");
+    console.log("모델리스트 비활성화");
     if (sseEvents.value !== null) {
       sseEvents.value.close();
     }
