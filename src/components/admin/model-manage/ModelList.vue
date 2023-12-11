@@ -109,6 +109,7 @@
       isActive: true,
       message: "삭제하시겠습니까?",
       isActiveCloseButton: true,
+      closeText: "close",
       fn: () => {
         defaultInstance
           .delete(serviceAPI.modelInfo + `?modelId=${modelId}`)
