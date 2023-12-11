@@ -42,12 +42,11 @@ export const connectSSE = () => {
       console.log("connect server sse");
     };
     sseEvents.value.onmessage = (stream) => {
-      console.log(stream);
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
           console.log("model:", data);
-          if (data.isChanged) {
+          if (data.reg) {
             sseEvents.value!.close();
             getModelList(1, "ALL");
           }

@@ -8,6 +8,7 @@ const services = {
   modelNameList: "/model/name/list", // 배포등록가능한 모델 리스트
   modelTagList: "/model/tag/list", // 배포등록가능한 태그 리스트
   modelInfo: "/model", // 단일 모델 정보
+  modelCheckDuplication: "/model/check/duplication", // 모델 업로드 중복 체크
   gpuList: "/gpu/list", // 배포등록가능한 gpu 리스트
   upload: "/file/upload", // 모델 업로드
   video: "/video",

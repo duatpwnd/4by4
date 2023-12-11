@@ -285,42 +285,7 @@
       validCheck.files = false;
     }
     if (Object.values(validCheck).indexOf(true) == -1) {
-      isActiveProgressModal.value = true;
       const file = files.value as File;
-      console.log(file);
-      // const chunkSize = 1024 * 1024 * 5;
-      // const upload = new tus.Upload(file, {
-      //   endpoint: serviceAPI.modelUpload,
-      //   chunkSize,
-      //   retryDelays: [0, 1000, 3000, 5000],
-      //   metadata: {
-      //     projectName: modelData.projectName,
-      //     imageName: modelData.modelName,
-      //     tag: modelData.tagName,
-      //   },
-      //   onError: function (error) {
-      //     console.log("Failed because: " + error);
-      //   },
-      //   onProgress: (bytesUploaded, bytesTotal) => {
-      //     console.log(bytesUploaded, bytesTotal);
-      //     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-      //     console.log(bytesUploaded, bytesTotal, percentage + "%");
-      //   },
-      //   onSuccess: () => {
-      //     console.log("Download %s from %s");
-      //   },
-      // });
-
-      // // Check if there are any previous uploads to continue.
-      // upload.findPreviousUploads().then(function (previousUploads) {
-      //   // Found previous uploads so we select the first one.
-      //   if (previousUploads.length) {
-      //     upload.resumeFromPreviousUpload(previousUploads[0]);
-      //   }
-
-      //   // Start the upload
-      //   upload.start();
-      // });
       const form = new FormData();
       form.append(
         "projectName",
@@ -330,42 +295,63 @@
       form.append("imageName", modelData.imageName);
       form.append("tag", modelData.tagName);
       form.append("file", file);
+      // 모델 업로드 중복 체크
       defaultInstance
-        .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
-          signal: controller.signal,
-          onUploadProgress: (progressEvent) => {
-            console.log(progressEvent);
-            const percentage =
-              (progressEvent.loaded * 100) / (progressEvent.total as number);
-            progressValue.value = Number(percentage.toFixed(0));
-            console.log(percentage);
-            if (percentage == 100) {
-              isActiveProgressModal.value = false;
-              emitter.emit("update:alert", {
-                isActive: true,
-                message: "모델 등록중 입니다.",
-                isActiveCloseButton: false,
-              });
-            }
-          },
+        .post(serviceAPI.modelCheckDuplication, form, {
           headers: {
             "Content-Type": "multipart/form-data",
-            type: "model",
           },
         })
         .then((result) => {
-          console.log(`output-> result`, result);
-          // connectSSE();
-          // getModelList(1, "ALL");
-          emitter.emit("update:alert", {
-            isActive: false,
-          });
-          router.push(
-            "/admin?mainCategory=modelManage&subCategory=modelStatus"
-          );
+          console.log("모델 중복 체크", result);
+          isActiveProgressModal.value = true;
+          // 업로드 시작
+          defaultInstance
+            .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
+              signal: controller.signal,
+              onUploadProgress: (progressEvent) => {
+                console.log(progressEvent);
+                const percentage =
+                  (progressEvent.loaded * 100) /
+                  (progressEvent.total as number);
+                progressValue.value = Number(percentage.toFixed(0));
+                console.log(percentage);
+                if (percentage == 100) {
+                  isActiveProgressModal.value = false;
+                  emitter.emit("update:alert", {
+                    isActive: true,
+                    message: "모델 등록중 입니다.",
+                    isActiveCloseButton: false,
+                  });
+                }
+              },
+              headers: {
+                "Content-Type": "multipart/form-data",
+                type: "model",
+              },
+            })
+            .then((result) => {
+              console.log(`output-> result`, result);
+              // connectSSE();
+              // getModelList(1, "ALL");
+              emitter.emit("update:alert", {
+                isActive: false,
+              });
+              router.push(
+                "/admin?mainCategory=modelManage&subCategory=modelStatus"
+              );
+            })
+            .catch((err) => {
+              console.log(err.response, err.message);
+              emitter.emit("update:alert", {
+                isActive: true,
+                message: err.response.data.message,
+                isActiveCloseButton: true,
+              });
+            });
         })
         .catch((err) => {
-          console.log(err.response, err.message);
+          console.log("모델 업로드 벨리데이션 체크 에러:", err);
           emitter.emit("update:alert", {
             isActive: true,
             message: err.response.data.message,
