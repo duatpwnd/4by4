@@ -131,7 +131,6 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { APIResponse } from "@axios/types";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
   import { AxiosInstance } from "axios";
   import { ref, inject, reactive } from "vue";
@@ -139,7 +138,7 @@
   import { useRouter, useRoute } from "vue-router";
   import BaseInput from "@/components/common/BaseInput.vue";
   import serviceAPI from "@api/services";
-  import { connectSSE, sseEvents } from "./model";
+  import { connectSSE, sseEvents, getModelList } from "./model";
   interface ProjectListType {
     name: string;
     value: string;
@@ -148,12 +147,6 @@
     modelName: string;
     imageName: string;
     tagName: string;
-  }
-  interface DeploymentRegistration extends APIResponse {
-    data: {
-      data: boolean;
-      resultMsg: string;
-    };
   }
 
   const router = useRouter();
@@ -305,7 +298,7 @@
             sseEvents.value.close();
           }
           defaultInstance
-            .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
+            .postForm(serviceAPI.upload, form, {
               signal: controller.signal,
               onUploadProgress: (progressEvent) => {
                 const percentage =
@@ -328,13 +321,14 @@
             })
             .then((result) => {
               console.log("모델 등록 결과:", result);
-              connectSSE();
+              getModelList(1, "ALL");
               emitter.emit("update:alert", {
                 isActive: false,
               });
               router.push(
                 "/admin?mainCategory=modelManage&subCategory=modelStatus"
               );
+              connectSSE();
             })
             .catch((err) => {
               console.log("모델 등록 에러:", err);

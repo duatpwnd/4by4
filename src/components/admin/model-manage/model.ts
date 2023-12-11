@@ -24,10 +24,10 @@ interface ModelListResType extends APIResponse {
 }
 const tab = <const>["REGISTERED", "UNREGISTERED", "ALL"];
 // 모델 리스트 조회
-const list = ref<ModelListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const userStore = useUserStore();
+const list = ref<ModelListType[]>([]);
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
   sseEvents.value = new EventSourcePolyfill(
