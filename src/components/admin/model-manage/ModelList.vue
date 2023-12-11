@@ -82,7 +82,8 @@
     Record<
       EventType,
       {
-        isActive: boolean;
+        isActive?: boolean;
+        isLoading?: boolean;
         isActiveCloseButton?: boolean;
         closeText?: string;
         message?: string;
@@ -111,15 +112,12 @@
       isActiveCloseButton: true,
       closeText: "close",
       fn: () => {
+        emitter.emit("update:loading", { isLoading: true });
         defaultInstance
           .delete(serviceAPI.modelInfo + `?modelId=${modelId}`)
           .then((result) => {
             console.log(result);
-            emitter.emit("update:alert", {
-              isActive: true,
-              message: "삭제 완료 되었습니다.",
-              closeText: "확인",
-            });
+            emitter.emit("update:loading", { isLoading: false });
             getModelList(1, "ALL");
           });
       },

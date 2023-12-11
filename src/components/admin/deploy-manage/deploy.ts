@@ -5,6 +5,7 @@ import { defaultInstance } from "@axios/instance";
 import router from "@/router/index";
 import { useUserStore } from "@/store/user";
 import { EventSourcePolyfill } from "event-source-polyfill";
+import { useRoute } from "vue-router";
 interface DeployListType {
   host: string;
   image: string;
@@ -26,6 +27,7 @@ const list = ref<DeployListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const userStore = useUserStore();
+const route = useRoute();
 export const tab = <const>["DEPLOYED", "DEPLOYING", "UNSTAGED", "ERROR", "ALL"];
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
@@ -49,7 +51,10 @@ export const connectSSE = () => {
           console.log("deploy:", data);
           if (data.status == "running") {
             sseEvents.value!.close();
-            getContainerList(1, "ALL");
+            getContainerList(
+              1,
+              route.query.currentStatus as (typeof tab)[number]
+            );
           }
         }
       } catch (error) {}

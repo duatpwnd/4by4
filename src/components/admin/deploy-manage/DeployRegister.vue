@@ -139,7 +139,12 @@
   const emitter = inject("emitter") as Emitter<
     Record<
       EventType,
-      { isLoading?: boolean; isActive?: boolean; message?: string }
+      {
+        isLoading?: boolean;
+        isActive?: boolean;
+        message?: string;
+        closeText?: string;
+      }
     >
   >;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
@@ -273,6 +278,7 @@
           emitter.emit("update:alert", {
             isActive: true,
             message: err.response.data.message,
+            closeText: "close",
           });
         });
     }

@@ -113,6 +113,7 @@
     Record<
       EventType,
       {
+        closeText?: string;
         isLoading?: boolean;
         isActive?: boolean;
         message?: string;
@@ -147,6 +148,7 @@
     emitter.emit("update:alert", {
       isActive: true,
       message: "삭제하시겠습니까?",
+      closeText: "close",
       fn: () => {
         console.log("삭제api");
         emitter.emit("update:loading", { isLoading: true });
@@ -161,6 +163,7 @@
             emitter.emit("update:alert", {
               isActive: true,
               message: err.response.data.message,
+              closeText: "close",
             });
           });
       },
