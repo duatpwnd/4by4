@@ -58,6 +58,7 @@ export const connectSSE = () => {
           const data = JSON.parse(stream.data);
           console.log("model:", data);
           if (data.reg) {
+            console.log("모델 변경 감지");
             // sseEvents.value!.close();
             getModelList(1, "ALL");
           }

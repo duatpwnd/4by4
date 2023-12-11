@@ -239,6 +239,7 @@
             });
             serverList.value.running[findIndex].gpuList = data.resource;
             if (data.isChanged) {
+              console.log("서버 변경 감지");
               getServerList(currentPage);
             }
           }
