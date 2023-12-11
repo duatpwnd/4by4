@@ -292,7 +292,6 @@
       form.append("modelName", modelData.modelName);
       form.append("imageName", modelData.imageName);
       form.append("tag", modelData.tagName);
-      form.append("file", file);
       // 모델 업로드 중복 체크
       defaultInstance
         .post(serviceAPI.modelCheckDuplication, form, {
@@ -303,6 +302,7 @@
         .then((result) => {
           console.log("모델 중복 체크", result);
           isActiveProgressModal.value = true;
+          form.append("file", file);
           // 모델 업로드
           defaultInstance
             .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
