@@ -184,7 +184,6 @@
         isLoading?: boolean;
         isActive?: boolean;
         message?: string;
-        closeText?: string;
         fn?: () => void;
       }
     >
@@ -198,7 +197,6 @@
     emitter.emit("update:alert", {
       isActive: true,
       message: message,
-      closeText: "close",
       fn: () => {
         emitter.emit("update:loading", { isLoading: true });
         // 상태 변경 업데이트
@@ -226,7 +224,6 @@
                   emitter.emit("update:alert", {
                     isActive: true,
                     message: err.response.data.message,
-                    closeText: "close",
                   });
                 });
             } else {

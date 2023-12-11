@@ -143,7 +143,6 @@
         isLoading?: boolean;
         isActive?: boolean;
         message?: string;
-        closeText?: string;
       }
     >
   >;
@@ -278,7 +277,6 @@
           emitter.emit("update:alert", {
             isActive: true,
             message: err.response.data.message,
-            closeText: "close",
           });
         });
     }
