@@ -3,7 +3,9 @@
     icon="xmark"
     class="close-button"
     @click="
-      router.push('/admin?mainCategory=deployManage&subCategory=deployStatus')
+      router.push(
+        `/admin?mainCategory=deployManage&subCategory=deployStatus&currentStatus=${route.query.currentStatus}`
+      )
     "
   />
   <div class="register-container">
@@ -105,7 +107,7 @@
 <script setup lang="ts">
   import { AxiosInstance } from "axios";
   import { onMounted, ref, inject, reactive } from "vue";
-  import { useRouter } from "vue-router";
+  import { useRouter, useRoute } from "vue-router";
   import serviceAPI from "@api/services";
   import BaseInput from "@/components/common/BaseInput.vue";
   import BaseSelect from "@/components/common/BaseSelect.vue";
@@ -142,6 +144,7 @@
   >;
   const defaultInstance = inject("defaultInstance") as AxiosInstance;
   const router = useRouter();
+  const route = useRoute();
   const containerName = ref("");
   const selectedHost = ref<HostListType | null>(null); // 선택된 host
   const selectedGpu = ref<GpuListType[]>([]); // 선택된 gpu

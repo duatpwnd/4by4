@@ -23,8 +23,5 @@
       }
     }
   });
-  onMounted(() => {
-    console.log("onmounted호출");
-  });
 </script>
 <style scoped lang="scss"></style>

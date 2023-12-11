@@ -11,6 +11,7 @@
   const isActiveCloseButton = ref(true);
   const fn = ref();
   const closeFn = ref();
+  const updateKey = ref(0);
   const emitter = inject("emitter") as Emitter<
     Record<
       EventType,
@@ -29,6 +30,7 @@
   watch(route.query, (curr, prev) => {});
   emitter.on("update:alert", (obj) => {
     console.log(obj);
+    updateKey.value += 1;
     isActiveAlert.value = obj.isActive;
     fn.value = obj.fn;
     closeFn.value = obj.closeFn;
@@ -57,6 +59,7 @@
     :fn="fn"
     :closeFn="closeFn"
     :text="noticeMessage"
+    :key="updateKey"
   />
   <router-view></router-view>
 </template>

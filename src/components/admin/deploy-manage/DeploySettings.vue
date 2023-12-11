@@ -70,7 +70,7 @@
       </dl>
     </div>
     <div class="button-area" v-if="'status' in containerInfo">
-      <BaseButton
+      <!-- <BaseButton
         type="button"
         text="Start"
         :class="containerInfo.status == 'stop' ? 'active' : 'inactive'"
@@ -95,22 +95,10 @@
         @click="containerUpdate('stop', '중지 하시겠습니까?')"
       />
       <BaseButton
-        :class="
-          containerInfo.status == 'running' ||
-          containerInfo.status == 'restarting' ||
-          containerInfo.status == 'stop'
-            ? 'active'
-            : 'inactive'
-        "
+        :class="containerInfo.status == 'stop' ? 'active' : 'inactive'"
         type="button"
         text="Delete"
-        :disabled="
-          containerInfo.status == 'running' ||
-          containerInfo.status == 'restarting' ||
-          containerInfo.status == 'stop'
-            ? false
-            : true
-        "
+        :disabled="containerInfo.status == 'stop' ? false : true"
         @click="containerUpdate('remove', '삭제 하시겠습니까?')"
       />
       <BaseButton
@@ -131,7 +119,7 @@
             : true
         "
         @click="containerUpdate('restart', '다시 시작 하시겠습니까?')"
-      />
+      /> -->
       <!-- <BaseButton
         type="button"
         text="Pause"
@@ -211,6 +199,7 @@
       message: message,
       fn: () => {
         emitter.emit("update:loading", { isLoading: true });
+        // 상태 변경 업데이트
         defaultInstance
           .patch(serviceAPI.container, {
             containerId: containerId,
@@ -220,6 +209,7 @@
             console.log(result);
             if (status == "remove") {
               emitter.emit("update:loading", { isLoading: true });
+              // 삭제 api 호출
               defaultInstance
                 .delete(serviceAPI.container + `?containerId=${containerId}`)
                 .then((result) => {
@@ -227,15 +217,31 @@
                   router.push(
                     "/admin?mainCategory=deployManage&subCategory=deployStatus"
                   );
-                  getContainerList(
-                    1,
-                    route.query.currentStatus as (typeof tab)[number]
-                  );
                   emitter.emit("update:loading", { isLoading: false });
+                })
+                .catch((err) => {
+                  emitter.emit("update:loading", { isLoading: false });
+                  emitter.emit("update:alert", {
+                    isActive: true,
+                    message: err.response.data.message,
+                  });
                 });
             } else {
+              // 컨테이너 정보 갱신
               getContainerInfo();
             }
+            // 업데이트시 리스트 갱신
+            getContainerList(
+              1,
+              route.query.currentStatus as (typeof tab)[number]
+            );
+          })
+          .catch((err) => {
+            emitter.emit("update:loading", { isLoading: false });
+            emitter.emit("update:alert", {
+              isActive: true,
+              message: err.response.data.message,
+            });
           });
       },
     });

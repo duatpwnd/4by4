@@ -21,17 +21,12 @@ interface DeployListResType extends APIResponse {
   totalPages: number;
   totalElements: number;
 }
-const reqStatus = <const>[
-  "running",
-  "starting",
-  "created,restarting,exited,paused,dead",
-  "all",
-];
+const reqStatus = <const>["staged", "deploying", "unstaged", "error", "all"];
 const list = ref<DeployListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const userStore = useUserStore();
-export const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
+export const tab = <const>["DEPLOYED", "DEPLOYING", "UNSTAGED", "ERROR", "ALL"];
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
   sseEvents.value = new EventSourcePolyfill(
@@ -52,7 +47,7 @@ export const connectSSE = () => {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
           console.log("deploy:", data);
-          if (data.isChanged) {
+          if (data.status == "running") {
             sseEvents.value!.close();
             getContainerList(1, "ALL");
           }

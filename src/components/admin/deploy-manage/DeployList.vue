@@ -64,17 +64,21 @@
           <FontAwesomeIcon
             icon="gear"
             class="setting-button"
+            :class="item.status == 'loading' ? 'loading' : ''"
             @click="
-              router.push(
-                route.fullPath +
-                  `&type=settings&containerId=${item.containerId}`
-              )
+              item.status == 'loading'
+                ? ''
+                : router.push(
+                    route.fullPath +
+                      `&type=settings&containerId=${item.containerId}`
+                  )
             "
           />
           <FontAwesomeIcon
             icon="trash"
             class="remove-button"
-            @click="remove(item.containerId)"
+            :class="item.status == 'loading' ? 'loading' : ''"
+            @click="item.status == 'loading' ? '' : remove(item.containerId)"
           />
         </td>
       </tr>
@@ -126,7 +130,7 @@
     "ContainerID",
     "",
   ];
-  const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
+  const tab = <const>["DEPLOYED", "DEPLOYING", "UNSTAGED", "ERROR", "ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const routeCurrentPage = computed<number>(() => {
     return route.query.currentPage == undefined
@@ -152,6 +156,12 @@
             console.log(result);
             getContainerList(1, "ALL");
             emitter.emit("update:loading", { isLoading: false });
+          })
+          .catch((err) => {
+            emitter.emit("update:alert", {
+              isActive: true,
+              message: err.response.data.message,
+            });
           });
       },
     });
@@ -269,10 +279,16 @@
         .remove-button {
           color: #ff4343;
           vertical-align: middle;
+          &.loading {
+            color: #ccc;
+          }
         }
         .setting-button {
           vertical-align: middle;
           margin-right: 10px;
+          &.loading {
+            color: #ccc;
+          }
         }
       }
     }
