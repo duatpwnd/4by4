@@ -62,11 +62,11 @@ export const connectSSE = () => {
             // sseEvents.value!.close();
             getModelList(1, "ALL");
           }
-          if (data.error) {
+          if (data.type == "error") {
             getModelList(1, "ALL");
             emitter.emit("update:alert", {
               isActive: true,
-              message: data.errorMessage,
+              message: data.message,
             });
           }
         }
