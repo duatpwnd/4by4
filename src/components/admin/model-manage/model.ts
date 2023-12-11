@@ -5,7 +5,7 @@ import { defaultInstance } from "@axios/instance";
 import router from "@/router/index";
 import { useUserStore } from "@/store/user";
 import { EventSourcePolyfill } from "event-source-polyfill";
-import { EventType, Emitter } from "mitt";
+import { emitter } from "@/utils";
 interface ModelListType {
   modelId: string;
   projectName: string;
@@ -30,15 +30,6 @@ const currentPage = ref(1);
 const userStore = useUserStore();
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
-  const emitter = inject("emitter") as Emitter<
-    Record<
-      EventType,
-      {
-        isActive: boolean;
-        message: string;
-      }
-    >
-  >;
   sseEvents.value = new EventSourcePolyfill(
     import.meta.env.VITE_BASE_URL + serviceAPI.connectModelSSE,
     {
@@ -53,6 +44,7 @@ export const connectSSE = () => {
     };
     sseEvents.value.onmessage = (stream) => {
       console.log("model:", stream);
+
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
@@ -68,6 +60,7 @@ export const connectSSE = () => {
             emitter.emit("update:alert", {
               isActive: true,
               message: data.message,
+              isActiveCloseButton: true,
             });
           }
         }

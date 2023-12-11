@@ -12,9 +12,9 @@ import BaseRadio from "@components/common/BaseRadio.vue";
 import BaseProgress from "@components/common/BaseProgress.vue";
 import BaseTable from "@components/common/BaseTable.vue";
 const { cookies } = useCookies();
+export const emitter = mitt();
 export default {
   install: (app: App) => {
-    const emitter = mitt();
     const userStore = useUserStore();
     const globalComponent = [
       BaseButton,

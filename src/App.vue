@@ -28,6 +28,7 @@
   const route = useRoute();
   watch(route.query, (curr, prev) => {});
   emitter.on("update:alert", (obj) => {
+    console.log(obj);
     isActiveAlert.value = obj.isActive;
     fn.value = obj.fn;
     closeFn.value = obj.closeFn;
