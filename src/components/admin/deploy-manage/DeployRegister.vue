@@ -92,7 +92,8 @@
           placeholder="Insert Container Name"
         />
         <p class="notice-message" v-if="validationCheck.containerName">
-          Please enter the container name.
+          Only English, numbers, underscores (_), and dashes (-) can be used.
+          However, it is not possible to start with an underscore or a dash.
         </p>
       </div>
     </div>
@@ -156,12 +157,13 @@
     containerName: false,
   });
   const changeContainerName = (newValue: string) => {
-    containerName.value = newValue;
-    if (containerName.value.trim().length == 0) {
+    const regType = /^[A-Za-z0-9]+[A-Za-z0-9_-]*$/;
+    if (!regType.test(newValue)) {
       validationCheck.containerName = true;
     } else {
       validationCheck.containerName = false;
     }
+    containerName.value = newValue;
   };
   const gpuChange = (gpu: string) => {
     console.log(gpu);
@@ -211,7 +213,10 @@
     } else {
       validationCheck.selectedTags = false;
     }
-    if (containerName.value.trim().length == 0) {
+    if (
+      containerName.value.trim().length == 0 ||
+      !new RegExp(/^[A-Za-z0-9]+[A-Za-z0-9_-]*$/).test(containerName.value)
+    ) {
       validationCheck.containerName = true;
     } else {
       validationCheck.containerName = false;

@@ -11,6 +11,7 @@ interface ModelListType {
   modelName: string;
   imageName: string;
   tag: string;
+  reg: boolean;
 }
 interface ModelListResType extends APIResponse {
   content: ModelListType[];
@@ -29,7 +30,7 @@ const userStore = useUserStore();
 export const sseEvents = ref<EventSource | null>(null);
 export const connectSSE = () => {
   sseEvents.value = new EventSourcePolyfill(
-    import.meta.env.VITE_BASE_URL + serviceAPI.connectServerSSE,
+    import.meta.env.VITE_BASE_URL + serviceAPI.connectModelSSE,
     {
       headers: {
         Authorization: userStore.user!.token,
@@ -45,7 +46,11 @@ export const connectSSE = () => {
       try {
         if (typeof JSON.parse(stream.data) == "object") {
           const data = JSON.parse(stream.data);
-          // sseEvents.close();
+          console.log("model:", data);
+          if (data.isChanged) {
+            sseEvents.value!.close();
+            getModelList(1, "ALL");
+          }
         }
       } catch (error) {}
     };

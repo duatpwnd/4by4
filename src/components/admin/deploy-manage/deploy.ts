@@ -3,6 +3,8 @@ import { APIResponse } from "@axios/types";
 import serviceAPI from "@api/services";
 import { defaultInstance } from "@axios/instance";
 import router from "@/router/index";
+import { useUserStore } from "@/store/user";
+import { EventSourcePolyfill } from "event-source-polyfill";
 interface DeployListType {
   host: string;
   image: string;
@@ -25,10 +27,44 @@ const reqStatus = <const>[
   "created,restarting,exited,paused,dead",
   "all",
 ];
-const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
 const list = ref<DeployListType[]>([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
+const userStore = useUserStore();
+export const tab = <const>["DEPLOYED", "DEPLOYING", "ERROR", "ALL"];
+export const sseEvents = ref<EventSource | null>(null);
+export const connectSSE = () => {
+  sseEvents.value = new EventSourcePolyfill(
+    import.meta.env.VITE_BASE_URL + serviceAPI.connectModelSSE,
+    {
+      headers: {
+        Authorization: userStore.user!.token,
+      },
+    }
+  );
+  if (sseEvents.value !== null) {
+    sseEvents.value.onopen = () => {
+      console.log("connect server sse");
+    };
+    sseEvents.value.onmessage = (stream) => {
+      console.log(stream);
+      try {
+        if (typeof JSON.parse(stream.data) == "object") {
+          const data = JSON.parse(stream.data);
+          console.log("deploy:", data);
+          if (data.isChanged) {
+            sseEvents.value!.close();
+            getContainerList(1, "ALL");
+          }
+        }
+      } catch (error) {}
+    };
+    sseEvents.value.onerror = (err) => {
+      console.log("sse 연결이 끊겼습니다.");
+      sseEvents.value!.close();
+    };
+  }
+};
 export const getContainerList = (
   page: number,
   status: (typeof tab)[number]

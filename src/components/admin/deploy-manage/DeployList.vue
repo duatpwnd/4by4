@@ -102,7 +102,7 @@
   import serviceAPI from "@api/services";
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
-  import { getContainerList } from "./deploy";
+  import { getContainerList, connectSSE, sseEvents } from "./deploy";
   const router = useRouter();
   const route = useRoute();
   const emitter = inject("emitter") as Emitter<
@@ -162,19 +162,23 @@
   );
   // 배포 리스트 조회
   onActivated(() => {
-    if (activeTab.value !== null) {
-      router.push({
-        query: {
-          mainCategory: "deployManage",
-          subCategory: "deployStatus",
-          currentPage: currentPage.value,
-          currentStatus: activeTab.value,
-        },
-      });
-    }
+    connectSSE();
+    // if (activeTab.value !== null) {
+    //   router.push({
+    //     query: {
+    //       mainCategory: "deployManage",
+    //       subCategory: "deployStatus",
+    //       currentPage: currentPage.value,
+    //       currentStatus: activeTab.value,
+    //     },
+    //   });
+    // }
   });
   onDeactivated(() => {
-    activeTab.value = currentStatus.value;
+    // activeTab.value = currentStatus.value;
+    if (sseEvents.value !== null) {
+      sseEvents.value.close();
+    }
   });
 </script>
 <style scoped lang="scss">

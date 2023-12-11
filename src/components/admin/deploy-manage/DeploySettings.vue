@@ -4,7 +4,9 @@
       icon="xmark"
       class="close-button"
       @click="
-        router.push('/admin?mainCategory=deployManage&subCategory=deployStatus')
+        router.push(
+          `/admin?mainCategory=deployManage&subCategory=deployStatus&currentStatus=${route.query.currentStatus}`
+        )
       "
     />
     <div class="dl-wrapper">
@@ -34,7 +36,7 @@
         </div>
         <div>
           <dt>Container Name</dt>
-          <dd>{{ containerInfo.status }}</dd>
+          <dd>{{ containerInfo.containerName }}</dd>
         </div>
 
         <div>
@@ -71,32 +73,22 @@
       <BaseButton
         type="button"
         text="Start"
-        :class="
-          containerInfo.status == 'created' || containerInfo.status == 'exited'
-            ? 'active'
-            : 'inactive'
-        "
-        :disabled="
-          containerInfo.status == 'created' || containerInfo.status == 'exited'
-            ? false
-            : true
-        "
+        :class="containerInfo.status == 'stop' ? 'active' : 'inactive'"
+        :disabled="containerInfo.status == 'stop' ? false : true"
         @click="containerUpdate('start', '시작 하시겠습니까?')"
       />
       <BaseButton
         :class="
-          containerInfo.status == 'starting' ||
           containerInfo.status == 'running' ||
-          containerInfo.status == 'paused'
+          containerInfo.status == 'restarting'
             ? 'active'
             : 'inactive'
         "
         type="button"
         text="Stop"
         :disabled="
-          containerInfo.status == 'starting' ||
           containerInfo.status == 'running' ||
-          containerInfo.status == 'paused'
+          containerInfo.status == 'restarting'
             ? false
             : true
         "
@@ -104,20 +96,18 @@
       />
       <BaseButton
         :class="
-          containerInfo.status == 'starting' ||
           containerInfo.status == 'running' ||
           containerInfo.status == 'restarting' ||
-          containerInfo.status == 'paused'
+          containerInfo.status == 'stop'
             ? 'active'
             : 'inactive'
         "
         type="button"
         text="Delete"
         :disabled="
-          containerInfo.status == 'starting' ||
           containerInfo.status == 'running' ||
           containerInfo.status == 'restarting' ||
-          containerInfo.status == 'paused'
+          containerInfo.status == 'stop'
             ? false
             : true
         "
@@ -127,16 +117,16 @@
         type="button"
         text="Restart"
         :class="
-          containerInfo.status == 'paused' ||
           containerInfo.status == 'running' ||
-          containerInfo.status == 'restarting'
+          containerInfo.status == 'restarting' ||
+          containerInfo.status == 'stop'
             ? 'active'
             : 'inactive'
         "
         :disabled="
-          containerInfo.status == 'paused' ||
           containerInfo.status == 'running' ||
-          containerInfo.status == 'restarting'
+          containerInfo.status == 'restarting' ||
+          containerInfo.status == 'stop'
             ? false
             : true
         "
@@ -186,12 +176,14 @@
   import BaseButton from "@components/common/BaseButton.vue";
   import serviceAPI from "@api/services";
   import { AxiosInstance } from "axios";
+  import { getContainerList, tab } from "./deploy";
   interface ContainerInfoType {
     host: string;
     port: string;
     tag: string;
     gpu: string;
     imageName: string;
+    containerName: string;
     containerId: string;
     status: string;
     deployStatus: string;
@@ -226,7 +218,24 @@
           })
           .then((result) => {
             console.log(result);
-            getContainerInfo();
+            if (status == "remove") {
+              emitter.emit("update:loading", { isLoading: true });
+              defaultInstance
+                .delete(serviceAPI.container + `?containerId=${containerId}`)
+                .then((result) => {
+                  console.log(result);
+                  router.push(
+                    "/admin?mainCategory=deployManage&subCategory=deployStatus"
+                  );
+                  getContainerList(
+                    1,
+                    route.query.currentStatus as (typeof tab)[number]
+                  );
+                  emitter.emit("update:loading", { isLoading: false });
+                });
+            } else {
+              getContainerInfo();
+            }
           });
       },
     });

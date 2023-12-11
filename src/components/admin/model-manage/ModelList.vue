@@ -33,7 +33,7 @@
         <td>
           {{ item.tag }}
         </td>
-        <td class="control">
+        <td class="control" v-if="item.reg">
           <FontAwesomeIcon
             icon="circle-info"
             class="info-button"
@@ -49,6 +49,7 @@
             @click="remove(item.modelId)"
           />
         </td>
+        <td class="control" v-else>진행중</td>
       </tr>
     </template>
   </BaseTable>
@@ -75,10 +76,18 @@
   import { Pagination } from "flowbite-vue";
   import { AxiosInstance } from "axios";
   import { getModelList, connectSSE, sseEvents } from "./model";
-  const tab = <const>["ALL", "REGISTERED", "UNREGISTERED"];
+  const tab = <const>["ALL"];
   const activeTab = ref<(typeof tab)[number] | null>(null);
   const emitter = inject("emitter") as Emitter<
-    Record<EventType, { isActive: boolean; message?: string; fn?: () => void }>
+    Record<
+      EventType,
+      {
+        isActive: boolean;
+        closeText?: string;
+        message?: string;
+        fn?: () => void;
+      }
+    >
   >;
   const ths = <const>["Name", "Project", "Image", "Tag", ""];
   const router = useRouter();
@@ -106,6 +115,7 @@
             emitter.emit("update:alert", {
               isActive: true,
               message: "삭제 완료 되었습니다.",
+              closeText: "확인",
             });
             getModelList(1, "ALL");
           });
@@ -141,7 +151,8 @@
   // };
 
   onActivated(() => {
-    // connectSSE();
+    console.log("배포리스트 활성화");
+    connectSSE();
     // if (activeTab.value !== null) {
     //   router.push({
     //     query: {
@@ -154,6 +165,7 @@
     // }
   });
   onDeactivated(() => {
+    console.log("배포리스트 비활성화");
     if (sseEvents.value !== null) {
       sseEvents.value.close();
     }

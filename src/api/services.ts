@@ -19,6 +19,8 @@ const services = {
   requestPasswordChange: "/user/password", // 비밀번호 변경
   connectSSE: "/sse/connect", // sse 연결
   connectServerSSE: "/sse/server", // server sse 연동
+  connectContainerSSE: "/sse/container", // container sse 연동
+  connectModelSSE: "/sse/model", // container sse 연동
   userJoin: "/user/join", // 회원가입후 이메일 인증
   videoAlready: "/video/already",
 };

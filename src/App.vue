@@ -5,8 +5,10 @@
   import BaseAlertModal from "@components/common/BaseAlertModal.vue";
   import { useRoute } from "vue-router";
   const noticeMessage = ref("");
+  const closeText = ref("Close");
   const isActiveAlert = ref(false);
   const isLoading = ref(false);
+  const isActiveCloseButton = ref(true);
   const fn = ref();
   const closeFn = ref();
   const emitter = inject("emitter") as Emitter<
@@ -15,9 +17,11 @@
       {
         isActive: boolean;
         message?: string;
+        closeText?: string;
         fn?: () => void;
         closeFn?: () => void;
         isLoading?: boolean;
+        isActiveCloseButton?: boolean;
       }
     >
   >;
@@ -30,6 +34,12 @@
     if (obj.message !== undefined) {
       noticeMessage.value = obj.message;
     }
+    if (obj.isActiveCloseButton !== undefined) {
+      isActiveCloseButton.value = obj.isActiveCloseButton;
+    }
+    if (obj.closeText !== undefined) {
+      closeText.value = obj.closeText;
+    }
   });
   emitter.on("update:loading", (obj) => {
     isLoading.value = obj.isLoading as boolean;
@@ -41,6 +51,8 @@
   <BaseAlertModal
     v-if="isActiveAlert"
     :isActiveAlert="isActiveAlert"
+    :closeText="closeText"
+    :isActiveCloseButton="isActiveCloseButton"
     :fn="fn"
     :closeFn="closeFn"
     :text="noticeMessage"

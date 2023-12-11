@@ -134,7 +134,7 @@
   import * as tus from "tus-js-client";
   import { APIResponse } from "@axios/types";
   import ProgressModal from "@/components/modal/upload/ProgressModal.vue";
-  import { getModelList } from "./model";
+  import { getModelList, connectSSE } from "./model";
   import { AxiosInstance } from "axios";
   import { ref, inject, reactive } from "vue";
   import { EventType, Emitter } from "mitt";
@@ -334,6 +334,7 @@
         .postForm<DeploymentRegistration>(serviceAPI.upload, form, {
           signal: controller.signal,
           onUploadProgress: (progressEvent) => {
+            console.log(progressEvent);
             const percentage =
               (progressEvent.loaded * 100) / (progressEvent.total as number);
             progressValue.value = Number(percentage.toFixed(0));
@@ -345,15 +346,6 @@
                 message: "모델 등록중 입니다.",
                 isActiveCloseButton: false,
               });
-              getModelList(1, "ALL");
-              setTimeout(() => {
-                emitter.emit("update:alert", {
-                  isActive: false,
-                });
-                router.push(
-                  "/admin?mainCategory=modelManage&subCategory=modelStatus"
-                );
-              }, 2000);
             }
           },
           headers: {
@@ -363,12 +355,21 @@
         })
         .then((result) => {
           console.log(`output-> result`, result);
+          // connectSSE();
+          // getModelList(1, "ALL");
+          emitter.emit("update:alert", {
+            isActive: false,
+          });
+          router.push(
+            "/admin?mainCategory=modelManage&subCategory=modelStatus"
+          );
         })
         .catch((err) => {
-          console.log(err.response, err.messag);
+          console.log(err.response, err.message);
           emitter.emit("update:alert", {
             isActive: true,
-            message: err.message,
+            message: err.response.data.message,
+            isActiveCloseButton: true,
           });
         });
     }

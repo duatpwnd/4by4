@@ -14,7 +14,7 @@
         class="ok-button"
       />
       <BaseButton
-        text="Close"
+        :text="closeText"
         class="close-button"
         @click.stop="
           emitter.emit('update:alert', { isActive: false });
@@ -29,6 +29,7 @@
   import { EventType, Emitter } from "mitt";
   interface Props {
     text: string;
+    closeText?: string;
     isActiveAlert: boolean;
     fn?: () => void;
     closeFn?: () => void;
@@ -37,10 +38,8 @@
   const emitter = inject("emitter") as Emitter<
     Record<EventType, { isActive: boolean; message?: string }>
   >;
-  const props = withDefaults(defineProps<Props>(), {
-    isActiveCloseButton: true,
-  });
-  const { text, isActiveAlert, fn, closeFn, isActiveCloseButton } =
+  const props = defineProps<Props>();
+  const { text, isActiveAlert, fn, closeFn, isActiveCloseButton, closeText } =
     toRefs(props);
   const ok = () => {
     emitter.emit("update:alert", { isActive: false });
